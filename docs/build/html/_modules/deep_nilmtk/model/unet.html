@@ -1,0 +1,615 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>deep_nilmtk.model.unet &mdash; deep_nilmtk 0.0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="https://kit.fontawesome.com/##########.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> deep_nilmtk
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">deep_nilmtk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials.html">Tutorials</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">deep_nilmtk</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>deep_nilmtk.model.unet</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for deep_nilmtk.model.unet</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+<span class="kn">import</span> <span class="nn">torch.nn.functional</span> <span class="k">as</span> <span class="nn">F</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">from</span> <span class="nn">pyro.contrib.forecast</span> <span class="kn">import</span> <span class="n">eval_crps</span>
+<span class="kn">from</span> <span class="nn">pyro.ops.stats</span> <span class="kn">import</span> <span class="n">quantile</span>
+<span class="kn">from</span> <span class="nn">.layers</span> <span class="kn">import</span>  <span class="n">create_conv1</span><span class="p">,</span> <span class="n">create_deconv1</span><span class="p">,</span> <span class="n">create_linear</span><span class="p">,</span> <span class="n">elu_plus_one_plus_epsilon</span><span class="p">,</span> <span class="n">Up</span><span class="p">,</span> <span class="n">MDGMM</span>
+
+
+
+
+
+<div class="viewcode-block" id="UNETNILM"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.unet.UNETNILM">[docs]</a><span class="k">class</span> <span class="nc">UNETNILM</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    </span>
+<span class="sd">    UNET-NILM impelementation </span>
+<span class="sd">    The orginal paper can be found here: https://dl.acm.org/doi/abs/10.1145/3427771.3427859</span>
+
+<span class="sd">    .. _unet:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+       
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> 
+            <span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        
+        
+        <span class="n">out_size</span><span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;appliances&#39;</span><span class="p">])</span> <span class="k">if</span> <span class="s1">&#39;appliance&#39;</span> <span class="ow">in</span> <span class="n">params</span> <span class="k">else</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;out_size&#39;</span><span class="p">]</span>
+        
+        <span class="k">if</span> <span class="s1">&#39;feature_type&#39;</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
+            <span class="n">n_channels</span><span class="o">=</span><span class="mi">4</span> <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;feature_type&#39;</span><span class="p">]</span><span class="o">==</span><span class="s2">&quot;combined&quot;</span> <span class="k">else</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">n_channels</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;n_channels&#39;</span><span class="p">]</span>
+        
+        <span class="n">pool_filter</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;pool_filter&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;pool_filter&#39;</span> <span class="ow">in</span> <span class="n">params</span>  <span class="k">else</span> <span class="mi">8</span>
+        <span class="n">latent_size</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;latent_size&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;latent_size&#39;</span> <span class="ow">in</span> <span class="n">params</span>  <span class="k">else</span> <span class="mi">1024</span>
+        
+        <span class="n">layers</span> <span class="o">=</span> <span class="p">[</span><span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="n">create_conv1</span><span class="p">(</span><span class="n">n_channels</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> 
+                                             <span class="n">kernel_size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> 
+                                             <span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+                                <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">())]</span>
+        
+        <span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="n">create_conv1</span><span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+                           <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">()))</span>
+        <span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="n">create_conv1</span><span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+                           <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">()))</span>
+        <span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="n">create_conv1</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+                           <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
+                            <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)))</span>
+        <span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="n">create_conv1</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">stride</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+                           <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">()))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enc_layers</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span>
+        
+        <span class="n">layers</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Up</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">()))</span>
+        <span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Up</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">()))</span>
+        <span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Up</span><span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">()))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dec_layers</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fc</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">AdaptiveAvgPool1d</span><span class="p">(</span><span class="n">pool_filter</span><span class="p">),</span>
+                                <span class="n">nn</span><span class="o">.</span><span class="n">Flatten</span><span class="p">(),</span>
+                                <span class="n">create_linear</span><span class="p">(</span><span class="mi">30</span><span class="o">*</span><span class="n">pool_filter</span><span class="p">,</span> <span class="n">latent_size</span><span class="p">),</span>
+                                <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span>
+                                <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="mf">0.2</span><span class="p">),</span>
+                                <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">latent_size</span><span class="p">,</span> <span class="n">out_size</span><span class="p">))</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;mean&#39;</span> <span class="ow">in</span> <span class="n">params</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">std</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;std&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;std&#39;</span> <span class="ow">in</span> <span class="n">params</span> <span class="k">else</span> <span class="mi">1</span>
+        
+    
+            
+
+<div class="viewcode-block" id="UNETNILM.forward"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.unet.UNETNILM.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">ndim</span><span class="o">!=</span><span class="mi">3</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">xi</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">enc_layers</span><span class="p">[</span><span class="mi">0</span><span class="p">](</span><span class="n">x</span><span class="p">)]</span>
+       
+        <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">enc_layers</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+            
+            <span class="n">xi</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">layer</span><span class="p">(</span><span class="n">xi</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+            
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">layer</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dec_layers</span><span class="p">):</span>
+           
+            <span class="n">xi</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">layer</span><span class="p">(</span><span class="n">xi</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">xi</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span> <span class="o">-</span> <span class="n">i</span><span class="p">])</span>
+            
+        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fc</span><span class="p">(</span><span class="n">xi</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">out</span></div>
+
+
+<div class="viewcode-block" id="UNETNILM.step"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.unet.UNETNILM.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">):</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span>  <span class="o">=</span> <span class="n">batch</span> 
+        <span class="n">out</span>   <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>  <span class="c1"># BxCxT</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span> <span class="o">-</span> <span class="n">out</span><span class="p">)</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">mse_loss</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="n">mae</span> <span class="o">=</span> <span class="n">error</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="k">return</span>  <span class="n">loss</span><span class="p">,</span> <span class="n">mae</span>   </div>
+    
+<div class="viewcode-block" id="UNETNILM.predict"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.unet.UNETNILM.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>  <span class="n">model</span><span class="p">,</span> <span class="n">test_dataloader</span><span class="p">):</span>
+        
+        <span class="n">net</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+        <span class="n">num_batches</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_dataloader</span><span class="p">)</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_batches</span><span class="p">)</span>
+        
+        <span class="n">pred</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">true</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">with</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">total</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">),</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span> <span class="k">as</span> <span class="n">pbar</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">batch_idx</span><span class="p">,</span> <span class="n">batch</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">test_dataloader</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+                        <span class="n">x</span><span class="p">,</span> <span class="n">y</span>  <span class="o">=</span> <span class="n">batch</span>
+                        <span class="n">out</span> <span class="o">=</span> <span class="n">net</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                        <span class="n">pred</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+                        <span class="n">true</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">x</span>  <span class="o">=</span> <span class="n">batch</span>
+                        <span class="n">out</span> <span class="o">=</span> <span class="n">net</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                        <span class="n">pred</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+                    <span class="k">del</span>  <span class="n">batch</span>    
+                    <span class="n">pbar</span><span class="o">.</span><span class="n">set_description</span><span class="p">(</span><span class="s1">&#39;processed: </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">batch_idx</span><span class="p">))</span>
+                    <span class="n">pbar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>  
+                
+                <span class="n">pbar</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        
+        <span class="c1"># Perform the denormalization Here</span>
+        <span class="c1"># Denormalise the output </span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_norm</span> <span class="o">==</span> <span class="s1">&#39;z-norm&#39;</span><span class="p">:</span>
+            <span class="c1"># z-normalisation</span>
+            <span class="n">pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">std</span> <span class="o">*</span> <span class="n">pred</span>
+            <span class="n">pred</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">pred</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_norm</span> <span class="o">==</span><span class="s1">&#39;min-max&#39;</span><span class="p">:</span>
+            <span class="c1"># min-max normalisation</span>
+            <span class="n">pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">)</span> <span class="o">*</span> <span class="n">pred</span>
+            <span class="n">pred</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">pred</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># log normalisation was perfomed</span>
+            <span class="n">pred</span> <span class="o">=</span> <span class="n">pred</span><span class="o">.</span><span class="n">expm1</span><span class="p">()</span> 
+        
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">true</span><span class="p">)</span><span class="o">!=</span><span class="mi">0</span><span class="p">:</span>
+            <span class="n">true</span>  <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span><span class="n">true</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">expm1</span><span class="p">()</span> 
+            <span class="n">results</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;pred&quot;</span><span class="p">:</span><span class="n">pred</span><span class="p">,</span> <span class="s1">&#39;true&#39;</span><span class="p">:</span><span class="n">true</span><span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;pred&quot;</span><span class="p">:</span><span class="n">pred</span><span class="p">}</span>
+        <span class="k">return</span> <span class="n">results</span></div></div>
+
+
+
+<div class="viewcode-block" id="UNETNILMSeq2Quantile"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.unet.UNETNILMSeq2Quantile">[docs]</a><span class="k">class</span> <span class="nc">UNETNILMSeq2Quantile</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+       
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        
+        <span class="n">out_size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;appliances&#39;</span><span class="p">])</span>
+        <span class="n">seq_len</span><span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;in_size&#39;</span><span class="p">]</span>
+        <span class="n">n_channels</span><span class="o">=</span><span class="mi">4</span> <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;feature_type&#39;</span><span class="p">]</span><span class="o">==</span><span class="s2">&quot;combined&quot;</span> <span class="k">else</span> <span class="mi">1</span>
+        <span class="n">quantiles</span><span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;quantiles&#39;</span><span class="p">]</span>
+                            
+        <span class="n">pool_filter</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;pool_filter&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;pool_filter&#39;</span> <span class="ow">in</span> <span class="n">params</span>  <span class="k">else</span> <span class="mi">8</span>
+        <span class="n">latent_size</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;latent_size&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;latent_size&#39;</span> <span class="ow">in</span> <span class="n">params</span>  <span class="k">else</span> <span class="mi">1024</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">q</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">quantiles</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">out_size</span> <span class="o">=</span> <span class="n">out_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unet</span> <span class="o">=</span> <span class="n">UNETNILM</span><span class="p">({</span>
+                         <span class="s1">&#39;n_channels&#39;</span> <span class="p">:</span> <span class="n">n_channels</span><span class="p">,</span> 
+                         <span class="s1">&#39;out_size&#39;</span> <span class="p">:</span> <span class="n">out_size</span><span class="o">*</span><span class="n">seq_len</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span> 
+                         <span class="s1">&#39;pool_filter&#39;</span> <span class="p">:</span> <span class="n">pool_filter</span><span class="p">,</span> 
+                         <span class="s1">&#39;latent_size&#39;</span><span class="p">:</span> <span class="n">latent_size</span>
+                         <span class="p">})</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_norm</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;target_norm&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;mean&#39;</span> <span class="ow">in</span> <span class="n">params</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">std</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;std&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;std&#39;</span> <span class="ow">in</span> <span class="n">params</span> <span class="k">else</span> <span class="mi">1</span>
+        
+        
+<div class="viewcode-block" id="UNETNILMSeq2Quantile.forward"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.unet.UNETNILMSeq2Quantile.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unet</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">out_size</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span></div>
+    
+<div class="viewcode-block" id="UNETNILMSeq2Quantile.suggest_hparams"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.unet.UNETNILMSeq2Quantile.suggest_hparams">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">suggest_hparams</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Function returning list of params that will be suggested from optuna</span>
+<span class="sd">    </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        trial : Optuna Trial.</span>
+<span class="sd">    </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict: Dictionary of parameters with values suggested from optuna</span>
+<span class="sd">    </span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="p">}</span></div>
+    
+<div class="viewcode-block" id="UNETNILMSeq2Quantile.smooth_pinball_loss"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.unet.UNETNILMSeq2Quantile.smooth_pinball_loss">[docs]</a>    <span class="k">def</span> <span class="nf">smooth_pinball_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">alpha</span> <span class="o">=</span> <span class="mf">1e-2</span><span class="p">,</span> <span class="n">kappa</span> <span class="o">=</span> <span class="mf">1e3</span><span class="p">,</span> <span class="n">margin</span> <span class="o">=</span> <span class="mf">1e-2</span><span class="p">):</span>
+        <span class="c1">#https://github.com/hatalis/smooth-pinball-neural-network/blob/master/pinball_loss.py</span>
+        <span class="c1">#Hatalis, Kostas, et al. &quot;A Novel Smoothed Loss and Penalty Function </span>
+        <span class="c1">#for Noncrossing Composite Quantile Estimation via Deep Neural Networks.&quot; arXiv preprint (2019).</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span> <span class="o">-</span> <span class="n">q</span><span class="p">)</span>
+        <span class="n">q_loss</span> <span class="o">=</span> <span class="p">(</span><span class="n">tau</span> <span class="o">*</span> <span class="n">error</span> <span class="o">+</span> <span class="n">alpha</span> <span class="o">*</span> <span class="n">F</span><span class="o">.</span><span class="n">softplus</span><span class="p">(</span><span class="o">-</span><span class="n">error</span> <span class="o">/</span> <span class="n">alpha</span><span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="c1"># calculate smooth cross-over penalty</span>
+        <span class="n">diff</span> <span class="o">=</span> <span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">:,:,:]</span> <span class="o">-</span> <span class="n">q</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,:,:]</span>
+        <span class="n">penalty</span> <span class="o">=</span> <span class="n">kappa</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="n">margin</span> <span class="o">-</span> <span class="n">diff</span><span class="p">))</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">penalty</span><span class="o">+</span><span class="n">q_loss</span>
+        <span class="k">return</span> <span class="n">loss</span></div>
+    
+<div class="viewcode-block" id="UNETNILMSeq2Quantile.step"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.unet.UNETNILMSeq2Quantile.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">):</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span>  <span class="o">=</span> <span class="n">batch</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">q_pred</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        
+        <span class="n">y_q</span>    <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+        
+      
+        <span class="n">tau</span>      <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="p">[:,</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span><span class="o">.</span><span class="n">expand_as</span><span class="p">(</span><span class="n">q_pred</span><span class="p">)</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">smooth_pinball_loss</span><span class="p">(</span><span class="n">y_q</span><span class="p">,</span> <span class="n">q_pred</span><span class="p">,</span> <span class="n">tau</span><span class="p">)</span>
+        <span class="n">mae</span> <span class="o">=</span> <span class="p">(</span><span class="n">y_q</span> <span class="o">-</span> <span class="n">q_pred</span><span class="p">)</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">loss</span><span class="p">,</span> <span class="n">mae</span></div>
+       
+    
+<div class="viewcode-block" id="UNETNILMSeq2Quantile.predict"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.unet.UNETNILMSeq2Quantile.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>  <span class="n">model</span><span class="p">,</span> <span class="n">test_dataloader</span><span class="p">):</span>
+        
+        <span class="n">net</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+        <span class="n">num_batches</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_dataloader</span><span class="p">)</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_batches</span><span class="p">)</span>
+        
+        <span class="n">pred</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">true</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">with</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">total</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">),</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span> <span class="k">as</span> <span class="n">pbar</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">batch_idx</span><span class="p">,</span> <span class="n">batch</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">test_dataloader</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+                        <span class="n">x</span><span class="p">,</span> <span class="n">y</span>  <span class="o">=</span> <span class="n">batch</span>
+                        <span class="n">out</span> <span class="o">=</span> <span class="n">net</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                        <span class="n">pred</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+                        <span class="n">true</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">x</span>  <span class="o">=</span> <span class="n">batch</span>
+                        <span class="n">out</span> <span class="o">=</span> <span class="n">net</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                        <span class="n">pred</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+                    <span class="k">del</span>  <span class="n">batch</span>    
+                    <span class="n">pbar</span><span class="o">.</span><span class="n">set_description</span><span class="p">(</span><span class="s1">&#39;processed: </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">batch_idx</span><span class="p">))</span>
+                    <span class="n">pbar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>  
+                
+                <span class="n">pbar</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+         
+        <span class="c1"># Perform the denormalization Here</span>
+        <span class="c1"># Denormalise the output </span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_norm</span> <span class="o">==</span> <span class="s1">&#39;z-norm&#39;</span><span class="p">:</span>
+            <span class="c1"># z-normalisation</span>
+            <span class="n">pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">std</span> <span class="o">*</span> <span class="n">pred</span>
+            <span class="n">pred</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">pred</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_norm</span> <span class="o">==</span><span class="s1">&#39;min-max&#39;</span><span class="p">:</span>
+            <span class="c1"># min-max normalisation</span>
+            <span class="n">pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">)</span> <span class="o">*</span> <span class="n">pred</span>
+            <span class="n">pred</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">pred</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># log normalisation was perfomed</span>
+            <span class="n">pred</span> <span class="o">=</span> <span class="n">pred</span><span class="o">.</span><span class="n">expm1</span><span class="p">()</span> 
+        
+        
+        
+        
+        <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">q_pred</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="n">q</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+        
+        
+        <span class="n">pred</span>  <span class="o">=</span> <span class="n">q_pred</span><span class="p">[:,</span><span class="n">q_pred</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span><span class="p">,:]</span>
+        
+        
+        <span class="n">results</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;pred&quot;</span><span class="p">:</span><span class="n">pred</span><span class="p">,</span> <span class="s2">&quot;q_pred&quot;</span><span class="p">:</span><span class="n">q_pred</span><span class="p">,</span> <span class="s2">&quot;pred_quantile&quot;</span><span class="p">:</span><span class="n">pred</span><span class="p">}</span>
+        <span class="k">return</span> <span class="n">results</span></div></div>
+    
+    
+
+
+
+
+
+<div class="viewcode-block" id="UNETNILMDN"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.unet.UNETNILMDN">[docs]</a><span class="k">class</span> <span class="nc">UNETNILMDN</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+       
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        
+        <span class="n">out_size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;appliances&#39;</span><span class="p">])</span>
+        <span class="n">n_channels</span><span class="o">=</span><span class="mi">4</span> <span class="k">if</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;feature_type&#39;</span><span class="p">]</span><span class="o">==</span><span class="s2">&quot;combined&quot;</span> <span class="k">else</span> <span class="mi">1</span>
+        <span class="n">dist_type</span><span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;mdn_dist_type&#39;</span><span class="p">]</span>
+        
+        <span class="n">pool_filter</span><span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;pool_filter&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;pool_filter&#39;</span> <span class="ow">in</span> <span class="n">params</span> <span class="k">else</span> <span class="mi">8</span> 
+        <span class="n">latent_size</span><span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;latent_size&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;latent_size&#39;</span><span class="ow">in</span> <span class="n">params</span> <span class="k">else</span> <span class="mi">1024</span>
+        <span class="n">mdn_latent</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;mdn_latent&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;mdn_latent&#39;</span> <span class="ow">in</span> <span class="n">params</span>  <span class="k">else</span> <span class="mi">50</span>
+        <span class="n">kmix</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;kmix&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;kmix&#39;</span> <span class="ow">in</span> <span class="n">params</span> <span class="k">else</span> <span class="mi">5</span>
+        <span class="n">dist_type</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;dist_type&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;dist_type&#39;</span> <span class="ow">in</span> <span class="n">params</span> <span class="k">else</span> <span class="s2">&quot;lognormal&quot;</span>
+        <span class="n">activation</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;activation&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;activation&#39;</span> <span class="ow">in</span> <span class="n">params</span> <span class="k">else</span> <span class="n">nn</span><span class="o">.</span><span class="n">SiLU</span><span class="p">()</span>
+        
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">unet</span> <span class="o">=</span> <span class="n">UNETNILM</span><span class="p">({</span>
+            <span class="s1">&#39;n_channels&#39;</span> <span class="p">:</span> <span class="n">n_channels</span><span class="p">,</span> 
+            <span class="s1">&#39;out_size&#39;</span> <span class="p">:</span> <span class="n">mdn_latent</span><span class="p">,</span> 
+            <span class="s1">&#39;pool_filter&#39;</span> <span class="p">:</span> <span class="n">pool_filter</span><span class="p">,</span> 
+            <span class="s1">&#39;latent_size&#39;</span><span class="p">:</span> <span class="n">latent_size</span>
+                         <span class="p">})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mdn</span> <span class="o">=</span> <span class="n">MDGMM</span><span class="p">(</span><span class="n">in_dims</span><span class="o">=</span><span class="n">mdn_latent</span><span class="p">,</span><span class="n">out_dims</span><span class="o">=</span><span class="n">out_size</span><span class="p">,</span>
+                 <span class="n">kmix</span><span class="o">=</span><span class="n">kmix</span><span class="p">,</span> <span class="n">dist_type</span><span class="o">=</span><span class="n">dist_type</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="n">activation</span><span class="p">)</span>
+        
+<div class="viewcode-block" id="UNETNILMDN.suggest_hparams"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.unet.UNETNILMDN.suggest_hparams">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">suggest_hparams</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Function returning list of params that will be suggested from optuna</span>
+<span class="sd">    </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        trial : Optuna Trial.</span>
+<span class="sd">    </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict: Dictionary of parameters with values suggested from optuna</span>
+<span class="sd">    </span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="p">}</span></div>
+    
+<div class="viewcode-block" id="UNETNILMDN.forward"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.unet.UNETNILMDN.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unet</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">pi</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">gmm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mdn</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">pi</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">gmm</span></div>
+    
+<div class="viewcode-block" id="UNETNILMDN.log_nlloss"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.unet.UNETNILMDN.log_nlloss">[docs]</a>    <span class="k">def</span> <span class="nf">log_nlloss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">gmm</span><span class="p">):</span>
+        <span class="n">logprobs</span> <span class="o">=</span> <span class="n">gmm</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="k">return</span> <span class="o">-</span><span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">logprobs</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="UNETNILMDN.sample"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.unet.UNETNILMDN.sample">[docs]</a>    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gmm</span><span class="p">,</span> <span class="n">n_sample</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
+        <span class="n">samples</span> <span class="o">=</span> <span class="n">gmm</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">sample_shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_sample</span><span class="p">,))</span>
+        <span class="k">return</span> <span class="n">samples</span></div>
+    
+<div class="viewcode-block" id="UNETNILMDN.step"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.unet.UNETNILMDN.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">):</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span>  <span class="o">=</span> <span class="n">batch</span>
+        <span class="n">pi</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">gmm</span>  <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        
+        <span class="n">samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">gmm</span><span class="p">)</span>
+        <span class="n">p10</span><span class="p">,</span> <span class="n">p50</span><span class="p">,</span> <span class="n">p90</span> <span class="o">=</span> <span class="n">quantile</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">))</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+       
+        <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_nlloss</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">gmm</span><span class="p">)</span> <span class="o">+</span> <span class="n">F</span><span class="o">.</span><span class="n">mse_loss</span><span class="p">(</span><span class="n">p50</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="n">crps</span> <span class="o">=</span> <span class="n">eval_crps</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="n">mae</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span> <span class="o">-</span> <span class="n">p50</span><span class="p">)</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="k">return</span>  <span class="n">loss</span><span class="p">,</span> <span class="n">mae</span></div>
+    
+<div class="viewcode-block" id="UNETNILMDN.predict"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.unet.UNETNILMDN.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>  <span class="n">model</span><span class="p">,</span> <span class="n">test_dataloader</span><span class="p">):</span>
+        
+        <span class="n">net</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+        <span class="n">num_batches</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_dataloader</span><span class="p">)</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_batches</span><span class="p">)</span>
+        
+        <span class="n">pred</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">true</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">mu_probs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">pi_probs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">simga_probs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">samples_pred</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">with</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">total</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">),</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span> <span class="k">as</span> <span class="n">pbar</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">batch_idx</span><span class="p">,</span> <span class="n">batch</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">test_dataloader</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+                        <span class="n">x</span><span class="p">,</span> <span class="n">y</span>  <span class="o">=</span> <span class="n">batch</span>
+                        <span class="n">true</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">x</span>  <span class="o">=</span> <span class="n">batch</span>
+                       
+                    <span class="n">pi</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">gmm</span> <span class="o">=</span> <span class="n">net</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                    <span class="n">pred_sample</span> <span class="o">=</span> <span class="n">net</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">gmm</span><span class="p">)</span>
+                    <span class="n">mu_probs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mu</span><span class="p">)</span>
+                    <span class="n">pi_probs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pi</span><span class="p">)</span>
+                    <span class="n">simga_probs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sigma</span><span class="p">)</span>
+                    <span class="n">samples_pred</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pred_sample</span><span class="p">)</span>
+                    <span class="k">del</span>  <span class="n">batch</span>    
+                    <span class="n">pbar</span><span class="o">.</span><span class="n">set_description</span><span class="p">(</span><span class="s1">&#39;processed: </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">batch_idx</span><span class="p">))</span>
+                    <span class="n">pbar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>  
+                
+                <span class="n">pbar</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        
+        <span class="n">mu_probs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span><span class="n">mu_probs</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">expm1</span><span class="p">()</span>
+        <span class="n">sigma_probs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span><span class="n">simga_probs</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">samples_pred</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span><span class="n">samples_pred</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">expm1</span><span class="p">()</span>
+        <span class="n">p10</span><span class="p">,</span> <span class="n">p50</span><span class="p">,</span> <span class="n">p90</span> <span class="o">=</span> <span class="n">quantile</span><span class="p">(</span><span class="n">samples_pred</span><span class="p">,</span> <span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">))</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">true</span><span class="p">)</span><span class="o">!=</span><span class="mi">0</span><span class="p">:</span>
+            <span class="n">true</span>  <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span><span class="n">true</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">expm1</span><span class="p">()</span> 
+            <span class="n">results</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;pred&quot;</span><span class="p">:</span> <span class="n">p50</span><span class="p">,</span> <span class="s2">&quot;sigma_pred&quot;</span><span class="p">:</span><span class="n">sigma_probs</span><span class="p">,</span> <span class="s2">&quot;mu_pred&quot;</span><span class="p">:</span><span class="n">mu_probs</span><span class="p">,</span> <span class="s2">&quot;pi_probs&quot;</span><span class="p">:</span><span class="n">pi_probs</span><span class="p">,</span>
+                    <span class="s2">&quot;sample_pred&quot;</span><span class="p">:</span><span class="n">samples_pred</span><span class="p">,</span><span class="s2">&quot;p10&quot;</span><span class="p">:</span><span class="n">p10</span><span class="p">,</span> <span class="s2">&quot;p90&quot;</span><span class="p">:</span><span class="n">p90</span><span class="p">,</span> <span class="s2">&quot;true&quot;</span><span class="p">:</span><span class="n">true</span><span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+             <span class="n">results</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;pred&quot;</span><span class="p">:</span> <span class="n">p50</span><span class="p">,</span> <span class="s2">&quot;sigma_pred&quot;</span><span class="p">:</span><span class="n">sigma_probs</span><span class="p">,</span> <span class="s2">&quot;mu_pred&quot;</span><span class="p">:</span><span class="n">mu_probs</span><span class="p">,</span> <span class="s2">&quot;pi_probs&quot;</span><span class="p">:</span><span class="n">pi_probs</span><span class="p">,</span>
+                    <span class="s2">&quot;sample_pred&quot;</span><span class="p">:</span><span class="n">samples_pred</span><span class="p">,</span><span class="s2">&quot;p10&quot;</span><span class="p">:</span><span class="n">p10</span><span class="p">,</span> <span class="s2">&quot;p90&quot;</span><span class="p">:</span><span class="n">p90</span><span class="p">}</span>
+        <span class="k">return</span> <span class="n">results</span></div></div>
+
+      
+        
+             
+            
+        
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Boubsiat Hafsa.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

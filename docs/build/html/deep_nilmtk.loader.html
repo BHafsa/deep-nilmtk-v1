@@ -1,0 +1,331 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>deep_nilmtk.loader package &mdash; deep_nilmtk 0.0.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="https://kit.fontawesome.com/##########.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="deep_nilmtk.model package" href="deep_nilmtk.model.html" />
+    <link rel="prev" title="deep_nilmtk.disaggregate package" href="deep_nilmtk.disaggregate.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> deep_nilmtk
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">deep_nilmtk</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="deep_nilmtk.config.html">deep_nilmtk.config package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deep_nilmtk.disaggregate.html">deep_nilmtk.disaggregate package</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">deep_nilmtk.loader package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#module-0">deep_nilmtk.loader module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-deep_nilmtk.loader.bertdataset">deep_nilmtk.loader.bertdataset module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-deep_nilmtk.loader.generaldataset">deep_nilmtk.loader.generaldataset module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-deep_nilmtk.loader.ptpdataset">deep_nilmtk.loader.ptpdataset module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-deep_nilmtk.loader.wavenetdataset">deep_nilmtk.loader.wavenetdataset module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="deep_nilmtk.model.html">deep_nilmtk.model package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deep_nilmtk.preprocessing.html">deep_nilmtk.preprocessing package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deep_nilmtk.utils.html">deep_nilmtk.utils package</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">deep_nilmtk</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="modules.html">deep_nilmtk</a> &raquo;</li>
+        
+      <li>deep_nilmtk.loader package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/deep_nilmtk.loader.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-deep_nilmtk.loader">
+<span id="deep-nilmtk-loader-package"></span><h1>deep_nilmtk.loader package<a class="headerlink" href="#module-deep_nilmtk.loader" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-0">
+<span id="deep-nilmtk-loader-module"></span><h2>deep_nilmtk.loader module<a class="headerlink" href="#module-0" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-deep_nilmtk.loader.bertdataset">
+<span id="deep-nilmtk-loader-bertdataset-module"></span><h2>deep_nilmtk.loader.bertdataset module<a class="headerlink" href="#module-deep_nilmtk.loader.bertdataset" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="deep_nilmtk.loader.bertdataset.BERTDataset">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">deep_nilmtk.loader.bertdataset.</span></span><span class="sig-name descname"><span class="pre">BERTDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">targets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">main_cutoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/loader/bertdataset.html#BERTDataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.loader.bertdataset.BERTDataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class is dataLoader correponding to the BERT4NILM 
+model. The original code can be found here: <a class="reference external" href="https://github.com/Yueeeeeeee/BERT4NILM/">https://github.com/Yueeeeeeee/BERT4NILM/</a>
+.. _bertdataset:</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="deep_nilmtk.loader.bertdataset.BERTDataset.compute_status">
+<span class="sig-name descname"><span class="pre">compute_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/loader/bertdataset.html#BERTDataset.compute_status"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.loader.bertdataset.BERTDataset.compute_status" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="deep_nilmtk.loader.bertdataset.BERTDataset.padding_seqs">
+<span class="sig-name descname"><span class="pre">padding_seqs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_array</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/loader/bertdataset.html#BERTDataset.padding_seqs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.loader.bertdataset.BERTDataset.padding_seqs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-deep_nilmtk.loader.generaldataset">
+<span id="deep-nilmtk-loader-generaldataset-module"></span><h2>deep_nilmtk.loader.generaldataset module<a class="headerlink" href="#module-deep_nilmtk.loader.generaldataset" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="deep_nilmtk.loader.generaldataset.collate_fns">
+<span class="sig-prename descclassname"><span class="pre">deep_nilmtk.loader.generaldataset.</span></span><span class="sig-name descname"><span class="pre">collate_fns</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/loader/generaldataset.html#collate_fns"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.loader.generaldataset.collate_fns" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is responsible of generating 
+the dynamic sequences for each batch</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>max_num_context ([int]): number of context points
+max_num_extra_target ([int]): number of target points
+sample ([bool]): if true sample from the static length sequence to obtain smaller sequences
+sort (bool, optional): [description]. Defaults to True.
+context_in_target (bool, optional): [description]. Defaults to True.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="deep_nilmtk.loader.generaldataset.generalDataLoader">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">deep_nilmtk.loader.generaldataset.</span></span><span class="sig-name descname"><span class="pre">generalDataLoader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">targets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/loader/generaldataset.html#generalDataLoader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.loader.generaldataset.generalDataLoader" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class implements the most two common NILM data generators:
+The seq-to-seq and seq-to-point. The data is generated correponding 
+to the sequence type. For the seq-to-point models, the position of 
+the point can also be specified according to the point_positon paramter.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="deep_nilmtk.loader.generaldataset.generalDataLoader.get_sample">
+<span class="sig-name descname"><span class="pre">get_sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/loader/generaldataset.html#generalDataLoader.get_sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.loader.generaldataset.generalDataLoader.get_sample" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="deep_nilmtk.loader.generaldataset.npsample_batch">
+<span class="sig-prename descclassname"><span class="pre">deep_nilmtk.loader.generaldataset.</span></span><span class="sig-name descname"><span class="pre">npsample_batch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/loader/generaldataset.html#npsample_batch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.loader.generaldataset.npsample_batch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sample from numpy arrays along 2nd dim.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="deep_nilmtk.loader.generaldataset.pad_data">
+<span class="sig-prename descclassname"><span class="pre">deep_nilmtk.loader.generaldataset.</span></span><span class="sig-name descname"><span class="pre">pad_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad_at_begin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/loader/generaldataset.html#pad_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.loader.generaldataset.pad_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-deep_nilmtk.loader.ptpdataset">
+<span id="deep-nilmtk-loader-ptpdataset-module"></span><h2>deep_nilmtk.loader.ptpdataset module<a class="headerlink" href="#module-deep_nilmtk.loader.ptpdataset" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="deep_nilmtk.loader.ptpdataset.pad_data">
+<span class="sig-prename descclassname"><span class="pre">deep_nilmtk.loader.ptpdataset.</span></span><span class="sig-name descname"><span class="pre">pad_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units_to_pad</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">border</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/loader/ptpdataset.html#pad_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.loader.ptpdataset.pad_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="deep_nilmtk.loader.ptpdataset.ptpLoader">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">deep_nilmtk.loader.ptpdataset.</span></span><span class="sig-name descname"><span class="pre">ptpLoader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">targets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/loader/ptpdataset.html#ptpLoader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.loader.ptpdataset.ptpLoader" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class is the dataLoader for the temporal pooling NILM model. The original code 
+can be found here: <a class="reference external" href="https://github.com/UCA-Datalab/nilm-thresholding">https://github.com/UCA-Datalab/nilm-thresholding</a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-deep_nilmtk.loader.wavenetdataset">
+<span id="deep-nilmtk-loader-wavenetdataset-module"></span><h2>deep_nilmtk.loader.wavenetdataset module<a class="headerlink" href="#module-deep_nilmtk.loader.wavenetdataset" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="deep_nilmtk.loader.wavenetdataset.WaveNetDataLoader">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">deep_nilmtk.loader.wavenetdataset.</span></span><span class="sig-name descname"><span class="pre">WaveNetDataLoader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">targets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/loader/wavenetdataset.html#WaveNetDataLoader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.loader.wavenetdataset.WaveNetDataLoader" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="deep_nilmtk.loader.wavenetdataset.WaveNetDataLoader.get_sample">
+<span class="sig-name descname"><span class="pre">get_sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/loader/wavenetdataset.html#WaveNetDataLoader.get_sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.loader.wavenetdataset.WaveNetDataLoader.get_sample" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="deep_nilmtk.loader.wavenetdataset.pad_data">
+<span class="sig-prename descclassname"><span class="pre">deep_nilmtk.loader.wavenetdataset.</span></span><span class="sig-name descname"><span class="pre">pad_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context_size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/loader/wavenetdataset.html#pad_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.loader.wavenetdataset.pad_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="deep_nilmtk.model.html" class="btn btn-neutral float-right" title="deep_nilmtk.model package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="deep_nilmtk.disaggregate.html" class="btn btn-neutral float-left" title="deep_nilmtk.disaggregate package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Boubsiat Hafsa.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,161 @@
+
+<!DOCTYPE html>
+
+<html lang="python">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>deep_nilmtk.utils.log &#8212; deep_nilmtk 0.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/groundwork.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">deep_nilmtk 0.0.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">deep_nilmtk.utils.log</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for deep_nilmtk.utils.log</h1><div class="highlight"><pre>
+<span></span>
+
+<span class="kn">import</span> <span class="nn">pickle</span>
+
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">import</span> <span class="nn">mlflow</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+<div class="viewcode-block" id="start_logging"><a class="viewcode-back" href="../../../deep_nilmtk.utils.html#deep_nilmtk.utils.log.start_logging">[docs]</a><span class="k">def</span> <span class="nf">start_logging</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    loggs all the output of the running into  file</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        filename (str): Name of the file where output will be logged</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        file: </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;../logs/experiment-</span><span class="si">{}</span><span class="s1">.txt&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">f</span>
+    <span class="k">return</span> <span class="n">f</span></div>
+
+<div class="viewcode-block" id="stop_logging"><a class="viewcode-back" href="../../../deep_nilmtk.utils.html#deep_nilmtk.utils.log.stop_logging">[docs]</a><span class="k">def</span> <span class="nf">stop_logging</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">__stdout_</span></div>
+
+<div class="viewcode-block" id="save_results"><a class="viewcode-back" href="../../../deep_nilmtk.utils.html#deep_nilmtk.utils.log.save_results">[docs]</a><span class="k">def</span> <span class="nf">save_results</span><span class="p">(</span><span class="n">api_results_f1</span><span class="p">,</span><span class="n">time</span><span class="p">,</span> <span class="n">experiment_name</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s1">&#39;../results&#39;</span><span class="p">):</span>
+    <span class="n">error_df_f1</span> <span class="o">=</span> <span class="n">api_results_f1</span><span class="o">.</span><span class="n">errors</span>
+    <span class="n">error_keys_df_f1</span> <span class="o">=</span> <span class="n">api_results_f1</span><span class="o">.</span><span class="n">errors_keys</span>
+    <span class="c1"># Save results in Pickle file.</span>
+    <span class="n">df_dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;error_keys&#39;</span><span class="p">:</span> <span class="n">api_results_f1</span><span class="o">.</span><span class="n">errors_keys</span><span class="p">,</span>
+        <span class="s1">&#39;errors&#39;</span><span class="p">:</span> <span class="n">api_results_f1</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span>
+        <span class="s1">&#39;train_mains&#39;</span><span class="p">:</span> <span class="n">api_results_f1</span><span class="o">.</span><span class="n">train_mains</span><span class="p">,</span>
+        <span class="s1">&#39;train_submeters&#39;</span><span class="p">:</span> <span class="n">api_results_f1</span><span class="o">.</span><span class="n">train_submeters</span><span class="p">,</span>
+        <span class="s1">&#39;test_mains&#39;</span><span class="p">:</span> <span class="n">api_results_f1</span><span class="o">.</span><span class="n">test_mains</span><span class="p">,</span>
+        <span class="s1">&#39;test_submeters&#39;</span><span class="p">:</span> <span class="n">api_results_f1</span><span class="o">.</span><span class="n">test_submeters</span><span class="p">,</span>
+        <span class="s1">&#39;gt&#39;</span><span class="p">:</span> <span class="n">api_results_f1</span><span class="o">.</span><span class="n">gt_overall</span><span class="p">,</span>
+        <span class="s1">&#39;predictions&#39;</span><span class="p">:</span> <span class="n">api_results_f1</span><span class="o">.</span><span class="n">pred_overall</span><span class="p">,</span>
+        <span class="s1">&#39;execution_time&#39;</span><span class="p">:</span><span class="n">time</span><span class="p">,</span>
+
+    <span class="p">}</span>
+  
+    <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">df_dict</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">experiment_name</span><span class="si">}</span><span class="s2">.p&quot;</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">))</span>
+  
+    <span class="k">for</span> <span class="n">metric</span><span class="p">,</span> <span class="n">f1_errors</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">error_keys_df_f1</span><span class="p">,</span> <span class="n">error_df_f1</span><span class="p">):</span>
+        <span class="n">ff_errors</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">f1_errors</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">ff_errors</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">experiment_name</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">metric</span><span class="si">}</span><span class="s1">.csv&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="log_results"><a class="viewcode-back" href="../../../deep_nilmtk.utils.html#deep_nilmtk.utils.log.log_results">[docs]</a><span class="k">def</span> <span class="nf">log_results</span><span class="p">(</span><span class="n">experiment</span><span class="p">,</span> <span class="n">api_res</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function logs the final results of the testing in the correspanding</span>
+<span class="sd">    experiment for each disaggregator</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        experiment (dict): dict of the experiment in nilmtk format</span>
+<span class="sd">        api_res (nilmtk-api reult): results of the execution as provided by nilmtk</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">appliance</span> <span class="ow">in</span> <span class="n">experiment</span><span class="p">[</span><span class="s1">&#39;appliances&#39;</span><span class="p">]:</span>  
+        <span class="c1"># Select the corresponding experiment and run ID</span>
+        <span class="n">mlflow</span><span class="o">.</span><span class="n">set_experiment</span><span class="p">(</span><span class="n">appliance</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">disaggregator_name</span><span class="p">,</span> <span class="n">disaggregator</span> <span class="ow">in</span> <span class="n">experiment</span><span class="p">[</span><span class="s1">&#39;methods&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+          <span class="k">with</span> <span class="n">mlflow</span><span class="o">.</span><span class="n">start_run</span><span class="p">(</span><span class="n">disaggregator</span><span class="o">.</span><span class="n">run_id</span><span class="p">[</span><span class="n">appliance</span><span class="p">]):</span>
+            <span class="c1"># Log test metrics for each appliance</span>
+            <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">api_res</span><span class="o">.</span><span class="n">errors_keys</span><span class="p">:</span>
+                <span class="n">metric_value</span> <span class="o">=</span> <span class="n">api_res</span><span class="o">.</span><span class="n">errors</span><span class="p">[</span><span class="n">api_res</span><span class="o">.</span><span class="n">errors_keys</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">metric</span><span class="p">)][</span><span class="n">disaggregator_name</span><span class="p">][</span><span class="n">appliance</span><span class="p">]</span>
+                <span class="n">metric_label</span> <span class="o">=</span> <span class="n">experiment</span><span class="p">[</span><span class="s1">&#39;test&#39;</span><span class="p">][</span><span class="s1">&#39;metrics&#39;</span><span class="p">][</span><span class="n">api_res</span><span class="o">.</span><span class="n">errors_keys</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">metric</span><span class="p">)]</span>
+                <span class="n">mlflow</span><span class="o">.</span><span class="n">log_metric</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;test_</span><span class="si">{</span><span class="n">metric_label</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">metric_value</span><span class="p">)</span>
+                <span class="n">mlflow</span><span class="o">.</span><span class="n">set_tag</span><span class="p">(</span><span class="s1">&#39;mlflow.note.content&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;&#39;&#39;</span>
+
+<span class="s1">                Information about the data used for this experiment:</span>
+<span class="s1">                Training: </span><span class="si">{</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">experiment</span><span class="p">[</span><span class="s1">&#39;train&#39;</span><span class="p">][</span><span class="s1">&#39;datasets&#39;</span><span class="p">])</span><span class="si">}</span><span class="s1"></span>
+<span class="s1">                Testing: </span><span class="si">{</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">experiment</span><span class="p">[</span><span class="s1">&#39;test&#39;</span><span class="p">][</span><span class="s1">&#39;datasets&#39;</span><span class="p">])</span><span class="si">}</span><span class="s1"> </span>
+
+<span class="s1">                &#39;&#39;&#39;</span><span class="p">)</span></div>
+
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">deep_nilmtk 0.0.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">deep_nilmtk.utils.log</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021, Boubsiat Hafsa.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.1.2.
+    </div>
+  </body>
+</html>
