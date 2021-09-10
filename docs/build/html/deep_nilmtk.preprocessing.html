@@ -333,23 +333,26 @@ power consumption</p>
 <span id="states-module"></span><h2>States module<a class="headerlink" href="#module-deep_nilmtk.preprocessing.states" title="Permalink to this headline">¶</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="deep_nilmtk.preprocessing.states.compute_status">
-<span class="sig-prename descclassname"><span class="pre">deep_nilmtk.preprocessing.states.</span></span><span class="sig-name descname"><span class="pre">compute_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">appliances</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'1min'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_power</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thresholds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_off</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_on</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold_std</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_means</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">appliances_labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'at'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/preprocessing/states.html#compute_status"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.preprocessing.states.compute_status" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates the operational states relative to the current power
-consumption of the applaince</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>appliances ([type]): [description]
-dates ([type], optional): [description]. Defaults to None.
-period (str, optional): [description]. Defaults to &quot;1min&quot;.
-max_power (float, optional): [description]. Defaults to 10000.0.
-thresholds ([type], optional): [description]. Defaults to None.
-min_off ([type], optional): [description]. Defaults to None.
-min_on ([type], optional): [description]. Defaults to None.
-threshold_std (bool, optional): [description]. Defaults to True.
-return_means (bool, optional): [description]. Defaults to False.
-appliances_labels (list, optional): [description]. Defaults to [].
-threshold_method (str, optional): [description]. Defaults to 'at'.</p>
+<span class="sig-prename descclassname"><span class="pre">deep_nilmtk.preprocessing.states.</span></span><span class="sig-name descname"><span class="pre">compute_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">appliances</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thresholds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_off</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_on</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold_std</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_means</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">appliances_labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'at'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/preprocessing/states.html#compute_status"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.preprocessing.states.compute_status" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the operational status of appliances using the specified thresholding method</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>appliances</strong> (<em>np.array</em>) -- Power consumption of target applainces</p></li>
+<li><p><strong>thresholds</strong> (<em>np.array</em><em>, </em><em>optional</em>) -- Threhsold of each applaince, defaults to None</p></li>
+<li><p><strong>min_off</strong> (<em>np.array</em><em>, </em><em>optional</em>) -- Minimum off duration, defaults to None</p></li>
+<li><p><strong>min_on</strong> (<em>np.array</em><em>, </em><em>optional</em>) -- Minimum on duration, defaults to None</p></li>
+<li><p><strong>threshold_std</strong> (<em>bool</em><em>, </em><em>optional</em>) -- Decides about the use of STD to calcualte the thresholds, defaults to True</p></li>
+<li><p><strong>return_means</strong> (<em>bool</em><em>, </em><em>optional</em>) -- Specifiyies if the mean consumption of each status is required, defaults to False</p></li>
+<li><p><strong>appliances_labels</strong> (<em>list</em><em>, </em><em>optional</em>) -- Labels of the considered appliances, defaults to []</p></li>
+<li><p><strong>threshold_method</strong> (<em>str</em><em>, </em><em>optional</em>) -- The thresholding method to be used for status derivation, defaults to 'at'</p></li>
+</ul>
 </dd>
-<dt>Returns:</dt><dd><p>[type]: [description]</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Operational states with the thresholds used and the power consumption of each states</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple</p>
 </dd>
 </dl>
 </dd></dl>
@@ -358,15 +361,18 @@ threshold_method (str, optional): [description]. Defaults to 'at'.</p>
 <dt class="sig sig-object py" id="deep_nilmtk.preprocessing.states.get_status">
 <span class="sig-prename descclassname"><span class="pre">deep_nilmtk.preprocessing.states.</span></span><span class="sig-name descname"><span class="pre">get_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ser</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thresholds</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/preprocessing/states.html#get_status"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.preprocessing.states.get_status" title="Permalink to this definition">¶</a></dt>
 <dd><p>[summary]</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>ser (np.array): shape = (num_series, series_len, num_meters)
-- num_series : Amount of time series.
-- series_len : Length of each time series.
-- num_meters : Meters contained in the array.
-thresholds (np.array): shape = (num_meters,)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ser</strong> (<em>np.array</em>) -- Target power consumption with shape = (num_series, series_len, num_meters)</p></li>
+<li><p><strong>thresholds</strong> (<em>np.array</em>) -- Thresholds of target power with shape = (num_meters,)</p></li>
+</ul>
 </dd>
-<dt>Returns:</dt><dd><p>np.array: shape = (num_series, series_len, num_meters)
-With binary values indicating ON (1) and OFF (0) states.</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An array (num_series, series_len, num_meters) with binary values indicating ON (1) and OFF (0) states.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array</p>
 </dd>
 </dl>
 </dd></dl>
@@ -374,26 +380,21 @@ With binary values indicating ON (1) and OFF (0) states.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="deep_nilmtk.preprocessing.states.get_status_by_duration">
 <span class="sig-prename descclassname"><span class="pre">deep_nilmtk.preprocessing.states.</span></span><span class="sig-name descname"><span class="pre">get_status_by_duration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ser</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thresholds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_off</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_on</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/preprocessing/states.html#get_status_by_duration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.preprocessing.states.get_status_by_duration" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>Args</dt><dd><dl class="simple">
-<dt>ser<span class="classifier">numpy.array</span></dt><dd><p>shape = (num_series, series_len, num_meters)
-- num_series : Amount of time series.
-- series_len : Length of each time series.
-- num_meters : Meters contained in the array.</p>
+<dd><p>Calculates operational status of multiple meters using thresholds</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ser</strong> (<em>np.array</em>) -- Power consumption shape = (num_series, series_len, num_meters) - num_series : Amount of time series- series_len : Length of each time series - num_meters : Meters contained in the array.</p></li>
+<li><p><strong>thresholds</strong> (<em>np.array</em>) -- Thresholds of power consumption  shape = (num_meters,)</p></li>
+<li><p><strong>min_off</strong> (<em>np.array</em>) -- Mimimum off duration with  shape = (num_meters,)</p></li>
+<li><p><strong>min_on</strong> (<em>np.array</em>) -- Mimimum on duration with  shape = (num_meters,)</p></li>
+</ul>
 </dd>
-<dt>thresholds<span class="classifier">numpy.array</span></dt><dd><p>shape = (num_meters,)</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Operational status with binary values indicating ON (1) and OFF (0) states with shape (num_series, series_len, num_meters).</p>
 </dd>
-<dt>min_off<span class="classifier">numpy.array</span></dt><dd><p>shape = (num_meters,)</p>
-</dd>
-<dt>min_on<span class="classifier">numpy.array</span></dt><dd><p>shape = (num_meters,)</p>
-</dd>
-</dl>
-</dd>
-<dt>Returns</dt><dd><dl class="simple">
-<dt>ser_bin<span class="classifier">numpy.array</span></dt><dd><p>shape = (num_series, series_len, num_meters)
-With binary values indicating ON (1) and OFF (0) states.</p>
-</dd>
-</dl>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array</p>
 </dd>
 </dl>
 </dd></dl>
@@ -401,7 +402,21 @@ With binary values indicating ON (1) and OFF (0) states.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="deep_nilmtk.preprocessing.states.get_status_means">
 <span class="sig-prename descclassname"><span class="pre">deep_nilmtk.preprocessing.states.</span></span><span class="sig-name descname"><span class="pre">get_status_means</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ser</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/preprocessing/states.html#get_status_means"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.preprocessing.states.get_status_means" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get means of both status.</p>
+<dd><p>Get means of ON/OFF status.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ser</strong> (<em>np.array</em>) -- Power data</p></li>
+<li><p><strong>status</strong> (<em>np.array</em>) -- The operational status of the target power</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Mean power consumption of each state</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array</p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -429,8 +444,10 @@ ukdale_data.load_ukdale_meter</p>
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>thresholds, min_off, min_on, threshold_std</p>
 </dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>tuple</p>
+</dd>
 </dl>
-<p>:rtype:tuple</p>
 </dd></dl>
 
 <dl class="py function">

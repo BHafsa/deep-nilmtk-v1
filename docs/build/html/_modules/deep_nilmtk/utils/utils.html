@@ -168,24 +168,27 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span> <span class="o">=</span> <span class="p">[]</span>
 
-<div class="viewcode-block" id="DictLogger.log_hyperparams"><a class="viewcode-back" href="../../../deep_nilmtk.utils.html#deep_nilmtk.utils.utils.DictLogger.log_hyperparams">[docs]</a>    <span class="k">def</span> <span class="nf">log_hyperparams</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="c1"># We will do this manually with final metrics</span>
-        <span class="k">pass</span></div>
-
 <div class="viewcode-block" id="DictLogger.log_metrics"><a class="viewcode-back" href="../../../deep_nilmtk.utils.html#deep_nilmtk.utils.utils.DictLogger.log_metrics">[docs]</a>    <span class="k">def</span> <span class="nf">log_metrics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metrics</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Logs the training metrics</span>
+
+<span class="sd">        :param metrics: the values of the metrics</span>
+<span class="sd">        :type metrics: dict</span>
+<span class="sd">        :param step: the ID of the current epoch, defaults to None</span>
+<span class="sd">        :type step: int, optional</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">log_metrics</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">step</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="get_latest_checkpoint"><a class="viewcode-back" href="../../../deep_nilmtk.utils.html#deep_nilmtk.utils.utils.get_latest_checkpoint">[docs]</a><span class="k">def</span> <span class="nf">get_latest_checkpoint</span><span class="p">(</span><span class="n">checkpoint_path</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Returns the latest checkpoint for the model</span>
-<span class="sd">    Args:</span>
-<span class="sd">        checkpoint_path (str): The path to the checkpoints&#39; folder</span>
+    <span class="sd">&quot;&quot;&quot;Returns the latest checkpoint for the model</span>
 
-<span class="sd">    Returns:</span>
-<span class="sd">        file: the latest checkpoint saved during training</span>
+<span class="sd">    :param checkpoint_path: The path to the checkpoints folder</span>
+<span class="sd">    :type checkpoint_path: str</span>
+<span class="sd">    :return: the latest checkpoint saved during training</span>
+<span class="sd">  </span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    
     <span class="n">checkpoint_path</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">checkpoint_path</span><span class="p">)</span>
     <span class="n">list_of_files</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">checkpoint_path</span> <span class="o">+</span> <span class="s1">&#39;/*.ckpt&#39;</span><span class="p">)</span>
     

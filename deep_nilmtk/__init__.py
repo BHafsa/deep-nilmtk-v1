@@ -6,5 +6,6 @@ evaluation and the validation of those models (e.g., cross-validation, hyper-par
 case of NILM. 
 """
 
-from .disaggregate import *
-from .utils import *
+from . import *
+
+

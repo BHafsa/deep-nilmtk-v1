@@ -164,14 +164,18 @@
 
 
 <div class="viewcode-block" id="setup"><a class="viewcode-back" href="../../../deep_nilmtk.utils.html#deep_nilmtk.utils.setup.setup">[docs]</a><span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="n">experiment</span><span class="p">,</span> <span class="n">experiment_name</span><span class="p">,</span> <span class="n">results_path</span><span class="o">=</span> <span class="s1">&#39;../results&#39;</span><span class="p">,</span> <span class="n">mlflow_repo</span> <span class="o">=</span><span class="s1">&#39;../mlflow&#39;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Runs NILM experiments as defined with a NILMt-API</span>
+    <span class="sd">&quot;&quot;&quot;Runs NILM experiments as defined with a NILMt-API</span>
 
-<span class="sd">    Args:</span>
-<span class="sd">        experiment (Dict): Experiment definition</span>
-<span class="sd">        experiment_name (string): The name of the current experiment</span>
-<span class="sd">        results_path (str, optional): [description]. Defaults to &#39;../results&#39;.</span>
+<span class="sd">    :param experiment: Experiment definition</span>
+<span class="sd">    :type experiment: dict</span>
+<span class="sd">    :param experiment_name: The name of the current experiment</span>
+<span class="sd">    :type experiment_name: str</span>
+<span class="sd">    :param results_path: The path to the resulst folder, defaults to &#39;../results&#39;</span>
+<span class="sd">    :type results_path: str, optional</span>
+<span class="sd">    :param mlflow_repo: The path to the Mlflow folder, defaults to &#39;../mlflow&#39;</span>
+<span class="sd">    :type mlflow_repo: str, optional</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+   
     <span class="n">f</span> <span class="o">=</span> <span class="n">start_logging</span><span class="p">(</span><span class="n">experiment_name</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;run </span><span class="si">{</span><span class="n">experiment_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="n">mlflow</span><span class="o">.</span><span class="n">set_tracking_uri</span><span class="p">(</span><span class="n">mlflow_repo</span><span class="p">)</span>

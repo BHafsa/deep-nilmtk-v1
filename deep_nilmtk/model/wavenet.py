@@ -247,9 +247,12 @@ class DilatedResidualBlock2(nn.Module):
 
 
 class WaveNet(S2S):
-    """[summary]
-
+    """
     .. _wavenilm:
+
+    WaveNet model for load disaggregtion using residual and dilated convolutions.
+
+    
     """
 
     def __init__(self, 
@@ -306,11 +309,16 @@ class WaveNet(S2S):
             return torch.sigmoid(data_out)
         return data_out
     
-    
-
-
 
 class WaveNetBGRU(nn.Module):
+    """
+    WaveNet model with a GRU 
+
+    :param nn: [description]
+    :type nn: [type]
+    :return: [description]
+    :rtype: [type]
+    """
 
     def __init__(self, layers=6, kernel_size=3, residual_channels=32, dilation_channels=32, skip_channels=32):
         super(WaveNetBGRU, self).__init__()
@@ -393,6 +401,14 @@ class WaveNetBGRU(nn.Module):
 
 
 class WaveNetBGRU_speedup(nn.Module):
+    """
+    WaveNet with a GRU and faster generation fo predictions
+
+    :param nn: [description]
+    :type nn: [type]
+    :return: [description]
+    :rtype: [type]
+    """
 
     def __init__(self, layers=6, kernel_size=3, residual_channels=32, dilation_channels=32, skip_channels=32):
         super(WaveNetBGRU_speedup, self).__init__()

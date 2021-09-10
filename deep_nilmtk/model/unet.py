@@ -13,13 +13,25 @@ from .layers import  create_conv1, create_deconv1, create_linear, elu_plus_one_p
 
 
 class UNETNILM(nn.Module):
-
     """
+    .. _unet:
     
     UNET-NILM impelementation 
     The orginal paper can be found here: https://dl.acm.org/doi/abs/10.1145/3427771.3427859
 
-    .. _unet:
+    The hyperparameter dictionnary is expected to include the following parameters
+    
+    :param appliances: List of appliances, defaults to 1
+    :type appliances: list
+    :param feature_type: The type of input features generated in the pre-processing, defaults  to 'main'
+    :type feature_type: str
+    :param n_channels: the number of output channels, defaults to 1
+    :type n_channels: int
+    :param pool_filter: Pooling filter, defaults to 8
+    :type pool_filter: int
+    :param latent_size: The latent size, defaults to 1024
+    :type latent_size: int
+    
     """
        
     def __init__(
@@ -92,6 +104,13 @@ class UNETNILM(nn.Module):
 
 
     def step(self, batch):
+        """Disaggregates a batch of data
+
+        :param batch: A batch of data.
+        :type batch: Tensor
+        :return: loss function as returned form the model and MAE as returned from the model.
+        :rtype: tuple(float,float)
+        """
         x, y  = batch 
         out   = self(x)  # BxCxT
         error = (y - out)
@@ -100,6 +119,14 @@ class UNETNILM(nn.Module):
         return  loss, mae   
     
     def predict(self,  model, test_dataloader):
+        """Generate prediction during testing for the test_dataLoader
+
+        :param model: pre-trained model.
+        :param test_dataloader: data loader for the testing period.
+        :type test_dataloader: dataLoader
+        :return: Disaggregated power consumption.
+        :rtype: tensor
+        """
         
         net = model.model.eval()
         num_batches = len(test_dataloader)
@@ -150,6 +177,26 @@ class UNETNILM(nn.Module):
 
 
 class UNETNILMSeq2Quantile(nn.Module):
+    """UNET-NILM impelementation with quantile regression
+    The orginal paper can be found here: https://dl.acm.org/doi/abs/10.1145/3427771.3427859
+
+    The hyperparameter dictionnary is expected to include the following parameters
+    
+    :param appliances: List of appliances, defaults to 1
+    :type appliances: list
+    :param feature_type: The type of input features generated in the pre-processing, defaults  to 'main'
+    :type feature_type: str
+    :param n_channels: the number of output channels, defaults to 1
+    :type n_channels: int
+    :param pool_filter: Pooling filter, defaults to 8
+    :type pool_filter: int
+    :param latent_size: The latent size, defaults to 1024
+    :type latent_size: int
+    :param quantile: The quantiles to use during prediction, defaults to [0.1, 0.25, 0.5, 0.75, 0.9]
+    :param quantile: list 
+    
+
+    """
        
     def __init__(self, params):
         super().__init__()
@@ -157,7 +204,7 @@ class UNETNILMSeq2Quantile(nn.Module):
         out_size=len(params['appliances'])
         seq_len= params['in_size']
         n_channels=4 if params['feature_type']=="combined" else 1
-        quantiles= params['quantiles']
+        quantiles= params['quantiles'] if 'quantiles' in params else [0.1, 0.25, 0.5, 0.75, 0.9]
                             
         pool_filter = params['pool_filter'] if 'pool_filter' in params  else 8
         latent_size = params['latent_size'] if 'latent_size' in params  else 1024
@@ -180,28 +227,16 @@ class UNETNILMSeq2Quantile(nn.Module):
         out = self.unet(x).reshape(x.size(0), -1, self.out_size)
         return out
     
-    @staticmethod
-    def suggest_hparams(self, trial):
-        '''
-        Function returning list of params that will be suggested from optuna
     
-        Parameters
-        ----------
-        trial : Optuna Trial.
-    
-        Returns
-        -------
-        dict: Dictionary of parameters with values suggested from optuna
-    
-        '''
-        
-        return {
-            }
     
     def smooth_pinball_loss(self, y, q, tau, alpha = 1e-2, kappa = 1e3, margin = 1e-2):
-        #https://github.com/hatalis/smooth-pinball-neural-network/blob/master/pinball_loss.py
-        #Hatalis, Kostas, et al. "A Novel Smoothed Loss and Penalty Function 
-        #for Noncrossing Composite Quantile Estimation via Deep Neural Networks." arXiv preprint (2019).
+        """
+        The implementation of the Pinball loss for NILM, original code can be found in :
+        https://github.com/hatalis/smooth-pinball-neural-network/blob/master/pinball_loss.py
+        Hatalis, Kostas, et al. "A Novel Smoothed Loss and Penalty Function 
+        for Noncrossing Composite Quantile Estimation via Deep Neural Networks." arXiv preprint (2019).
+        """
+       
         error = (y - q)
         q_loss = (tau * error + alpha * F.softplus(-error / alpha)).sum(0).mean()
         # calculate smooth cross-over penalty
@@ -211,6 +246,13 @@ class UNETNILMSeq2Quantile(nn.Module):
         return loss
     
     def step(self, batch):
+        """Disaggregates a batch of data
+
+        :param batch: A batch of data.
+        :type batch: Tensor
+        :return: loss function as returned form the model and MAE as returned from the model.
+        :rtype: tuple(float,float)
+        """
         x, y  = batch
         out = self(x)
         self.q = self.q.to(x.device)
@@ -226,6 +268,14 @@ class UNETNILMSeq2Quantile(nn.Module):
        
     
     def predict(self,  model, test_dataloader):
+        """Generate prediction during testing for the test_dataLoader
+
+        :param model: pre-trained model.
+        :param test_dataloader: data loader for the testing period.
+        :type test_dataloader: dataLoader
+        :return: Disaggregated power consumption.
+        :rtype: tensor
+        """
         
         net = model.model.eval()
         num_batches = len(test_dataloader)
@@ -279,151 +329,3 @@ class UNETNILMSeq2Quantile(nn.Module):
         results = {"pred":pred, "q_pred":q_pred, "pred_quantile":pred}
         return results
     
-    
-class UNETNILMDN(nn.Module):
-    """[summary]
-
-    :param nn: [description]
-    :type nn: [type]
-    """
-       
-    def __init__(self, params):
-        super().__init__()
-        
-        out_size=len( params['appliances'])
-        n_channels=4 if params['feature_type']=="combined" else 1
-        dist_type= params['mdn_dist_type']
-        
-        pool_filter= params['pool_filter'] if 'pool_filter' in params else 8 
-        latent_size= params['latent_size'] if 'latent_size'in params else 1024
-        mdn_latent=params['mdn_latent'] if 'mdn_latent' in params  else 50
-        kmix=params['kmix'] if 'kmix' in params else 5
-        dist_type=params['dist_type'] if 'dist_type' in params else "lognormal"
-        activation=params['activation'] if 'activation' in params else nn.SiLU()
-        
-        
-        self.unet = UNETNILM({
-            'n_channels' : n_channels, 
-            'out_size' : mdn_latent, 
-            'pool_filter' : pool_filter, 
-            'latent_size': latent_size
-                         })
-        self.mdn = MDGMM(in_dims=mdn_latent,out_dims=out_size,
-                 kmix=kmix, dist_type=dist_type, activation=activation)
-        
-  
-    
-    def forward(self, x):
-        z = self.unet(x)
-        pi, mu, sigma, gmm = self.mdn(z)
-        return pi, mu, sigma, gmm
-    
-    def log_nlloss(self, y, gmm):
-        """[summary]
-
-        :param y: [description]
-        :type y: [type]
-        :param gmm: [description]
-        :type gmm: [type]
-        :return: [description]
-        :rtype: [type]
-        """
-        logprobs = gmm.log_prob(y)
-        return -torch.mean(logprobs)
-    
-    def sample(self, gmm, n_sample=1000):
-        """[summary]
-
-        :param gmm: [description]
-        :type gmm: [type]
-        :param n_sample: [description], defaults to 1000
-        :type n_sample: int, optional
-        :return: [description]
-        :rtype: [type]
-        """
-        samples = gmm.sample(sample_shape=(n_sample,))
-        return samples
-    
-    def step(self, batch):
-        """[summary]
-
-        :param batch: [description]
-        :type batch: [type]
-        :return: [description]
-        :rtype: [type]
-        """
-        x, y  = batch
-        pi, mu, sigma, gmm  = self(x)
-        
-        samples = self.sample(gmm)
-        p10, p50, p90 = quantile(samples, (0.1, 0.5, 0.9)).squeeze(-1)
-       
-        loss = self.log_nlloss(y, gmm) + F.mse_loss(p50, y)
-        crps = eval_crps(samples, y)
-        mae = (y - p50).abs().data.mean()
-        return  loss, mae
-    
-    def predict(self,  model, test_dataloader):
-        """[summary]
-
-        :param model: [description]
-        :type model: [type]
-        :param test_dataloader: [description]
-        :type test_dataloader: [type]
-        :return: [description]
-        :rtype: [type]
-        """
-        
-        net = model.model.eval()
-        num_batches = len(test_dataloader)
-        values = range(num_batches)
-        
-        pred = []
-        true = []
-        mu_probs = []
-        pi_probs = []
-        simga_probs = []
-        samples_pred = []
-        
-        with tqdm(total = len(values), file=sys.stdout) as pbar:
-            with torch.no_grad():
-                for batch_idx, batch in enumerate(test_dataloader):
-                    if len(batch)==2:
-                        x, y  = batch
-                        true.append(y)
-                    else:
-                        x  = batch
-                       
-                    pi, mu, sigma, gmm = net(x)
-                    pred_sample = net.sample(gmm)
-                    mu_probs.append(mu)
-                    pi_probs.append(pi)
-                    simga_probs.append(sigma)
-                    samples_pred.append(pred_sample)
-                    del  batch    
-                    pbar.set_description('processed: %d' % (1 + batch_idx))
-                    pbar.update(1)  
-                
-                pbar.close()
-        
-        mu_probs = torch.cat(mu_probs, 0).expm1()
-        sigma_probs = torch.cat(simga_probs, 0)
-        samples_pred = torch.cat(samples_pred, 1).expm1()
-        p10, p50, p90 = quantile(samples_pred, (0.1, 0.5, 0.9)).squeeze(-1)
-
-        if len(true)!=0:
-            true  = torch.cat(true, 0).expm1() 
-            results = {
-                    "pred": p50, "sigma_pred":sigma_probs, "mu_pred":mu_probs, "pi_probs":pi_probs,
-                    "sample_pred":samples_pred,"p10":p10, "p90":p90, "true":true}
-        else:
-             results = {
-                    "pred": p50, "sigma_pred":sigma_probs, "mu_pred":mu_probs, "pi_probs":pi_probs,
-                    "sample_pred":samples_pred,"p10":p10, "p90":p90}
-        return results
-
-      
-        
-             
-            
-        

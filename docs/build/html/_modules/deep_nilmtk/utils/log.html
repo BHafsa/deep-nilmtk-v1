@@ -168,24 +168,34 @@
 <span class="kn">import</span> <span class="nn">json</span>
 
 <div class="viewcode-block" id="start_logging"><a class="viewcode-back" href="../../../deep_nilmtk.utils.html#deep_nilmtk.utils.log.start_logging">[docs]</a><span class="k">def</span> <span class="nf">start_logging</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    loggs all the output of the running into  file</span>
+    <span class="sd">&quot;&quot;&quot;Logs the output of the execution in the specified file</span>
 
-<span class="sd">    Args:</span>
-<span class="sd">        filename (str): Name of the file where output will be logged</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        file: </span>
+<span class="sd">    :param filename: The name of the log file</span>
+<span class="sd">    :type filename: str</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;../logs/experiment-</span><span class="si">{}</span><span class="s1">.txt&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
     <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">f</span>
     <span class="k">return</span> <span class="n">f</span></div>
 
 <div class="viewcode-block" id="stop_logging"><a class="viewcode-back" href="../../../deep_nilmtk.utils.html#deep_nilmtk.utils.log.stop_logging">[docs]</a><span class="k">def</span> <span class="nf">stop_logging</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Stops logging the output in the file f</span>
+
+<span class="sd">    :param f: Logs file</span>
+<span class="sd">    :type f: file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
     <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">__stdout_</span></div>
 
 <div class="viewcode-block" id="save_results"><a class="viewcode-back" href="../../../deep_nilmtk.utils.html#deep_nilmtk.utils.log.save_results">[docs]</a><span class="k">def</span> <span class="nf">save_results</span><span class="p">(</span><span class="n">api_results_f1</span><span class="p">,</span><span class="n">time</span><span class="p">,</span> <span class="n">experiment_name</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s1">&#39;../results&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This function persists teh output of the predictions in a pickel file</span>
+
+<span class="sd">    :param api_results_f1: Execution results as returned by the NILMtk-API</span>
+<span class="sd">    :param time: execution time</span>
+<span class="sd">    :param experiment_name: Name of the experiment</span>
+<span class="sd">    :type experiment_name: str</span>
+<span class="sd">    :param path: Path to the results folder, defaults to &#39;../results&#39;</span>
+<span class="sd">    :type path: str, optional</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">error_df_f1</span> <span class="o">=</span> <span class="n">api_results_f1</span><span class="o">.</span><span class="n">errors</span>
     <span class="n">error_keys_df_f1</span> <span class="o">=</span> <span class="n">api_results_f1</span><span class="o">.</span><span class="n">errors_keys</span>
     <span class="c1"># Save results in Pickle file.</span>
@@ -209,13 +219,13 @@
         <span class="n">ff_errors</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">experiment_name</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">metric</span><span class="si">}</span><span class="s1">.csv&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="log_results"><a class="viewcode-back" href="../../../deep_nilmtk.utils.html#deep_nilmtk.utils.log.log_results">[docs]</a><span class="k">def</span> <span class="nf">log_results</span><span class="p">(</span><span class="n">experiment</span><span class="p">,</span> <span class="n">api_res</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    This function logs the final results of the testing in the correspanding</span>
+    <span class="sd">&quot;&quot;&quot;This function logs the final results of the testing in the correspanding</span>
 <span class="sd">    experiment for each disaggregator</span>
-<span class="sd">    </span>
-<span class="sd">    Args:</span>
-<span class="sd">        experiment (dict): dict of the experiment in nilmtk format</span>
-<span class="sd">        api_res (nilmtk-api reult): results of the execution as provided by nilmtk</span>
+
+<span class="sd">    :param experiment: dict of the experiment in nilmtk format</span>
+<span class="sd">    :type experiment: dict</span>
+<span class="sd">    :param api_res: results of the execution as provided by nilmtk</span>
+<span class="sd">    :type api_res: nilmtk-api result</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">appliance</span> <span class="ow">in</span> <span class="n">experiment</span><span class="p">[</span><span class="s1">&#39;appliances&#39;</span><span class="p">]:</span>  
         <span class="c1"># Select the corresponding experiment and run ID</span>

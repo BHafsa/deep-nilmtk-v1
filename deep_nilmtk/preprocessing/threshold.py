@@ -50,7 +50,7 @@ def get_threshold_params(appliances, threshold_method = 'at'):
     :raises ValueError: Wrong thresholding method
     :raises ValueError: Missing parameters of an applaince
     :return: thresholds, min_off, min_on, threshold_std
-    :rtype:tuple
+    :rtype: tuple
     """
 
     if threshold_method == 'vs':

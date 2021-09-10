@@ -404,9 +404,12 @@
 
 
 <div class="viewcode-block" id="WaveNet"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.wavenet.WaveNet">[docs]</a><span class="k">class</span> <span class="nc">WaveNet</span><span class="p">(</span><span class="n">S2S</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;[summary]</span>
-
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    .. _wavenilm:</span>
+
+<span class="sd">    WaveNet model for load disaggregtion using residual and dilated convolutions.</span>
+
+<span class="sd">    </span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
@@ -463,11 +466,16 @@
             <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">data_out</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">data_out</span></div></div>
     
-    
-
-
 
 <div class="viewcode-block" id="WaveNetBGRU"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.wavenet.WaveNetBGRU">[docs]</a><span class="k">class</span> <span class="nc">WaveNetBGRU</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    WaveNet model with a GRU </span>
+
+<span class="sd">    :param nn: [description]</span>
+<span class="sd">    :type nn: [type]</span>
+<span class="sd">    :return: [description]</span>
+<span class="sd">    :rtype: [type]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layers</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">residual_channels</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">dilation_channels</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">skip_channels</span><span class="o">=</span><span class="mi">32</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">WaveNetBGRU</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
@@ -550,6 +558,14 @@
 
 
 <div class="viewcode-block" id="WaveNetBGRU_speedup"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.wavenet.WaveNetBGRU_speedup">[docs]</a><span class="k">class</span> <span class="nc">WaveNetBGRU_speedup</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    WaveNet with a GRU and faster generation fo predictions</span>
+
+<span class="sd">    :param nn: [description]</span>
+<span class="sd">    :type nn: [type]</span>
+<span class="sd">    :return: [description]</span>
+<span class="sd">    :rtype: [type]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layers</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">kernel_size</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">residual_channels</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">dilation_channels</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">skip_channels</span><span class="o">=</span><span class="mi">32</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">WaveNetBGRU_speedup</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>

@@ -218,13 +218,34 @@ class TransformerBlock(nn.Module):
 
 class BERT4NILM(nn.Module):
     """
-    
+    .. _bert:
+
     BERT4NILM implementation. 
     Original paper can be found here: https://dl.acm.org/doi/pdf/10.1145/3427771.3429390
     Original code can be found here: https://github.com/Yueeeeeeee/BERT4NILM
 
-    .. _bert:
-
+    The hyperparameter dictionnary is expected to include the following parameters
+    
+    :param threshold:  The threshold for states generation in the target power consumption, defaults to None
+    :type threshold: List of floats
+    :param cutoff: The cutoff for states generation in the target power consumption, defaults to None
+    :type cutoff: List of floats
+    :param min_on: The min on duration for states generation in the target power consumption, defaults to None
+    :type min_on: List of floats
+    :param min_off: The min off duration for states generation in the target power consumption, defaults to None
+    :type min_off: List of floats
+    :param in_size: The length of the input sequence, defaults to 488.
+    :type in_size: int
+    :param stride: The distance between two consecutive sequences, defaults to 1.
+    :type stride: int
+    :param hidden: The hidden size, defaults to 256
+    :type hidden: int
+    :param heads: The number of attention heads in each transformer block, defaults to 2
+    :type heads: int
+    :param n_layers: the number of transformer blocks in the model, defaults to 2
+    :type n_layers: int
+    :params dropout: The dropout, defaults to 0.2
+    :type dropout: float
     """
     def __init__(self, params):
 
@@ -251,7 +272,7 @@ class BERT4NILM(nn.Module):
         #self.C0 = torch.tensor([params['c0'] if 'c0' in params else 1.]).float()
 
         self.latent_len = int(self.original_len / 2)
-        self.dropout_rate = params['dropout']
+        self.dropout_rate = params['dropout'] if 'dropout' in params else 0.2
 
         self.hidden = params['hidden'] if 'hidden' in params else 256
         self.heads = params['heads'] if 'heads' in params else 2

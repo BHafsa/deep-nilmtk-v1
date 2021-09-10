@@ -375,13 +375,34 @@
 
 <div class="viewcode-block" id="BERT4NILM"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.bert4nilm.BERT4NILM">[docs]</a><span class="k">class</span> <span class="nc">BERT4NILM</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    </span>
+<span class="sd">    .. _bert:</span>
+
 <span class="sd">    BERT4NILM implementation. </span>
 <span class="sd">    Original paper can be found here: https://dl.acm.org/doi/pdf/10.1145/3427771.3429390</span>
 <span class="sd">    Original code can be found here: https://github.com/Yueeeeeeee/BERT4NILM</span>
 
-<span class="sd">    .. _bert:</span>
-
+<span class="sd">    The hyperparameter dictionnary is expected to include the following parameters</span>
+<span class="sd">    </span>
+<span class="sd">    :param threshold:  The threshold for states generation in the target power consumption, defaults to None</span>
+<span class="sd">    :type threshold: List of floats</span>
+<span class="sd">    :param cutoff: The cutoff for states generation in the target power consumption, defaults to None</span>
+<span class="sd">    :type cutoff: List of floats</span>
+<span class="sd">    :param min_on: The min on duration for states generation in the target power consumption, defaults to None</span>
+<span class="sd">    :type min_on: List of floats</span>
+<span class="sd">    :param min_off: The min off duration for states generation in the target power consumption, defaults to None</span>
+<span class="sd">    :type min_off: List of floats</span>
+<span class="sd">    :param in_size: The length of the input sequence, defaults to 488.</span>
+<span class="sd">    :type in_size: int</span>
+<span class="sd">    :param stride: The distance between two consecutive sequences, defaults to 1.</span>
+<span class="sd">    :type stride: int</span>
+<span class="sd">    :param hidden: The hidden size, defaults to 256</span>
+<span class="sd">    :type hidden: int</span>
+<span class="sd">    :param heads: The number of attention heads in each transformer block, defaults to 2</span>
+<span class="sd">    :type heads: int</span>
+<span class="sd">    :param n_layers: the number of transformer blocks in the model, defaults to 2</span>
+<span class="sd">    :type n_layers: int</span>
+<span class="sd">    :params dropout: The dropout, defaults to 0.2</span>
+<span class="sd">    :type dropout: float</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
 
@@ -408,7 +429,7 @@
         <span class="c1">#self.C0 = torch.tensor([params[&#39;c0&#39;] if &#39;c0&#39; in params else 1.]).float()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">latent_len</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">original_len</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dropout_rate</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;dropout&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dropout_rate</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;dropout&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;dropout&#39;</span> <span class="ow">in</span> <span class="n">params</span> <span class="k">else</span> <span class="mf">0.2</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">hidden</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;hidden&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;hidden&#39;</span> <span class="ow">in</span> <span class="n">params</span> <span class="k">else</span> <span class="mi">256</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">heads</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;heads&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;heads&#39;</span> <span class="ow">in</span> <span class="n">params</span> <span class="k">else</span> <span class="mi">2</span>

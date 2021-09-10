@@ -7,14 +7,18 @@ import mlflow
 
 
 def setup(experiment, experiment_name, results_path= '../results', mlflow_repo ='../mlflow'):
-    """
-    Runs NILM experiments as defined with a NILMt-API
+    """Runs NILM experiments as defined with a NILMt-API
 
-    Args:
-        experiment (Dict): Experiment definition
-        experiment_name (string): The name of the current experiment
-        results_path (str, optional): [description]. Defaults to '../results'.
+    :param experiment: Experiment definition
+    :type experiment: dict
+    :param experiment_name: The name of the current experiment
+    :type experiment_name: str
+    :param results_path: The path to the resulst folder, defaults to '../results'
+    :type results_path: str, optional
+    :param mlflow_repo: The path to the Mlflow folder, defaults to '../mlflow'
+    :type mlflow_repo: str, optional
     """
+   
     f = start_logging(experiment_name)
     print(f'run {experiment_name}')
     mlflow.set_tracking_uri(mlflow_repo)

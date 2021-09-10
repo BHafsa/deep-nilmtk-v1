@@ -11,24 +11,27 @@ class DictLogger(TensorBoardLogger):
         super().__init__(*args, **kwargs)
         self.metrics = []
 
-    def log_hyperparams(*args, **kwargs):
-        # We will do this manually with final metrics
-        pass
-
     def log_metrics(self, metrics, step=None):
+        """Logs the training metrics
+
+        :param metrics: the values of the metrics
+        :type metrics: dict
+        :param step: the ID of the current epoch, defaults to None
+        :type step: int, optional
+        """
         super().log_metrics(metrics, step=step)
         self.metrics.append(metrics)
 
 
 def get_latest_checkpoint(checkpoint_path):
-    """
-    Returns the latest checkpoint for the model
-    Args:
-        checkpoint_path (str): The path to the checkpoints' folder
+    """Returns the latest checkpoint for the model
 
-    Returns:
-        file: the latest checkpoint saved during training
+    :param checkpoint_path: The path to the checkpoints folder
+    :type checkpoint_path: str
+    :return: the latest checkpoint saved during training
+  
     """
+    
     checkpoint_path = str(checkpoint_path)
     list_of_files = glob.glob(checkpoint_path + '/*.ckpt')
     

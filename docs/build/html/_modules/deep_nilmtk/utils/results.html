@@ -158,6 +158,17 @@
 <span></span><span class="kn">from</span> <span class="nn">..preprocessing</span> <span class="kn">import</span> <span class="n">quantile_filter</span>
 
 <div class="viewcode-block" id="filter_prediction"><a class="viewcode-back" href="../../../deep_nilmtk.utils.html#deep_nilmtk.utils.results.filter_prediction">[docs]</a><span class="k">def</span> <span class="nf">filter_prediction</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">w</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Filters the predictions</span>
+
+<span class="sd">    param data: The input data power data.</span>
+<span class="sd">    :type data: np.array</span>
+<span class="sd">    :param sequence_length: The length of sequence, defaults to 10</span>
+<span class="sd">    :type sequence_length: int, optional</span>
+<span class="sd">    :param p: The percentile. Defaults to 50.</span>
+<span class="sd">    :type p: int, optional</span>
+<span class="sd">    :return: array of values for correponding percentile</span>
+<span class="sd">    :rtype: np.array</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">quantile_filter</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(),</span> <span class="n">w</span><span class="p">,</span> <span class="n">q</span><span class="p">)</span></div>
 </pre></div>
 

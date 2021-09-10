@@ -166,16 +166,12 @@
 <div class="viewcode-block" id="get_status"><a class="viewcode-back" href="../../../deep_nilmtk.preprocessing.html#deep_nilmtk.preprocessing.states.get_status">[docs]</a><span class="k">def</span> <span class="nf">get_status</span><span class="p">(</span><span class="n">ser</span><span class="p">,</span> <span class="n">thresholds</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;[summary]</span>
 
-<span class="sd">    Args:</span>
-<span class="sd">        ser (np.array): shape = (num_series, series_len, num_meters)</span>
-<span class="sd">        - num_series : Amount of time series.</span>
-<span class="sd">        - series_len : Length of each time series.</span>
-<span class="sd">        - num_meters : Meters contained in the array.</span>
-<span class="sd">        thresholds (np.array): shape = (num_meters,)</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        np.array: shape = (num_series, series_len, num_meters)</span>
-<span class="sd">        With binary values indicating ON (1) and OFF (0) states.</span>
+<span class="sd">    :param ser: Target power consumption with shape = (num_series, series_len, num_meters)</span>
+<span class="sd">    :type ser: np.array</span>
+<span class="sd">    :param thresholds: Thresholds of target power with shape = (num_meters,)</span>
+<span class="sd">    :type thresholds: np.array</span>
+<span class="sd">    :return: An array (num_series, series_len, num_meters) with binary values indicating ON (1) and OFF (0) states.</span>
+<span class="sd">    :rtype: np.array</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="c1"># We don&#39;t want to modify the original series</span>
@@ -198,8 +194,14 @@
     <span class="k">return</span> <span class="n">ser_bin</span></div>
 
 <div class="viewcode-block" id="get_status_means"><a class="viewcode-back" href="../../../deep_nilmtk.preprocessing.html#deep_nilmtk.preprocessing.states.get_status_means">[docs]</a><span class="k">def</span> <span class="nf">get_status_means</span><span class="p">(</span><span class="n">ser</span><span class="p">,</span> <span class="n">status</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Get means of both status.</span>
+    <span class="sd">&quot;&quot;&quot;Get means of ON/OFF status.</span>
+
+<span class="sd">    :param ser: Power data</span>
+<span class="sd">    :type ser: np.array</span>
+<span class="sd">    :param status: The operational status of the target power</span>
+<span class="sd">    :type status: np.array</span>
+<span class="sd">    :return: Mean power consumption of each state</span>
+<span class="sd">    :rtype: np.array</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">means</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">ser</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">2</span><span class="p">))</span>
@@ -216,22 +218,20 @@
 
 
 <span class="k">def</span> <span class="nf">_get_app_status_by_duration</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">min_off</span><span class="p">,</span> <span class="n">min_on</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;[summary]</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the operational status using operation duartions.</span>
 
-<span class="sd">    Args:</span>
-<span class="sd">        y (np.array): shape = (num_series, series_len)</span>
-<span class="sd">                        - num_series : Amount of time series.</span>
-<span class="sd">                        - series_len : Length of each time series.</span>
-<span class="sd">        threshold (float): threshold value.</span>
-<span class="sd">        min_off (int): minimum off duration of the appliance.</span>
-<span class="sd">        min_on (int): minimum on duration of the appliance.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        np.array: shape = (num_series, series_len)</span>
-<span class="sd">        With binary values indicating ON (1) and OFF (0) states.</span>
+<span class="sd">    :param y: Power consumption array with shape = (num_series, series_len) , num_series : Amount of time series - series_len : Length of each time series.</span>
+<span class="sd">    :type y: np.array </span>
+<span class="sd">    :param threshold: threshold value.</span>
+<span class="sd">    :type threshold: float</span>
+<span class="sd">    :param min_off: minimum off duration of the appliance.</span>
+<span class="sd">    :type min_off: int</span>
+<span class="sd">    :param min_on: minimum on duration of the appliance.</span>
+<span class="sd">    :type min_on: int</span>
+<span class="sd">    :return: With binary values indicating ON (1) and OFF (0) states.</span>
+<span class="sd">    :rtype: np.array</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-
     <span class="n">shape_original</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
@@ -282,25 +282,22 @@
 
 <div class="viewcode-block" id="get_status_by_duration"><a class="viewcode-back" href="../../../deep_nilmtk.preprocessing.html#deep_nilmtk.preprocessing.states.get_status_by_duration">[docs]</a><span class="k">def</span> <span class="nf">get_status_by_duration</span><span class="p">(</span><span class="n">ser</span><span class="p">,</span> <span class="n">thresholds</span><span class="p">,</span> <span class="n">min_off</span><span class="p">,</span> <span class="n">min_on</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    </span>
-<span class="sd">    Args</span>
-<span class="sd">        ser : numpy.array</span>
-<span class="sd">            shape = (num_series, series_len, num_meters)</span>
-<span class="sd">            - num_series : Amount of time series.</span>
-<span class="sd">            - series_len : Length of each time series.</span>
-<span class="sd">            - num_meters : Meters contained in the array.</span>
-<span class="sd">        thresholds : numpy.array</span>
-<span class="sd">            shape = (num_meters,)</span>
-<span class="sd">        min_off : numpy.array</span>
-<span class="sd">            shape = (num_meters,)</span>
-<span class="sd">        min_on : numpy.array</span>
-<span class="sd">            shape = (num_meters,)</span>
-<span class="sd">    </span>
-<span class="sd">    Returns</span>
-<span class="sd">        ser_bin : numpy.array</span>
-<span class="sd">            shape = (num_series, series_len, num_meters)</span>
-<span class="sd">            With binary values indicating ON (1) and OFF (0) states.</span>
+<span class="sd">    Calculates operational status of multiple meters using thresholds </span>
+
+<span class="sd">    :param ser: Power consumption shape = (num_series, series_len, num_meters) - num_series : Amount of time series- series_len : Length of each time series - num_meters : Meters contained in the array.</span>
+<span class="sd">    :type ser: np.array</span>
+<span class="sd">    :param thresholds: Thresholds of power consumption  shape = (num_meters,)</span>
+<span class="sd">    :type thresholds: np.array</span>
+<span class="sd">    :param min_off: Mimimum off duration with  shape = (num_meters,)</span>
+<span class="sd">    :type min_off: np.array</span>
+<span class="sd">    :param min_on: Mimimum on duration with  shape = (num_meters,)</span>
+<span class="sd">    :type min_on: np.array</span>
+<span class="sd">    :return: Operational status with binary values indicating ON (1) and OFF (0) states with shape (num_series, series_len, num_meters).</span>
+<span class="sd">    :rtype: np.array</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    
+
     <span class="n">num_apps</span> <span class="o">=</span> <span class="n">ser</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">ser_bin</span> <span class="o">=</span> <span class="n">ser</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
@@ -336,9 +333,9 @@
 
 
 <div class="viewcode-block" id="compute_status"><a class="viewcode-back" href="../../../deep_nilmtk.preprocessing.html#deep_nilmtk.preprocessing.states.compute_status">[docs]</a><span class="k">def</span> <span class="nf">compute_status</span><span class="p">(</span><span class="n">appliances</span><span class="p">,</span>
-                    <span class="n">dates</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                    <span class="n">period</span><span class="o">=</span><span class="s2">&quot;1min&quot;</span><span class="p">,</span>
-                    <span class="n">max_power</span><span class="o">=</span><span class="mf">10000.0</span><span class="p">,</span>
+                    <span class="c1"># dates=None,</span>
+                    <span class="c1"># period=&quot;1min&quot;,</span>
+                    <span class="c1"># max_power=10000.0,</span>
                     <span class="n">thresholds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                     <span class="n">min_off</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                     <span class="n">min_on</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -347,25 +344,28 @@
                     <span class="n">appliances_labels</span><span class="o">=</span><span class="p">[],</span>
                     <span class="n">threshold_method</span><span class="o">=</span><span class="s1">&#39;at&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Calculates the operational states relative to the current power</span>
-<span class="sd">    consumption of the applaince</span>
+<span class="sd">    Calculates the operational status of appliances using the specified thresholding method</span>
 
-<span class="sd">    Args:</span>
-<span class="sd">        appliances ([type]): [description]</span>
-<span class="sd">        dates ([type], optional): [description]. Defaults to None.</span>
-<span class="sd">        period (str, optional): [description]. Defaults to &quot;1min&quot;.</span>
-<span class="sd">        max_power (float, optional): [description]. Defaults to 10000.0.</span>
-<span class="sd">        thresholds ([type], optional): [description]. Defaults to None.</span>
-<span class="sd">        min_off ([type], optional): [description]. Defaults to None.</span>
-<span class="sd">        min_on ([type], optional): [description]. Defaults to None.</span>
-<span class="sd">        threshold_std (bool, optional): [description]. Defaults to True.</span>
-<span class="sd">        return_means (bool, optional): [description]. Defaults to False.</span>
-<span class="sd">        appliances_labels (list, optional): [description]. Defaults to [].</span>
-<span class="sd">        threshold_method (str, optional): [description]. Defaults to &#39;at&#39;.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        [type]: [description]</span>
+<span class="sd">    :param appliances: Power consumption of target applainces</span>
+<span class="sd">    :type appliances: np.array</span>
+<span class="sd">    :param thresholds: Threhsold of each applaince, defaults to None</span>
+<span class="sd">    :type thresholds: np.array, optional</span>
+<span class="sd">    :param min_off: Minimum off duration, defaults to None</span>
+<span class="sd">    :type min_off: np.array, optional</span>
+<span class="sd">    :param min_on: Minimum on duration, defaults to None</span>
+<span class="sd">    :type min_on: np.array, optional</span>
+<span class="sd">    :param threshold_std: Decides about the use of STD to calcualte the thresholds, defaults to True</span>
+<span class="sd">    :type threshold_std: bool, optional</span>
+<span class="sd">    :param return_means: Specifiyies if the mean consumption of each status is required, defaults to False</span>
+<span class="sd">    :type return_means: bool, optional</span>
+<span class="sd">    :param appliances_labels: Labels of the considered appliances, defaults to []</span>
+<span class="sd">    :type appliances_labels: list, optional</span>
+<span class="sd">    :param threshold_method: The thresholding method to be used for status derivation, defaults to &#39;at&#39;</span>
+<span class="sd">    :type threshold_method: str, optional</span>
+<span class="sd">    :return: Operational states with the thresholds used and the power consumption of each states</span>
+<span class="sd">    :rtype: tuple</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    
     
     
     <span class="c1"># Set the parameters according to given threshold method</span>

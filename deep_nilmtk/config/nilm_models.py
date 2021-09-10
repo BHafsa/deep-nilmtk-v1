@@ -41,7 +41,6 @@ when needed. The mapping specified here will be directly used during disaggregat
 """
 from ..loader import *
 from ..model import *
-from ..model.tempool import _PTPNet
 from ..preprocessing import *
 
 NILM_MODELS = {
@@ -54,15 +53,6 @@ NILM_MODELS = {
         'extra_params':{}
     },
     
-    # =============================================================================
-    #     Not published Work
-    # =============================================================================
-    
-    'UNETNiLMDN': {
-        'model': UNETNILMDN,
-        'loader': generalDataLoader,
-        'extra_params':{}
-    },
     'UNETNiLMSeq2Quantile': {
         'model': UNETNILMSeq2Quantile,
         'loader': generalDataLoader,
@@ -74,7 +64,7 @@ NILM_MODELS = {
     #     Temporal Pooling model
     # =============================================================================
     'tempPool':{
-        'model': _PTPNet,
+        'model': PTPNet,
         'loader': tempooldataset,
         'extra_params':{
         }

@@ -9,16 +9,12 @@ from .threshold import *
 def get_status(ser, thresholds):
     """[summary]
 
-    Args:
-        ser (np.array): shape = (num_series, series_len, num_meters)
-        - num_series : Amount of time series.
-        - series_len : Length of each time series.
-        - num_meters : Meters contained in the array.
-        thresholds (np.array): shape = (num_meters,)
-
-    Returns:
-        np.array: shape = (num_series, series_len, num_meters)
-        With binary values indicating ON (1) and OFF (0) states.
+    :param ser: Target power consumption with shape = (num_series, series_len, num_meters)
+    :type ser: np.array
+    :param thresholds: Thresholds of target power with shape = (num_meters,)
+    :type thresholds: np.array
+    :return: An array (num_series, series_len, num_meters) with binary values indicating ON (1) and OFF (0) states.
+    :rtype: np.array
     """
     
     # We don't want to modify the original series
@@ -41,8 +37,14 @@ def get_status(ser, thresholds):
     return ser_bin
 
 def get_status_means(ser, status):
-    """
-    Get means of both status.
+    """Get means of ON/OFF status.
+
+    :param ser: Power data
+    :type ser: np.array
+    :param status: The operational status of the target power
+    :type status: np.array
+    :return: Mean power consumption of each state
+    :rtype: np.array
     """
 
     means = np.zeros((ser.shape[2], 2))
@@ -59,22 +61,20 @@ def get_status_means(ser, status):
 
 
 def _get_app_status_by_duration(y, threshold, min_off, min_on):
-    """[summary]
-
-    Args:
-        y (np.array): shape = (num_series, series_len)
-                        - num_series : Amount of time series.
-                        - series_len : Length of each time series.
-        threshold (float): threshold value.
-        min_off (int): minimum off duration of the appliance.
-        min_on (int): minimum on duration of the appliance.
-
-    Returns:
-        np.array: shape = (num_series, series_len)
-        With binary values indicating ON (1) and OFF (0) states.
     """
+    Calculates the operational status using operation duartions.
 
-
+    :param y: Power consumption array with shape = (num_series, series_len) , num_series : Amount of time series - series_len : Length of each time series.
+    :type y: np.array 
+    :param threshold: threshold value.
+    :type threshold: float
+    :param min_off: minimum off duration of the appliance.
+    :type min_off: int
+    :param min_on: minimum on duration of the appliance.
+    :type min_on: int
+    :return: With binary values indicating ON (1) and OFF (0) states.
+    :rtype: np.array
+    """
     shape_original = y.shape
     y = y.flatten().copy()
 
@@ -125,25 +125,22 @@ def _get_app_status_by_duration(y, threshold, min_off, min_on):
 
 def get_status_by_duration(ser, thresholds, min_off, min_on):
     """
-    
-    Args
-        ser : numpy.array
-            shape = (num_series, series_len, num_meters)
-            - num_series : Amount of time series.
-            - series_len : Length of each time series.
-            - num_meters : Meters contained in the array.
-        thresholds : numpy.array
-            shape = (num_meters,)
-        min_off : numpy.array
-            shape = (num_meters,)
-        min_on : numpy.array
-            shape = (num_meters,)
-    
-    Returns
-        ser_bin : numpy.array
-            shape = (num_series, series_len, num_meters)
-            With binary values indicating ON (1) and OFF (0) states.
+    Calculates operational status of multiple meters using thresholds 
+
+    :param ser: Power consumption shape = (num_series, series_len, num_meters) - num_series : Amount of time series- series_len : Length of each time series - num_meters : Meters contained in the array.
+    :type ser: np.array
+    :param thresholds: Thresholds of power consumption  shape = (num_meters,)
+    :type thresholds: np.array
+    :param min_off: Mimimum off duration with  shape = (num_meters,)
+    :type min_off: np.array
+    :param min_on: Mimimum on duration with  shape = (num_meters,)
+    :type min_on: np.array
+    :return: Operational status with binary values indicating ON (1) and OFF (0) states with shape (num_series, series_len, num_meters).
+    :rtype: np.array
     """
+
+    
+
     num_apps = ser.shape[-1]
     ser_bin = ser.copy()
 
@@ -179,9 +176,9 @@ def get_status_by_duration(ser, thresholds, min_off, min_on):
 
 
 def compute_status(appliances,
-                    dates=None,
-                    period="1min",
-                    max_power=10000.0,
+                    # dates=None,
+                    # period="1min",
+                    # max_power=10000.0,
                     thresholds=None,
                     min_off=None,
                     min_on=None,
@@ -190,25 +187,28 @@ def compute_status(appliances,
                     appliances_labels=[],
                     threshold_method='at'):
     """
-    Calculates the operational states relative to the current power
-    consumption of the applaince
+    Calculates the operational status of appliances using the specified thresholding method
 
-    Args:
-        appliances ([type]): [description]
-        dates ([type], optional): [description]. Defaults to None.
-        period (str, optional): [description]. Defaults to "1min".
-        max_power (float, optional): [description]. Defaults to 10000.0.
-        thresholds ([type], optional): [description]. Defaults to None.
-        min_off ([type], optional): [description]. Defaults to None.
-        min_on ([type], optional): [description]. Defaults to None.
-        threshold_std (bool, optional): [description]. Defaults to True.
-        return_means (bool, optional): [description]. Defaults to False.
-        appliances_labels (list, optional): [description]. Defaults to [].
-        threshold_method (str, optional): [description]. Defaults to 'at'.
-
-    Returns:
-        [type]: [description]
+    :param appliances: Power consumption of target applainces
+    :type appliances: np.array
+    :param thresholds: Threhsold of each applaince, defaults to None
+    :type thresholds: np.array, optional
+    :param min_off: Minimum off duration, defaults to None
+    :type min_off: np.array, optional
+    :param min_on: Minimum on duration, defaults to None
+    :type min_on: np.array, optional
+    :param threshold_std: Decides about the use of STD to calcualte the thresholds, defaults to True
+    :type threshold_std: bool, optional
+    :param return_means: Specifiyies if the mean consumption of each status is required, defaults to False
+    :type return_means: bool, optional
+    :param appliances_labels: Labels of the considered appliances, defaults to []
+    :type appliances_labels: list, optional
+    :param threshold_method: The thresholding method to be used for status derivation, defaults to 'at'
+    :type threshold_method: str, optional
+    :return: Operational states with the thresholds used and the power consumption of each states
+    :rtype: tuple
     """
+    
     
     
     # Set the parameters according to given threshold method

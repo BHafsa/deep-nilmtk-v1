@@ -96,7 +96,7 @@
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Model package</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#module-deep_nilmtk.model.baselines">baselines module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-deep_nilmtk.model.bert4nilm">bert4nilm module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-deep_nilmtk.model.tempool">Temporal-Pooling module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-deep_nilmtk.model.tempool">tempool module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-deep_nilmtk.model.unet">unet module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-deep_nilmtk.model.wavenet">wavenet module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-deep_nilmtk.model.model_pil">model_pil module</a></li>
@@ -607,10 +607,29 @@ registered hooks while the latter silently ignores them.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="deep_nilmtk.model.bert4nilm.BERT4NILM">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">deep_nilmtk.model.bert4nilm.</span></span><span class="sig-name descname"><span class="pre">BERT4NILM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/model/bert4nilm.html#BERT4NILM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.model.bert4nilm.BERT4NILM" title="Permalink to this definition">¶</a></dt>
-<dd><p>BERT4NILM implementation. 
+<dd><p id="bert">BERT4NILM implementation. 
 Original paper can be found here: <a class="reference external" href="https://dl.acm.org/doi/pdf/10.1145/3427771.3429390">https://dl.acm.org/doi/pdf/10.1145/3427771.3429390</a>
 Original code can be found here: <a class="reference external" href="https://github.com/Yueeeeeeee/BERT4NILM">https://github.com/Yueeeeeeee/BERT4NILM</a></p>
-<span class="target" id="bert"></span><dl class="py method">
+<p>The hyperparameter dictionnary is expected to include the following parameters</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>threshold</strong> (<em>List of floats</em>) -- The threshold for states generation in the target power consumption, defaults to None</p></li>
+<li><p><strong>cutoff</strong> (<em>List of floats</em>) -- The cutoff for states generation in the target power consumption, defaults to None</p></li>
+<li><p><strong>min_on</strong> (<em>List of floats</em>) -- The min on duration for states generation in the target power consumption, defaults to None</p></li>
+<li><p><strong>min_off</strong> (<em>List of floats</em>) -- The min off duration for states generation in the target power consumption, defaults to None</p></li>
+<li><p><strong>in_size</strong> (<em>int</em>) -- The length of the input sequence, defaults to 488.</p></li>
+<li><p><strong>stride</strong> (<em>int</em>) -- The distance between two consecutive sequences, defaults to 1.</p></li>
+<li><p><strong>hidden</strong> (<em>int</em>) -- The hidden size, defaults to 256</p></li>
+<li><p><strong>heads</strong> (<em>int</em>) -- The number of attention heads in each transformer block, defaults to 2</p></li>
+<li><p><strong>n_layers</strong> (<em>int</em>) -- the number of transformer blocks in the model, defaults to 2</p></li>
+</ul>
+</dd>
+<dt class="field-even">Params dropout</dt>
+<dd class="field-even"><p>The dropout, defaults to 0.2</p>
+</dd>
+</dl>
+<dl class="py method">
 <dt class="sig sig-object py" id="deep_nilmtk.model.bert4nilm.BERT4NILM.aggregate_seqs">
 <span class="sig-name descname"><span class="pre">aggregate_seqs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/model/bert4nilm.html#BERT4NILM.aggregate_seqs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.model.bert4nilm.BERT4NILM.aggregate_seqs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Aggregate the overleapping sequences using the mean
@@ -940,16 +959,203 @@ registered hooks while the latter silently ignores them.</p>
 
 </div>
 <div class="section" id="module-deep_nilmtk.model.tempool">
-<span id="temporal-pooling-module"></span><h2>Temporal-Pooling module<a class="headerlink" href="#module-deep_nilmtk.model.tempool" title="Permalink to this headline">¶</a></h2>
+<span id="tempool-module"></span><h2>tempool module<a class="headerlink" href="#module-deep_nilmtk.model.tempool" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="deep_nilmtk.model.tempool.Decoder">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">deep_nilmtk.model.tempool.</span></span><span class="sig-name descname"><span class="pre">Decoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stride</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/model/tempool.html#Decoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.model.tempool.Decoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decoder block of the Temporal_pooling layer</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="deep_nilmtk.model.tempool.Decoder.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/model/tempool.html#Decoder.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.model.tempool.Decoder.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="deep_nilmtk.model.tempool.Decoder.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#deep_nilmtk.model.tempool.Decoder.training" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="deep_nilmtk.model.tempool.Encoder">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">deep_nilmtk.model.tempool.</span></span><span class="sig-name descname"><span class="pre">Encoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">padding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stride</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/model/tempool.html#Encoder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.model.tempool.Encoder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decoder block of the Temporal_pooling layer</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="deep_nilmtk.model.tempool.Encoder.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/model/tempool.html#Encoder.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.model.tempool.Encoder.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="deep_nilmtk.model.tempool.Encoder.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#deep_nilmtk.model.tempool.Encoder.training" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="deep_nilmtk.model.tempool.PTPNet">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">deep_nilmtk.model.tempool.</span></span><span class="sig-name descname"><span class="pre">PTPNet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/model/tempool.html#PTPNet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.model.tempool.PTPNet" title="Permalink to this definition">¶</a></dt>
+<dd><p id="ptp">Source: <a class="reference external" href="https://github.com/lmssdd/TPNILM">https://github.com/lmssdd/TPNILM</a>
+Check the paper
+Non-Intrusive Load Disaggregation by Convolutional
+Neural Network and Multilabel Classification
+by Luca Massidda, Marino Marrocu and Simone Manca</p>
+<p>The hyperparameter dictionnary is expected to include the following parameters</p>
+<p>The hyperparameter dictionnary is expected to include the following parameters</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>in_size</strong> (<em>int</em>) -- The input sequence length, defaults to 99</p></li>
+<li><p><strong>border</strong> (<em>int</em>) -- The delay between the input and out sequence, defaults to 30.</p></li>
+<li><p><strong>appliances</strong> (<em>list</em>) -- List of appliances</p></li>
+<li><p><strong>feature_type</strong> (<em>str</em>) -- The type of input features generated during pre-processing, defaults to 'main'.</p></li>
+<li><p><strong>init_features</strong> -- The number of features in the first encoder layer, defaults to 32.</p></li>
+<li><p><strong>dropout</strong> (<em>float</em>) -- Dropout</p></li>
+<li><p><strong>target_norm</strong> (<em>str</em>) -- The type of normalization of the target data, defeaults to 'z-norm'.</p></li>
+<li><p><strong>mean</strong> (<em>float</em>) -- The mean consumption of the target power, defaults to 0</p></li>
+<li><p><strong>std</strong> (<em>float</em>) -- The STD consumption of the target power, defaults to 1</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="deep_nilmtk.model.tempool.PTPNet.aggregate_seqs">
+<span class="sig-name descname"><span class="pre">aggregate_seqs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">states</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/model/tempool.html#PTPNet.aggregate_seqs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.model.tempool.PTPNet.aggregate_seqs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregates the overleapping sequences using the mean</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>prediction</strong> (<em>tensor</em>) -- test predictions of the current model with shape (n_samples + window_size -1 ,window_size)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Aggregted sequence</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="deep_nilmtk.model.tempool.PTPNet.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/model/tempool.html#PTPNet.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.model.tempool.PTPNet.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="deep_nilmtk.model.tempool.PTPNet.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_dataloader</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/model/tempool.html#PTPNet.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.model.tempool.PTPNet.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates predictions for the test data loader</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<em>nn.Module</em>) -- Pre-trained model</p></li>
+<li><p><strong>test_dataloader</strong> (<em>dataLoader</em>) -- The test data</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Generated predictions</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="deep_nilmtk.model.tempool.PTPNet.step">
+<span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequence_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/model/tempool.html#PTPNet.step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.model.tempool.PTPNet.step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Disaggregates a batch of data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>batch</strong> (<em>Tensor</em>) -- A batch of data.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>loss function as returned form the model and MAE as returned from the model.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple(float,float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="deep_nilmtk.model.tempool.PTPNet.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#deep_nilmtk.model.tempool.PTPNet.training" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="deep_nilmtk.model.tempool.TemporalPooling">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">deep_nilmtk.model.tempool.</span></span><span class="sig-name descname"><span class="pre">TemporalPooling</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/model/tempool.html#TemporalPooling"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.model.tempool.TemporalPooling" title="Permalink to this definition">¶</a></dt>
+<dd><p>Temporal Pooling mechanism that combines data with different scales.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="deep_nilmtk.model.tempool.TemporalPooling.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/model/tempool.html#TemporalPooling.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.model.tempool.TemporalPooling.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Defines the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="deep_nilmtk.model.tempool.TemporalPooling.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#deep_nilmtk.model.tempool.TemporalPooling.training" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </div>
 <div class="section" id="module-deep_nilmtk.model.unet">
 <span id="unet-module"></span><h2>unet module<a class="headerlink" href="#module-deep_nilmtk.model.unet" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="deep_nilmtk.model.unet.UNETNILM">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">deep_nilmtk.model.unet.</span></span><span class="sig-name descname"><span class="pre">UNETNILM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/model/unet.html#UNETNILM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.model.unet.UNETNILM" title="Permalink to this definition">¶</a></dt>
-<dd><p>UNET-NILM impelementation 
+<dd><p id="unet">UNET-NILM impelementation 
 The orginal paper can be found here: <a class="reference external" href="https://dl.acm.org/doi/abs/10.1145/3427771.3427859">https://dl.acm.org/doi/abs/10.1145/3427771.3427859</a></p>
-<span class="target" id="unet"></span><dl class="py method">
+<p>The hyperparameter dictionnary is expected to include the following parameters</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>appliances</strong> (<em>list</em>) -- List of appliances, defaults to 1</p></li>
+<li><p><strong>feature_type</strong> (<em>str</em>) -- The type of input features generated in the pre-processing, defaults  to 'main'</p></li>
+<li><p><strong>n_channels</strong> (<em>int</em>) -- the number of output channels, defaults to 1</p></li>
+<li><p><strong>pool_filter</strong> (<em>int</em>) -- Pooling filter, defaults to 8</p></li>
+<li><p><strong>latent_size</strong> (<em>int</em>) -- The latent size, defaults to 1024</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
 <dt class="sig sig-object py" id="deep_nilmtk.model.unet.UNETNILM.forward">
 <span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/model/unet.html#UNETNILM.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.model.unet.UNETNILM.forward" title="Permalink to this definition">¶</a></dt>
 <dd><p>Defines the computation performed at every call.</p>
@@ -966,12 +1172,39 @@ registered hooks while the latter silently ignores them.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="deep_nilmtk.model.unet.UNETNILM.predict">
 <span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_dataloader</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/model/unet.html#UNETNILM.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.model.unet.UNETNILM.predict" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Generate prediction during testing for the test_dataLoader</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> -- pre-trained model.</p></li>
+<li><p><strong>test_dataloader</strong> (<em>dataLoader</em>) -- data loader for the testing period.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Disaggregated power consumption.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tensor</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="deep_nilmtk.model.unet.UNETNILM.step">
 <span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/model/unet.html#UNETNILM.step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.model.unet.UNETNILM.step" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Disaggregates a batch of data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>batch</strong> (<em>Tensor</em>) -- A batch of data.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>loss function as returned form the model and MAE as returned from the model.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple(float,float)</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="deep_nilmtk.model.unet.UNETNILM.training">
@@ -981,116 +1214,25 @@ registered hooks while the latter silently ignores them.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="deep_nilmtk.model.unet.UNETNILMDN">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">deep_nilmtk.model.unet.</span></span><span class="sig-name descname"><span class="pre">UNETNILMDN</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/model/unet.html#UNETNILMDN"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.model.unet.UNETNILMDN" title="Permalink to this definition">¶</a></dt>
-<dd><p>[summary]</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>nn</strong> (<em>[</em><em>type</em><em>]</em>) -- [description]</p>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="deep_nilmtk.model.unet.UNETNILMDN.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/model/unet.html#UNETNILMDN.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.model.unet.UNETNILMDN.forward" title="Permalink to this definition">¶</a></dt>
-<dd><p>Defines the computation performed at every call.</p>
-<p>Should be overridden by all subclasses.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Although the recipe for forward pass needs to be defined within
-this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
-instead of this since the former takes care of running the
-registered hooks while the latter silently ignores them.</p>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="deep_nilmtk.model.unet.UNETNILMDN.log_nlloss">
-<span class="sig-name descname"><span class="pre">log_nlloss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gmm</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/model/unet.html#UNETNILMDN.log_nlloss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.model.unet.UNETNILMDN.log_nlloss" title="Permalink to this definition">¶</a></dt>
-<dd><p>[summary]</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>y</strong> (<em>[</em><em>type</em><em>]</em>) -- [description]</p></li>
-<li><p><strong>gmm</strong> (<em>[</em><em>type</em><em>]</em>) -- [description]</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>[description]</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>[type]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="deep_nilmtk.model.unet.UNETNILMDN.predict">
-<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_dataloader</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/model/unet.html#UNETNILMDN.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.model.unet.UNETNILMDN.predict" title="Permalink to this definition">¶</a></dt>
-<dd><p>[summary]</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>model</strong> (<em>[</em><em>type</em><em>]</em>) -- [description]</p></li>
-<li><p><strong>test_dataloader</strong> (<em>[</em><em>type</em><em>]</em>) -- [description]</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>[description]</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>[type]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="deep_nilmtk.model.unet.UNETNILMDN.sample">
-<span class="sig-name descname"><span class="pre">sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gmm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_sample</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/model/unet.html#UNETNILMDN.sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.model.unet.UNETNILMDN.sample" title="Permalink to this definition">¶</a></dt>
-<dd><p>[summary]</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>gmm</strong> (<em>[</em><em>type</em><em>]</em>) -- [description]</p></li>
-<li><p><strong>n_sample</strong> (<em>int</em><em>, </em><em>optional</em>) -- [description], defaults to 1000</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>[description]</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>[type]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="deep_nilmtk.model.unet.UNETNILMDN.step">
-<span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/model/unet.html#UNETNILMDN.step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.model.unet.UNETNILMDN.step" title="Permalink to this definition">¶</a></dt>
-<dd><p>[summary]</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>batch</strong> (<em>[</em><em>type</em><em>]</em>) -- [description]</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>[description]</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>[type]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="deep_nilmtk.model.unet.UNETNILMDN.training">
-<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#deep_nilmtk.model.unet.UNETNILMDN.training" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
 <dt class="sig sig-object py" id="deep_nilmtk.model.unet.UNETNILMSeq2Quantile">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">deep_nilmtk.model.unet.</span></span><span class="sig-name descname"><span class="pre">UNETNILMSeq2Quantile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/model/unet.html#UNETNILMSeq2Quantile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.model.unet.UNETNILMSeq2Quantile" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="py method">
+<dd><p>UNET-NILM impelementation with quantile regression
+The orginal paper can be found here: <a class="reference external" href="https://dl.acm.org/doi/abs/10.1145/3427771.3427859">https://dl.acm.org/doi/abs/10.1145/3427771.3427859</a></p>
+<p>The hyperparameter dictionnary is expected to include the following parameters</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>appliances</strong> (<em>list</em>) -- List of appliances, defaults to 1</p></li>
+<li><p><strong>feature_type</strong> (<em>str</em>) -- The type of input features generated in the pre-processing, defaults  to 'main'</p></li>
+<li><p><strong>n_channels</strong> (<em>int</em>) -- the number of output channels, defaults to 1</p></li>
+<li><p><strong>pool_filter</strong> (<em>int</em>) -- Pooling filter, defaults to 8</p></li>
+<li><p><strong>latent_size</strong> (<em>int</em>) -- The latent size, defaults to 1024</p></li>
+<li><p><strong>quantile</strong> -- The quantiles to use during prediction, defaults to [0.1, 0.25, 0.5, 0.75, 0.9]</p></li>
+<li><p><strong>quantile</strong> -- list</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
 <dt class="sig sig-object py" id="deep_nilmtk.model.unet.UNETNILMSeq2Quantile.forward">
 <span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/model/unet.html#UNETNILMSeq2Quantile.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.model.unet.UNETNILMSeq2Quantile.forward" title="Permalink to this definition">¶</a></dt>
 <dd><p>Defines the computation performed at every call.</p>
@@ -1107,24 +1249,47 @@ registered hooks while the latter silently ignores them.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="deep_nilmtk.model.unet.UNETNILMSeq2Quantile.predict">
 <span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_dataloader</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/model/unet.html#UNETNILMSeq2Quantile.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.model.unet.UNETNILMSeq2Quantile.predict" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Generate prediction during testing for the test_dataLoader</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> -- pre-trained model.</p></li>
+<li><p><strong>test_dataloader</strong> (<em>dataLoader</em>) -- data loader for the testing period.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Disaggregated power consumption.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tensor</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="deep_nilmtk.model.unet.UNETNILMSeq2Quantile.smooth_pinball_loss">
 <span class="sig-name descname"><span class="pre">smooth_pinball_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kappa</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">margin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/model/unet.html#UNETNILMSeq2Quantile.smooth_pinball_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.model.unet.UNETNILMSeq2Quantile.smooth_pinball_loss" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>The implementation of the Pinball loss for NILM, original code can be found in :
+<a class="reference external" href="https://github.com/hatalis/smooth-pinball-neural-network/blob/master/pinball_loss.py">https://github.com/hatalis/smooth-pinball-neural-network/blob/master/pinball_loss.py</a>
+Hatalis, Kostas, et al. &quot;A Novel Smoothed Loss and Penalty Function 
+for Noncrossing Composite Quantile Estimation via Deep Neural Networks.&quot; arXiv preprint (2019).</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="deep_nilmtk.model.unet.UNETNILMSeq2Quantile.step">
 <span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/model/unet.html#UNETNILMSeq2Quantile.step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.model.unet.UNETNILMSeq2Quantile.step" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="deep_nilmtk.model.unet.UNETNILMSeq2Quantile.suggest_hparams">
-<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">suggest_hparams</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trial</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/model/unet.html#UNETNILMSeq2Quantile.suggest_hparams"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.model.unet.UNETNILMSeq2Quantile.suggest_hparams" title="Permalink to this definition">¶</a></dt>
-<dd><p>Function returning list of params that will be suggested from optuna</p>
-<p>trial : Optuna Trial.</p>
-<p>dict: Dictionary of parameters with values suggested from optuna</p>
+<dd><p>Disaggregates a batch of data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>batch</strong> (<em>Tensor</em>) -- A batch of data.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>loss function as returned form the model and MAE as returned from the model.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple(float,float)</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1285,8 +1450,8 @@ registered hooks while the latter silently ignores them.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="deep_nilmtk.model.wavenet.WaveNet">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">deep_nilmtk.model.wavenet.</span></span><span class="sig-name descname"><span class="pre">WaveNet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/model/wavenet.html#WaveNet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.model.wavenet.WaveNet" title="Permalink to this definition">¶</a></dt>
-<dd><p>[summary]</p>
-<span class="target" id="wavenilm"></span><dl class="py method">
+<dd><p id="wavenilm">WaveNet model for load disaggregtion using residual and dilated convolutions.</p>
+<dl class="py method">
 <dt class="sig sig-object py" id="deep_nilmtk.model.wavenet.WaveNet.forward">
 <span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_in</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/model/wavenet.html#WaveNet.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.model.wavenet.WaveNet.forward" title="Permalink to this definition">¶</a></dt>
 <dd><p>Defines the computation performed at every call.</p>
@@ -1315,7 +1480,19 @@ registered hooks while the latter silently ignores them.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="deep_nilmtk.model.wavenet.WaveNetBGRU">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">deep_nilmtk.model.wavenet.</span></span><span class="sig-name descname"><span class="pre">WaveNetBGRU</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">residual_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dilation_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/model/wavenet.html#WaveNetBGRU"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.model.wavenet.WaveNetBGRU" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="py method">
+<dd><p>WaveNet model with a GRU</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>nn</strong> (<em>[</em><em>type</em><em>]</em>) -- [description]</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>[description]</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>[type]</p>
+</dd>
+</dl>
+<dl class="py method">
 <dt class="sig sig-object py" id="deep_nilmtk.model.wavenet.WaveNetBGRU.forward">
 <span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_in</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/model/wavenet.html#WaveNetBGRU.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.model.wavenet.WaveNetBGRU.forward" title="Permalink to this definition">¶</a></dt>
 <dd><p>Defines the computation performed at every call.</p>
@@ -1344,7 +1521,19 @@ registered hooks while the latter silently ignores them.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="deep_nilmtk.model.wavenet.WaveNetBGRU_speedup">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">deep_nilmtk.model.wavenet.</span></span><span class="sig-name descname"><span class="pre">WaveNetBGRU_speedup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">residual_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dilation_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/model/wavenet.html#WaveNetBGRU_speedup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.model.wavenet.WaveNetBGRU_speedup" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="py method">
+<dd><p>WaveNet with a GRU and faster generation fo predictions</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>nn</strong> (<em>[</em><em>type</em><em>]</em>) -- [description]</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>[description]</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>[type]</p>
+</dd>
+</dl>
+<dl class="py method">
 <dt class="sig sig-object py" id="deep_nilmtk.model.wavenet.WaveNetBGRU_speedup.forward">
 <span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_in</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/model/wavenet.html#WaveNetBGRU_speedup.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.model.wavenet.WaveNetBGRU_speedup.forward" title="Permalink to this definition">¶</a></dt>
 <dd><p>Defines the computation performed at every call.</p>
@@ -1409,14 +1598,50 @@ with PyTorch models included in Deep-NILMtk.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="deep_nilmtk.model.model_pil.pilModel.forward">
 <span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/model/model_pil.html#pilModel.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.model.model_pil.pilModel.forward" title="Permalink to this definition">¶</a></dt>
-<dd><p>Same as <code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.nn.Module.forward()</span></code>.</p>
+<dd><p>Same as <code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.nn.Module.forward()</span></code>, however in Lightning you want this to define
+the operations you want to use for prediction (i.e.: on a server or as a feature extractor).</p>
+<p>Normally you'd call <code class="docutils literal notranslate"><span class="pre">self()</span></code> from your <a class="reference internal" href="#deep_nilmtk.model.model_pil.pilModel.training_step" title="deep_nilmtk.model.model_pil.pilModel.training_step"><code class="xref py py-meth docutils literal notranslate"><span class="pre">training_step()</span></code></a> method.
+This makes it easy to write a complex system for training with the outputs
+you'd want in a prediction setting.</p>
+<p>You may also find the <code class="xref py py-func docutils literal notranslate"><span class="pre">auto_move_data()</span></code> decorator useful
+when using the module outside Lightning in a production setting.</p>
 <dl class="simple">
 <dt>Args:</dt><dd><p><a href="#id1"><span class="problematic" id="id2">*</span></a>args: Whatever you decide to pass into the forward method.
 <a href="#id3"><span class="problematic" id="id4">**</span></a>kwargs: Keyword arguments are also possible.</p>
 </dd>
-<dt>Return:</dt><dd><p>Your model's output</p>
+<dt>Return:</dt><dd><p>Predicted output</p>
 </dd>
 </dl>
+<p>Examples:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># example if we were using this model as a feature extractor</span>
+<span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="n">feature_maps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convnet</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">feature_maps</span>
+
+<span class="k">def</span> <span class="nf">training_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">):</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">batch</span>
+    <span class="n">feature_maps</span> <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">logits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">classifier</span><span class="p">(</span><span class="n">feature_maps</span><span class="p">)</span>
+
+    <span class="c1"># ...</span>
+    <span class="k">return</span> <span class="n">loss</span>
+
+<span class="c1"># splitting it this way allows model to be used a feature extractor</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">MyModelAbove</span><span class="p">()</span>
+
+<span class="n">inputs</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">get_request</span><span class="p">()</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+<span class="n">server</span><span class="o">.</span><span class="n">write_results</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+
+<span class="c1"># -------------</span>
+<span class="c1"># This is in stark contrast to torch.nn.Module where normally you would have this:</span>
+<span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">):</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">batch</span>
+    <span class="n">feature_maps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convnet</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">logits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">classifier</span><span class="p">(</span><span class="n">feature_maps</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">logits</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1438,7 +1663,7 @@ the progress bar or logger.</p>
 optimizer_idx (int): When using multiple optimizers, this argument will also be present.
 hiddens(<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>): Passed in if</p>
 <blockquote>
-<div><p><a href="#id5"><span class="problematic" id="id6">:paramref:`~pytorch_lightning.core.lightning.LightningModule.truncated_bptt_steps`</span></a> &gt; 0.</p>
+<div><p><a href="#id5"><span class="problematic" id="id6">:paramref:`~pytorch_lightning.trainer.trainer.Trainer.truncated_bptt_steps`</span></a> &gt; 0.</p>
 </div></blockquote>
 </dd>
 <dt>Return:</dt><dd><p>Any of.</p>
@@ -1467,10 +1692,8 @@ You can also do fancier things like multiple forward passes or something model s
 <span class="k">def</span> <span class="nf">training_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">,</span> <span class="n">optimizer_idx</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">optimizer_idx</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="c1"># do training_step with encoder</span>
-        <span class="o">...</span>
     <span class="k">if</span> <span class="n">optimizer_idx</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="c1"># do training_step with decoder</span>
-        <span class="o">...</span>
 </pre></div>
 </div>
 <p>If you add truncated back propagation through time you will also get an additional
@@ -1481,7 +1704,7 @@ argument with the hidden states of the previous step.</p>
     <span class="o">...</span>
     <span class="n">out</span><span class="p">,</span> <span class="n">hiddens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lstm</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">hiddens</span><span class="p">)</span>
     <span class="o">...</span>
-    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;loss&quot;</span><span class="p">:</span> <span class="n">loss</span><span class="p">,</span> <span class="s2">&quot;hiddens&quot;</span><span class="p">:</span> <span class="n">hiddens</span><span class="p">}</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;loss&#39;</span><span class="p">:</span> <span class="n">loss</span><span class="p">,</span> <span class="s1">&#39;hiddens&#39;</span><span class="p">:</span> <span class="n">hiddens</span><span class="p">}</span>
 </pre></div>
 </div>
 <dl class="simple">
@@ -1515,30 +1738,27 @@ dataloader_idx (int): The index of the dataloader that produced this batch</p>
 <div><p>(only if multiple val dataloaders used)</p>
 </div></blockquote>
 </dd>
-<dt>Return:</dt><dd><ul class="simple">
+<dt>Return:</dt><dd><p>Any of.</p>
+<blockquote>
+<div><ul class="simple">
 <li><p>Any object or value</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">None</span></code> - Validation will skip to the next batch</p></li>
 </ul>
+</div></blockquote>
 </dd>
 </dl>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># pseudocode of order</span>
-<span class="n">val_outs</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="k">for</span> <span class="n">val_batch</span> <span class="ow">in</span> <span class="n">val_data</span><span class="p">:</span>
-    <span class="n">out</span> <span class="o">=</span> <span class="n">validation_step</span><span class="p">(</span><span class="n">val_batch</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">defined</span><span class="p">(</span><span class="s2">&quot;validation_step_end&quot;</span><span class="p">):</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="n">validation_step_end</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
-    <span class="n">val_outs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
-<span class="n">val_outs</span> <span class="o">=</span> <span class="n">validation_epoch_end</span><span class="p">(</span><span class="n">val_outs</span><span class="p">)</span>
+<span class="n">out</span> <span class="o">=</span> <span class="n">validation_step</span><span class="p">()</span>
+<span class="k">if</span> <span class="n">defined</span><span class="p">(</span><span class="s1">&#39;validation_step_end&#39;</span><span class="p">):</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">validation_step_end</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+<span class="n">out</span> <span class="o">=</span> <span class="n">validation_epoch_end</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># if you have one val dataloader:</span>
-<span class="k">def</span> <span class="nf">validation_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">):</span>
-    <span class="o">...</span>
-
+<span class="k">def</span> <span class="nf">validation_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">)</span>
 
 <span class="c1"># if you have multiple val dataloaders:</span>
-<span class="k">def</span> <span class="nf">validation_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">,</span> <span class="n">dataloader_idx</span><span class="p">):</span>
-    <span class="o">...</span>
+<span class="k">def</span> <span class="nf">validation_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">,</span> <span class="n">dataloader_idx</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Examples:</p>
@@ -1568,7 +1788,6 @@ dataloader_idx (int): The index of the dataloader that produced this batch</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># CASE 2: multiple validation dataloaders</span>
 <span class="k">def</span> <span class="nf">validation_step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">,</span> <span class="n">dataloader_idx</span><span class="p">):</span>
     <span class="c1"># dataloader_idx tells you which dataset this is.</span>
-    <span class="o">...</span>
 </pre></div>
 </div>
 <dl class="simple">

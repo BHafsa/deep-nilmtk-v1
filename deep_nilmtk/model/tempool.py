@@ -10,16 +10,13 @@ from tqdm import tqdm
 import sys
 import numpy as np
 
-"""
-Source: https://github.com/lmssdd/TPNILM
-Check the paper
-Non-Intrusive Load Disaggregation by Convolutional
-Neural Network and Multilabel Classification
-by Luca Massidda, Marino Marrocu and Simone Manca
-"""
 
 
-class _Encoder(nn.Module):
+
+class Encoder(nn.Module):
+    """
+    Decoder block of the Temporal_pooling layer 
+    """
     def __init__(
         self,
         in_features=3,
@@ -29,7 +26,7 @@ class _Encoder(nn.Module):
         stride=1,
         dropout=0.1,
     ):
-        super(_Encoder, self).__init__()
+        super(Encoder, self).__init__()
         self.conv = nn.Conv1d(
             in_features,
             out_features,
@@ -45,10 +42,13 @@ class _Encoder(nn.Module):
         return self.drop(self.bn(F.relu(self.conv(x))))
 
 
-class _TemporalPooling(nn.Module):
+class TemporalPooling(nn.Module):
+    """
+    Temporal Pooling mechanism that combines data with different scales.
+    """
     def __init__(self, in_features=3, out_features=1, kernel_size=2,
                  dropout=0.1):
-        super(_TemporalPooling, self).__init__()
+        super(TemporalPooling, self).__init__()
         self.kernel_size = kernel_size
 
         self.pool = nn.AvgPool1d(kernel_size=self.kernel_size,
@@ -75,9 +75,12 @@ class _TemporalPooling(nn.Module):
         return x
 
 
-class _Decoder(nn.Module):
+class Decoder(nn.Module):
+    """
+    Decoder block of the Temporal_pooling layer 
+    """
     def __init__(self, in_features=3, out_features=1, kernel_size=2, stride=2):
-        super(_Decoder, self).__init__()
+        super(Decoder, self).__init__()
         self.conv = nn.ConvTranspose1d(in_features, out_features,
                                        kernel_size=kernel_size, stride=stride,
                                        bias=False)
@@ -88,14 +91,41 @@ class _Decoder(nn.Module):
 
 
 
-class _PTPNet(nn.Module):
+class PTPNet(nn.Module):
     """
     .. _ptp:
 
-    """
+    Source: https://github.com/lmssdd/TPNILM
+    Check the paper
+    Non-Intrusive Load Disaggregation by Convolutional
+    Neural Network and Multilabel Classification
+    by Luca Massidda, Marino Marrocu and Simone Manca
 
+    The hyperparameter dictionnary is expected to include the following parameters
+
+    The hyperparameter dictionnary is expected to include the following parameters
+
+    :param in_size: The input sequence length, defaults to 99
+    :type in_size: int
+    :param border: The delay between the input and out sequence, defaults to 30.
+    :type border: int
+    :param appliances: List of appliances
+    :type appliances: list
+    :param feature_type: The type of input features generated during pre-processing, defaults to 'main'.
+    :type feature_type: str
+    :param init_features: The number of features in the first encoder layer, defaults to 32.
+    :type init_fetaure: int
+    :param dropout: Dropout
+    :type dropout: float
+    :param target_norm: The type of normalization of the target data, defeaults to 'z-norm'.
+    :type target_norm: str
+    :param mean: The mean consumption of the target power, defaults to 0
+    :type mean: float
+    :param std: The STD consumption of the target power, defaults to 1
+    :type std: float
+    """
     def __init__(self, params):
-        super(_PTPNet, self).__init__()
+        super(PTPNet, self).__init__()
 
         output_len= params['in_size'] if 'in_size' in params else 481
         self.border = params["border"] if "border" in params else 30
@@ -114,24 +144,24 @@ class _PTPNet(nn.Module):
         p = 2
         k = 1
 
-        self.encoder1 = _Encoder(input_features, features, kernel_size=3,
+        self.encoder1 = Encoder(input_features, features, kernel_size=3,
                                  padding=0, dropout=dropout)
                         
                         
         # (batch, input_len - 2, 32)
         self.pool1 = nn.MaxPool1d(kernel_size=p, stride=p)
 
-        self.encoder2 = _Encoder(features * 1 ** k, features * 2 ** k,
+        self.encoder2 = Encoder(features * 1 ** k, features * 2 ** k,
                                  kernel_size=3, padding=0, dropout=dropout)
         # (batch, [input_len - 6] / 2, 64)
         self.pool2 = nn.MaxPool1d(kernel_size=p, stride=p)
 
-        self.encoder3 = _Encoder(features * 2 ** k, features * 4 ** k,
+        self.encoder3 = Encoder(features * 2 ** k, features * 4 ** k,
                                  kernel_size=3, padding=0, dropout=dropout)
         # (batch, [input_len - 12] / 4, 128)
         self.pool3 = nn.MaxPool1d(kernel_size=p, stride=p)
 
-        self.encoder4 = _Encoder(features * 4 ** k, features * 8 ** k,
+        self.encoder4 = Encoder(features * 4 ** k, features * 8 ** k,
                                  kernel_size=3, padding=0, dropout=dropout)
         # (batch, [input_len - 30] / 8, 256)
 
@@ -145,22 +175,22 @@ class _PTPNet(nn.Module):
             Continuing with the current length could badly impact the performance :(
             """)
 
-        self.tpool1 = _TemporalPooling(features * 8 ** k, features * 2 ** k,
+        self.tpool1 = TemporalPooling(features * 8 ** k, features * 2 ** k,
                                        kernel_size=int(s / 12)  if int(s/ 12) > 0 else 1,
                                        dropout=dropout)
-        self.tpool2 = _TemporalPooling(features * 8 ** k, features * 2 ** k,
+        self.tpool2 = TemporalPooling(features * 8 ** k, features * 2 ** k,
                                        kernel_size=int(s / 6)  if int(s/ 6) > 0 else 1,
                                         dropout=dropout)
                                         
-        self.tpool3 = _TemporalPooling(features * 8 ** k, features * 2 ** k,
+        self.tpool3 = TemporalPooling(features * 8 ** k, features * 2 ** k,
                                        kernel_size=int(s / 3) - int(s / 3) % 2 if int(s/ 3) > 0 else 1,
                                         dropout=dropout)
 
-        self.tpool4 = _TemporalPooling(features * 8 ** k, features * 2 ** k,
+        self.tpool4 = TemporalPooling(features * 8 ** k, features * 2 ** k,
                                        kernel_size=int(s / 2) - int(s / 2) % 2  if int(s/ 2) > 0 else 1,
                                       dropout=dropout)
 
-        self.decoder = _Decoder(2 * features * 8 ** k, features * 1 ** k,
+        self.decoder = Decoder(2 * features * 8 ** k, features * 1 ** k,
                                 kernel_size=p ** 3, stride=p ** 3)
 
         self.activation = nn.Conv1d(features * 1 ** k, out_channels,
@@ -182,26 +212,6 @@ class _PTPNet(nn.Module):
         self.power_scale = params["power_scale"] if "power_scale" in params else 2000.0
         
         
-
-    @staticmethod
-    def suggest_hparams(self, trial):
-        '''
-        Function returning list of params that will be suggested from optuna
-    
-        Parameters
-        ----------
-        trial : Optuna Trial.
-    
-        Returns
-        -------
-        dict: Dictionary of parameters with values suggested from optuna
-    
-        '''
-        
-        return {
-            'in_size': trial.suggest_int('in_size', 420, 580  , step=10),
-            'task_type':trial.suggest_categorical('task_type',['classification', 'regression']),
-            }
     
     def forward(self, x):
         # TODO: verify that the shapes with the original paper using the same parameters 
@@ -231,6 +241,13 @@ class _PTPNet(nn.Module):
         return pw.permute(0,2,1), act.permute(0,2,1)
     
     def step(self,batch , sequence_type= None):
+        """Disaggregates a batch of data
+
+        :param batch: A batch of data.
+        :type batch: Tensor
+        :return: loss function as returned form the model and MAE as returned from the model.
+        :rtype: tuple(float,float)
+        """
         data, target_power, target_status = batch
         
         output_power, output_status = self(data)
@@ -250,8 +267,15 @@ class _PTPNet(nn.Module):
         return loss, mae
     
     def predict(self,  model, test_dataloader):
-        
-        
+        """Generates predictions for the test data loader
+
+        :param model: Pre-trained model
+        :type model: nn.Module
+        :param test_dataloader: The test data
+        :type test_dataloader: dataLoader
+        :return: Generated predictions
+        :rtype: dict
+        """
         net = model.model.eval()
         num_batches = len(test_dataloader)
         values = range(num_batches)
@@ -273,7 +297,7 @@ class _PTPNet(nn.Module):
                     s_hat.append(sh)
                     p_hat.append(pw)
                     
-#                     x += x.detach().cpu().numpy().mean() #TODO: This was done in the original implementation. 
+                    #x += x.detach().cpu().numpy().mean() #TODO: This was done in the original implementation. 
                                                           #This is a strange normalisation method. Check how it works in an notebook
                     x_true.append(x[:, :,
                                   self.border:-self.border].detach().cpu().numpy().flatten())
@@ -322,14 +346,12 @@ class _PTPNet(nn.Module):
         return results
     
     def aggregate_seqs(self, prediction, states):
-        """
-        Aggregates the overleapping sequences using the mean
+        """ Aggregates the overleapping sequences using the mean
 
-        Args:
-            prediction (tensor[n_samples + window_size -1 ,window_size]): test predictions of the current model
-
-        Returns:
-            [type]: [description]
+        :param prediction: test predictions of the current model with shape (n_samples + window_size -1 ,window_size)
+        :type prediction: tensor
+        :return: Aggregted sequence
+        :rtype: tensor
         """
         l = self.seq_len
         n = prediction.shape[0] + l - 1
@@ -349,5 +371,6 @@ class _PTPNet(nn.Module):
             sum_states[i] = sum_states[i] / counts_arr[i]
         
         return torch.tensor(sum_arr), torch.tensor(sum_states)
+
 
 

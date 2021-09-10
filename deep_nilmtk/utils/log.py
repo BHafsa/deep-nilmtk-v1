@@ -11,24 +11,34 @@ import mlflow
 import json
 
 def start_logging(filename):
-    """
-    loggs all the output of the running into  file
+    """Logs the output of the execution in the specified file
 
-    Args:
-        filename (str): Name of the file where output will be logged
-
-    Returns:
-        file: 
+    :param filename: The name of the log file
+    :type filename: str
     """
     f = open('../logs/experiment-{}.txt'.format(filename), 'w')
     sys.stdout = f
     return f
 
 def stop_logging(f):
+    """Stops logging the output in the file f
+
+    :param f: Logs file
+    :type f: file
+    """
     f.close()
     sys.stdout = sys.__stdout_
 
 def save_results(api_results_f1,time, experiment_name, path='../results'):
+    """This function persists teh output of the predictions in a pickel file
+
+    :param api_results_f1: Execution results as returned by the NILMtk-API
+    :param time: execution time
+    :param experiment_name: Name of the experiment
+    :type experiment_name: str
+    :param path: Path to the results folder, defaults to '../results'
+    :type path: str, optional
+    """
     error_df_f1 = api_results_f1.errors
     error_keys_df_f1 = api_results_f1.errors_keys
     # Save results in Pickle file.
@@ -52,13 +62,13 @@ def save_results(api_results_f1,time, experiment_name, path='../results'):
         ff_errors.to_csv(f'{path}/{experiment_name}_{metric}.csv', sep='\t')
 
 def log_results(experiment, api_res):
-    """
-    This function logs the final results of the testing in the correspanding
+    """This function logs the final results of the testing in the correspanding
     experiment for each disaggregator
-    
-    Args:
-        experiment (dict): dict of the experiment in nilmtk format
-        api_res (nilmtk-api reult): results of the execution as provided by nilmtk
+
+    :param experiment: dict of the experiment in nilmtk format
+    :type experiment: dict
+    :param api_res: results of the execution as provided by nilmtk
+    :type api_res: nilmtk-api result
     """
     for appliance in experiment['appliances']:  
         # Select the corresponding experiment and run ID

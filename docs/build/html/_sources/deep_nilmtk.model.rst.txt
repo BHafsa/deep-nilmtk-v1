@@ -24,7 +24,7 @@ bert4nilm module
    :undoc-members:
     
 
-Temporal-Pooling module
+tempool module
 -----------------------------
 
 .. automodule:: deep_nilmtk.model.tempool
