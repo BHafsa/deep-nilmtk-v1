@@ -19,26 +19,53 @@ from collections import OrderedDict
 class S2P(nn.Module):
     """
     This class is an abstract class  for Sequence to point models. By implementing this class, 
-    you can avoid to implemnt the predict and the forward functions. 
+    you can avoid to implement the predict and the forward functions. 
+
+    :param params: dictionnary of values relative to hyper-parameters.
+    :type params: dict
+
+    The dictionnay is expected to include the following keys:
+    
+    :param target_norm: the type of normlization of the target power, defaults to 'z-norm'.
+    :type target_norm: str.
+    :param mean: The mean consumption value of the target appliance, defaults to 0.
+    :type mean: float.
+    :param std: The std consumption value  the target power, defaults to 1
+    :type std: float.
+    :param min: The mininum consumption value of the target appliance, defaults to 0.
+    :type min: float.
+    :param max: The maximum consumption value  the target power, defaults to 1
+    :type max: float.
+
+    """
 
     
-    """
+    
+    def __init__(self, params):
+        """Initialise the Seq-to-Point model
+
+        :param params: dictionnary of values relative to hyper-parameters.
+        :type params: dict
+        """
+        super(S2P, self).__init__()
+        self.target_norm = params['target_norm'] if 'target_norm' in params else 'z-norm'
+        self.mean = params['mean'] if 'mean' in params else 0
+        self.std = params['std'] if 'std' in params else 1
+
+        self.min = params['min'] if 'min' in params else 0
+        self.max = params['max'] if 'max' in params else 1
 
     @staticmethod
     def suggest_hparams(self, trial):
-        
-        '''
+        """
         Function returning list of params that will be suggested from optuna
-    
-        Parameters
-        ----------
-        trial : Optuna Trial.
-    
-        Returns
-        -------
-        dict: Dictionary of parameters with values suggested from optuna
-    
-        '''
+
+        :param trial: Optuna Trial.
+        :type trial: optuna.trial
+        :return: Parameters with values suggested by optuna
+        :rtype: dict
+        """
+        
         norm_ = trial.suggest_categorical('normalize', ['z-norm', 'lognorm'])
         window_length = trial.suggest_int('in_size', low=50, high=1800) 
         window_length += 1 if window_length % 2 == 0 else 0
@@ -48,39 +75,17 @@ class S2P(nn.Module):
             'in_size': window_length,
             'point_position':trial.suggest_categorical('point_position',['median','last_point'])
             }
-    
-    def __init__(self, params):
-        """
-        Initialise the Seq-to-Point model
-
-        Parameters
-        ----------
-            params (dict): dictionnary of values relative to hyper-parameters.
-
-        """
-        super(S2P, self).__init__()
-        self.target_norm = params['target_norm'] if 'target_norm' in params else 'z-norm'
-        self.mean = params['mean'] if 'mean' in params else 0
-        self.std = params['std'] if 'std' in params else 1
         
     def step(self, batch):
         """
         Disaggregates a batch of data
 
-        Parameters
-        ----------
-        batch : Tensor
-            DESCRIPTION.
-
-
-        Returns
-        -------
-        loss : float
-            loss function as returned form the model.
-        mae : float
-            MAE as returned from the model.
-
+        :param batch: A batch of data
+        :type batch: Tensor
+        :return: loss function as returned form the model and the MAE as returned from the model.
+        :rtype: tuple(float, float)
         """
+        
         x, y  = batch 
         out   = self(x)  # BxCxT
         
@@ -90,22 +95,13 @@ class S2P(nn.Module):
         return  loss, mae 
     
     def predict(self,  model, test_dataloader):
-        """
-        
-        Generate prediction during testing for the test_dataLoader
+        """Generate prediction during testing for the test_dataLoader
 
-        Parameters
-        ----------
-        model : TYPE
-            pre-trained model.
-        test_dataloader : DataLoader
-            data loader for the testing period.
-
-        Returns
-        -------
-        results : tensor
-            Disaggregated power consumption.
-
+        :param model: pre-trained model.
+        :param test_dataloader: data loader for the testing period.
+        :type test_dataloader: dataLoader
+        :return: Disaggregated power consumption.
+        :rtype: tensor
         """
         
         net = model.model.eval()
@@ -163,15 +159,31 @@ class S2P(nn.Module):
 
 class Seq2Point(S2P):
     """
+    .. _seqpoint:
+
     PyTorch implementation of the Seq-to-point
     NILM model as porposed in :
     https://dl.acm.org/doi/pdf/10.1145/3360322.3360844
 
-    .. _seqpoint:
+    :param params: dictionnary of values relative to hyper-parameters.
+    :type params: dict
+
+    Besides the additional paramter from teh parent model, the params dictionnay is expected to include the following keys:
+
+    :param feature_type: The number of input features, defaults to 1.
+    :type feature_type: int
+    :param appliances: A list of appliances.
+    :type appliances: list of str
+    :param pool_filter: The size of pooling filter, defaults to 50.
+    :type pool_filter: int
+
+    :param latent_size: The number of nodes in the last layer, defaults to 1024.
+    :type latent_size: int
 
     """
   
     def __init__(self, params):
+    
         super(Seq2Point, self).__init__(params)
         
         in_size=4 if params['feature_type']=="combined" else 1
@@ -215,14 +227,23 @@ class Seq2Point(S2P):
         
         return x
 
-     
+#TODO: Continue from here    
 class RNN(S2P):
     """
+        .. _rnn:
         PyTorch implementation of the RNN
         NILM model as porposed in :
         https://dl.acm.org/doi/pdf/10.1145/3360322.3360844
+
+        :param params: dictionnary of values relative to hyper-parameters.
+        :type params: dict
     
-    .. _rnn:
+        Besides the additional paramter from teh parent model, the params dictionnay is expected to include the following keys:
+    
+        :param feature_type: The number of input features, defaults to 1.
+        :type feature_type: int
+        :param appliances: A list of appliances.
+        :type appliances: list of str
     """
     def __init__(self, params):
         super(RNN, self).__init__(params)
@@ -280,10 +301,20 @@ class RNN(S2P):
 
 class WindowGRU(S2P):
     """
+        .. _gru:
         PyTorch implementation of the Window-GRU
         NILM model as porposed in :
         https://dl.acm.org/doi/pdf/10.1145/3360322.3360844
-    .. _gru:
+
+        :param params: dictionnary of values relative to hyper-parameters.
+        :type params: dict
+    
+        Besides the additional paramter from teh parent model, the params dictionnay is expected to include the following keys:
+    
+        :param feature_type: The number of input features, defaults to 1.
+        :type feature_type: int
+        :param appliances: A list of appliances.
+        :type appliances: list of str
     """
     def __init__(self, params):
         super(WindowGRU, self).__init__(params)
@@ -350,8 +381,24 @@ class WindowGRU(S2P):
 
 class S2S(nn.Module):
     """
-    A class for sequence to sequence models as most of them have would have the 
-    same predict step and predict functions. 
+    This class is an abstract class  for Sequence to Sequence models. By implementing this class, 
+    you can avoid to implement the predict and the forward functions. 
+
+    :param params: dictionnary of values relative to hyper-parameters.
+    :type params: dict
+
+    The dictionnay is expected to include the following keys:
+    
+    :param target_norm: the type of normlization of the target power, defaults to 'z-norm'.
+    :type target_norm: str.
+    :param mean: The mean consumption value of the target appliance, defaults to 0.
+    :type mean: float.
+    :param std: The std consumption value  the target power, defaults to 1
+    :type std: float.
+    :param min: The mininum consumption value of the target appliance, defaults to 0.
+    :type min: float.
+    :param max: The maximum consumption value  the target power, defaults to 1
+    :type max: float.
 
     """
     
@@ -369,25 +416,20 @@ class S2S(nn.Module):
         self.target_norm = params['target_norm'] if 'target_norm' in params else 'z-norm'
         self.mean = params['mean'] if 'mean' in params else 0
         self.std = params['std'] if 'std' in params else 1
+
+        self.min = params['min'] if 'min' in params else 0
+        self.max = params['max'] if 'max' in params else 1
         
     def step(self, batch):
+        """Disaggregates a batch of data
+
+        :param batch: A batch of data.
+        :type batch: Tensor
+        :return: loss function as returned form the model and MAE as returned from the model.
+        :rtype: tuple(float,float)
         """
-        Disaggregates a batch of data
 
-        Parameters
-        ----------
-        batch : Tensor
-            DESCRIPTION.
-
-
-        Returns
-        -------
-        loss : float
-            loss function as returned form the model.
-        mae : float
-            MAE as returned from the model.
-
-        """
+    
         x, y  = batch 
         out   = self(x)  # BxCxT
         
@@ -397,25 +439,15 @@ class S2S(nn.Module):
         return  loss, mae 
     
     def predict(self,  model, test_dataloader):
+        """Generate prediction during testing for the test_dataLoader
 
+        :param model: pre-trained model.
+        :param test_dataloader: data loader for the testing period.
+
+        :return: data loader for the testing period.
+        :rtype: tensor
         """
-        
-        Generate prediction during testing for the test_dataLoader
 
-        Parameters
-        ----------
-        model : TYPE
-            pre-trained model.
-        test_dataloader : DataLoader
-            data loader for the testing period.
-
-        Returns
-        -------
-        results : tensor
-            Disaggregated power consumption.
-
-        """
-        
         net = model.model.eval()
         num_batches = len(test_dataloader)
         values = range(num_batches)
@@ -469,15 +501,12 @@ class S2S(nn.Module):
         return results
     
     def aggregate_seqs(self, prediction):
-        """
-        Aggregate the overleapping sequences using the mean
+        """Aggregate the overleapping sequences using the mean
 
-        Parameters
-        ----------
-            prediction (tensor[n_samples + window_size +1 1,window_size]): test predictions of the current model
-
-        Returns:
-            [type]: [description]
+        :param prediction: test predictions of the current model
+        :type prediction: tensor
+        :return: Aggregted sequence
+        :rtype: tensor
         """
         l = self.original_len
         n = prediction.shape[0] + l - 1
@@ -495,11 +524,26 @@ class S2S(nn.Module):
              
 class Seq2Seq(S2S):
     """
+        .. _seqseq:
+
         PyTorch implementation of the Window-GRU
         NILM model as porposed in :
         https://dl.acm.org/doi/pdf/10.1145/3360322.3360844
 
-        .. _seqseq:
+        :param params: dictionnary of values relative to hyper-parameters.
+        :type params: dict
+
+        Besides the additional paramter from teh parent model, the params dictionnay is expected to include the following keys:
+
+        :param feature_type: The number of input features, defaults to 1.
+        :type feature_type: int
+        :param appliances: A list of appliances.
+        :type appliances: list of str
+        :param pool_filter: The size of pooling filter, defaults to 50.
+        :type pool_filter: int
+
+        :param latent_size: The number of nodes in the last layer, defaults to 1024.
+        :type latent_size: int
     """
     def __init__(self, params):
 
@@ -547,11 +591,25 @@ class Seq2Seq(S2S):
     
 class DAE(S2S):
     """
+        .. _dae:
         PyTorch implementation of the DAE
         NILM model as porposed in :
         https://dl.acm.org/doi/pdf/10.1145/3360322.3360844
 
-        .. _dae:
+        :param params: dictionnary of values relative to hyper-parameters.
+        :type params: dict
+
+        Besides the additional paramter from teh parent model, the params dictionnay is expected to include the following keys:
+
+        :param feature_type: The number of input features, defaults to 1.
+        :type feature_type: int
+        :param appliances: A list of appliances.
+        :type appliances: list of str
+        :param pool_filter: The size of pooling filter, defaults to 50.
+        :type pool_filter: int
+
+        :param latent_size: The number of nodes in the last layer, defaults to 1024.
+        :type latent_size: int
     """
     
     def __init__(self, params):

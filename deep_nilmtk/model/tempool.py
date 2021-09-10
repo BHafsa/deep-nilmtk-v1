@@ -90,9 +90,8 @@ class _Decoder(nn.Module):
 
 class _PTPNet(nn.Module):
     """
-    
-
     .. _ptp:
+
     """
 
     def __init__(self, params):

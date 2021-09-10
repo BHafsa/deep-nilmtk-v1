@@ -280,12 +280,12 @@ class UNETNILMSeq2Quantile(nn.Module):
         return results
     
     
-
-
-
-
-
 class UNETNILMDN(nn.Module):
+    """[summary]
+
+    :param nn: [description]
+    :type nn: [type]
+    """
        
     def __init__(self, params):
         super().__init__()
@@ -311,23 +311,7 @@ class UNETNILMDN(nn.Module):
         self.mdn = MDGMM(in_dims=mdn_latent,out_dims=out_size,
                  kmix=kmix, dist_type=dist_type, activation=activation)
         
-    @staticmethod
-    def suggest_hparams(self, trial):
-        '''
-        Function returning list of params that will be suggested from optuna
-    
-        Parameters
-        ----------
-        trial : Optuna Trial.
-    
-        Returns
-        -------
-        dict: Dictionary of parameters with values suggested from optuna
-    
-        '''
-        
-        return {
-            }
+  
     
     def forward(self, x):
         z = self.unet(x)
@@ -335,14 +319,39 @@ class UNETNILMDN(nn.Module):
         return pi, mu, sigma, gmm
     
     def log_nlloss(self, y, gmm):
+        """[summary]
+
+        :param y: [description]
+        :type y: [type]
+        :param gmm: [description]
+        :type gmm: [type]
+        :return: [description]
+        :rtype: [type]
+        """
         logprobs = gmm.log_prob(y)
         return -torch.mean(logprobs)
     
     def sample(self, gmm, n_sample=1000):
+        """[summary]
+
+        :param gmm: [description]
+        :type gmm: [type]
+        :param n_sample: [description], defaults to 1000
+        :type n_sample: int, optional
+        :return: [description]
+        :rtype: [type]
+        """
         samples = gmm.sample(sample_shape=(n_sample,))
         return samples
     
     def step(self, batch):
+        """[summary]
+
+        :param batch: [description]
+        :type batch: [type]
+        :return: [description]
+        :rtype: [type]
+        """
         x, y  = batch
         pi, mu, sigma, gmm  = self(x)
         
@@ -355,6 +364,15 @@ class UNETNILMDN(nn.Module):
         return  loss, mae
     
     def predict(self,  model, test_dataloader):
+        """[summary]
+
+        :param model: [description]
+        :type model: [type]
+        :param test_dataloader: [description]
+        :type test_dataloader: [type]
+        :return: [description]
+        :rtype: [type]
+        """
         
         net = model.model.eval()
         num_batches = len(test_dataloader)

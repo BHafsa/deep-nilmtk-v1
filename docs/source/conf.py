@@ -53,10 +53,6 @@ language = 'python'
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = []
 
-html_js_files = [
-    'https://kit.fontawesome.com/##########.js',
-]
-
 
 # -- Options for HTML output -------------------------------------------------
 

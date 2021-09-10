@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-This variable defines the models and their corresponding dataloaders as well as extra-parameters
-when needed. The mapping specified in here will be directly used during disaggregation.
+This variable defines the models and their corresponding data loaders as well as extra-parameters
+when needed. The mapping specified here will be directly used during disaggregation.
 
 
 .. list-table:: Liste of available models
@@ -41,7 +41,7 @@ when needed. The mapping specified in here will be directly used during disaggre
 """
 from ..loader import *
 from ..model import *
-from ..model.ptp import _PTPNet
+from ..model.tempool import _PTPNet
 from ..preprocessing import *
 
 NILM_MODELS = {
@@ -69,23 +69,13 @@ NILM_MODELS = {
         'extra_params':{}
     },
   
-  
-    # =============================================================================
-    #     Not published work Neurla Process from (__addlink)
-    # =============================================================================
-    'ANPRNN': {
-        'model': NeuralProcess,
-        'loader': generalDataLoader,
-        'extra_params':{
-            'collate_fns': collate_fns
-            }
-    },
+
     # =============================================================================
     #     Temporal Pooling model
     # =============================================================================
     'tempPool':{
         'model': _PTPNet,
-        'loader': ptpLoader,
+        'loader': tempooldataset,
         'extra_params':{
         }
         },

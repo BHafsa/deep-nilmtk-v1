@@ -5,10 +5,8 @@ import pytorch_lightning as pl
 
 class pilModel(pl.LightningModule):
     """
-
     Lightning module that is compatible 
     with PyTorch models included in Deep-NILMtk.
-
     """
     
     def __init__(self, net, hparams):

@@ -1,4 +1,4 @@
-deep\_nilmtk.config package
+Config package
 ===========================
 
 

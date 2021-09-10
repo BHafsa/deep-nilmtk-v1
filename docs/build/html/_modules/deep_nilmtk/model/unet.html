@@ -36,7 +36,6 @@
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
-        <script src="https://kit.fontawesome.com/##########.js"></script>
     
     <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
@@ -88,7 +87,7 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">deep_nilmtk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">Deep-NILMtk</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials.html">Tutorials</a></li>
 </ul>
 
@@ -438,12 +437,12 @@
         <span class="k">return</span> <span class="n">results</span></div></div>
     
     
-
-
-
-
-
 <div class="viewcode-block" id="UNETNILMDN"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.unet.UNETNILMDN">[docs]</a><span class="k">class</span> <span class="nc">UNETNILMDN</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;[summary]</span>
+
+<span class="sd">    :param nn: [description]</span>
+<span class="sd">    :type nn: [type]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
        
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
@@ -469,23 +468,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">mdn</span> <span class="o">=</span> <span class="n">MDGMM</span><span class="p">(</span><span class="n">in_dims</span><span class="o">=</span><span class="n">mdn_latent</span><span class="p">,</span><span class="n">out_dims</span><span class="o">=</span><span class="n">out_size</span><span class="p">,</span>
                  <span class="n">kmix</span><span class="o">=</span><span class="n">kmix</span><span class="p">,</span> <span class="n">dist_type</span><span class="o">=</span><span class="n">dist_type</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="n">activation</span><span class="p">)</span>
         
-<div class="viewcode-block" id="UNETNILMDN.suggest_hparams"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.unet.UNETNILMDN.suggest_hparams">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">suggest_hparams</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Function returning list of params that will be suggested from optuna</span>
-<span class="sd">    </span>
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        trial : Optuna Trial.</span>
-<span class="sd">    </span>
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        dict: Dictionary of parameters with values suggested from optuna</span>
-<span class="sd">    </span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        
-        <span class="k">return</span> <span class="p">{</span>
-            <span class="p">}</span></div>
+  
     
 <div class="viewcode-block" id="UNETNILMDN.forward"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.unet.UNETNILMDN.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unet</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
@@ -493,14 +476,39 @@
         <span class="k">return</span> <span class="n">pi</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">gmm</span></div>
     
 <div class="viewcode-block" id="UNETNILMDN.log_nlloss"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.unet.UNETNILMDN.log_nlloss">[docs]</a>    <span class="k">def</span> <span class="nf">log_nlloss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">gmm</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;[summary]</span>
+
+<span class="sd">        :param y: [description]</span>
+<span class="sd">        :type y: [type]</span>
+<span class="sd">        :param gmm: [description]</span>
+<span class="sd">        :type gmm: [type]</span>
+<span class="sd">        :return: [description]</span>
+<span class="sd">        :rtype: [type]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">logprobs</span> <span class="o">=</span> <span class="n">gmm</span><span class="o">.</span><span class="n">log_prob</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
         <span class="k">return</span> <span class="o">-</span><span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">logprobs</span><span class="p">)</span></div>
     
 <div class="viewcode-block" id="UNETNILMDN.sample"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.unet.UNETNILMDN.sample">[docs]</a>    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gmm</span><span class="p">,</span> <span class="n">n_sample</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;[summary]</span>
+
+<span class="sd">        :param gmm: [description]</span>
+<span class="sd">        :type gmm: [type]</span>
+<span class="sd">        :param n_sample: [description], defaults to 1000</span>
+<span class="sd">        :type n_sample: int, optional</span>
+<span class="sd">        :return: [description]</span>
+<span class="sd">        :rtype: [type]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">samples</span> <span class="o">=</span> <span class="n">gmm</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">sample_shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_sample</span><span class="p">,))</span>
         <span class="k">return</span> <span class="n">samples</span></div>
     
 <div class="viewcode-block" id="UNETNILMDN.step"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.unet.UNETNILMDN.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;[summary]</span>
+
+<span class="sd">        :param batch: [description]</span>
+<span class="sd">        :type batch: [type]</span>
+<span class="sd">        :return: [description]</span>
+<span class="sd">        :rtype: [type]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">x</span><span class="p">,</span> <span class="n">y</span>  <span class="o">=</span> <span class="n">batch</span>
         <span class="n">pi</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">gmm</span>  <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
         
@@ -513,6 +521,15 @@
         <span class="k">return</span>  <span class="n">loss</span><span class="p">,</span> <span class="n">mae</span></div>
     
 <div class="viewcode-block" id="UNETNILMDN.predict"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.unet.UNETNILMDN.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>  <span class="n">model</span><span class="p">,</span> <span class="n">test_dataloader</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;[summary]</span>
+
+<span class="sd">        :param model: [description]</span>
+<span class="sd">        :type model: [type]</span>
+<span class="sd">        :param test_dataloader: [description]</span>
+<span class="sd">        :type test_dataloader: [type]</span>
+<span class="sd">        :return: [description]</span>
+<span class="sd">        :rtype: [type]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         
         <span class="n">net</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
         <span class="n">num_batches</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_dataloader</span><span class="p">)</span>

@@ -2,30 +2,25 @@ import numpy as np
 import pandas as pd
 
 def get_differential_power(data):
-    """
-    Generate differential power := p[t+1]-p[t]
+    """Generate differential power := p[t+1]-p[t]
 
     :param data: The  power data
     :type data: np.array
     :return: The differentiated power
     :rtype: np.array
     """
-
     return np.ediff1d(data, to_end=None, to_begin=0)   
 
  
 def get_variant_power(data, alpha=0.1):
-    """
-    Generate variant power which reduce noise that may impose negative influence on  pattern identification
-    Parameters
-    ----------
-    
-    data(np.array) :  power signal
-    alpha(float) :  reflection rate
-    
-    Returns
-    ----------
-    variant_power: The variant power generated
+    """Generate variant power which reduce noise that may impose negative influence on  pattern identification
+
+    :param data: power signal
+    :type data: np.array
+    :param alpha: reflection rate, defaults to 0.1
+    :type alpha: float, optional
+    :return: The variant power generated
+    :rtype: np.array
     """
     variant_power = np.zeros(len(data))
     for i in range(1,len(data)):
@@ -36,35 +31,31 @@ def get_variant_power(data, alpha=0.1):
     
 
 def get_percentile(data,p=50):
-    """
-    Calculates the percentile p of the data
-    
-    Parameters
-    ----------
-        data (np.array) : The power data
-        p (np.array) : The quantile 
-    
-    Returns
-    ----------
-        np.array : The quantile values of the power data
+    """Calculates the percentile p of the data
+
+    :param data: The power data
+    :type data: np.array
+    :param p:  The quantile , defaults to 50
+    :type p: int, optional
+    :return: The quantile values of the power data
+    :rtype: np.array
     """
     return np.percentile(data, p, axis=1, interpolation="midpoint")
 
 
 def over_lapping_sliding_window(data, seq_len = 4, step_size = 1):
-    """
-    Generates overlappping sequences using the sliding sequence approach.
+    """Generates overlappping sequences using the sliding sequence approach.
 
-    Parameters
-    ----------
-        data (np.array): Power data
-        seq_len (int, optional): The length of the sequences. Defaults to 4.
-        step_size (int, optional): The step size. Defaults to 1.
-
-    Returns
-    ----------
-        np.array: An array of the generated sequences.
+    :param data: Power data
+    :type data: np.array
+    :param seq_len: The length of the sequences. Defaults to 4.
+    :type seq_len: int, optional
+    :param step_size:  The step size. Defaults to 1.
+    :type step_size: int, optional
+    :return: An array of the generated sequences.
+    :rtype: np.array
     """
+    
     units_to_pad = (seq_len//2)*step_size
     new_data = np.pad(data, (units_to_pad,units_to_pad),'constant',constant_values=(0,0))
     sh = (new_data.size - seq_len, seq_len)
@@ -75,75 +66,43 @@ def over_lapping_sliding_window(data, seq_len = 4, step_size = 1):
 
 
 def quantile_filter(data:np.array, sequence_length:int=10,  p:int=50):
-    """ 
-    Applies quantile filter on the input data.
+    """Applies quantile filter on the input data.
 
-    Parameters
-    ----------
-        data (np.array): The input data power data.
-        sequence_length (int): The length of sequence
-        p (int, optional): The percentile. Defaults to 50.
-
-    Returns
-    ----------
-        np.array: array of values for correponding percentile
+    :param data: The input data power data.
+    :type data: np.array
+    :param sequence_length: The length of sequence, defaults to 10
+    :type sequence_length: int, optional
+    :param p: The percentile. Defaults to 50.
+    :type p: int, optional
+    :return: array of values for correponding percentile
+    :rtype: np.array
     """
+
     new_mains = over_lapping_sliding_window(data, sequence_length)
     new_mains = get_percentile(new_mains, p)
     return new_mains
 
 
 def get_differential_power(data):
-    """
-    The differences between consecutive elements of an array.
+    """The differences between consecutive elements of an array.
 
-    Parameters
-    ----------
-        data (np.array): the input data 
-
-    Returns
-    ----------
-        np.array: The differences.
+    :param data: the input data 
+    :type data: np.array
+    :return: The differences.
+    :rtype: np.array
     """
     return np.ediff1d(data, to_end=None, to_begin=0)   
     
 
 
-def get_variant_power(data, alpha=0.1):
-
-    """
-    Generate variant power which reduce noise that may impose negative inluence on  pattern identification
-
-    Parameters
-    ----------
-        data:  power signal
-        alpha[0,0.9]:  reflection rate
-
-    Returns
-    ----------
-        variant_power: The variant power generated
-    """
-
-
-    variant_power = np.zeros(len(data))
-    for i in range(1,len(data)):
-            d = data[i]-variant_power[i-1]
-            variant_power[i] = variant_power[i-1] + alpha*d     
-    return  variant_power 
-
-
 def get_temporal_info(data):
-    """
-    Generates the temporal information related 
+    """Generates the temporal information related 
     power consumption
 
-    Parameters
-    ----------
-        data (list(DatetimeIndex)): a list of all temporal information
-
-    Returns
-    ----------
-        np.array: Temporal contextual information of the energy data
+    :param data: a list of temporal information
+    :type data: list(DatetimeIndex)
+    :return: Temporal contextual information of the energy data
+    :rtype: np.array
     """
     
     out_info =[]
@@ -161,7 +120,7 @@ def get_temporal_info(data):
 
 
 def data_preprocessing(aggregate, targets=None, 
-                       feature_type="vpower",
+                       feature_type="mains",
                        alpha=0.1,
                        normalize=None, 
                        main_mu=329, 
@@ -169,31 +128,34 @@ def data_preprocessing(aggregate, targets=None,
                        q_filter={"q":50, "w":10},
                        main_min=0,
                        main_max = 1500,):
-    
-
-    """
-    Default pre-processing function. It performs normalization of the input. 
+    """Default pre-processing function. It performs normalization of the input. 
     However, it leaves the target output normlization to the dataloader as 
     some loaders require to also generate the states from the the original data.
 
-    Parameters
-    ----------
-        aggregate: the aggregate power consumption
-        feature_type([str]): the type of input features to derive from the aggregate power, default 'main' 
-        alpha ([float]): reflection rate
-        normalize ([str]): normalization type
-        main_mu ([float]): the mean of the aggregate power data
-        main_std ([float]): the std of the aggregate power data
-        main_min ([float]): the min of the aggregate power data
-        main_max ([float]): the max of the aggregate power data
-        q_filter: quantile filters
 
-    Returns
-    ----------
-        aggregate power, submetered data , submetered data: [description]
+    :param aggregate: The aggregate power
+    :type aggregate: list of DataFrames
+    :param targets: The target power, defaults to None
+    :type targets: list of DataFrames, optional
+    :param feature\_type: the type of input features to derive from the aggregate power, defaults to main
+    :type feature\_type: str, optional
+    :param alpha: reflection rate, defaults to 0.1
+    :type alpha: float, optional
+    :param normalize: normalization type, defaults to None
+    :type normalize: [type], optional
+    :param main_mu:  the mean of the aggregate power data, defaults to 329
+    :type main\_mu: int, optional
+    :param main\_std:  the std of the aggregate power data, defaults to 450
+    :type main\_std: int, optional
+    :param q\_filter: quantile filters, defaults to {"q":50, "w":10}
+    :type q\_filter: dict, optional
+    :param main\_min: the min of the aggregate power data, defaults to 0
+    :type main\_min: int, optional
+    :param main\_max:  the max of the aggregate power data, defaults to 1500
+    :type main\_max: int, optional
+    :return: aggregate power, submetered data all in one dataframe , submetered data as seperate datFrames
+    :rtype: tuple
     """
-
-    
 
     if targets is not None: 
         processed_mains_lst = []

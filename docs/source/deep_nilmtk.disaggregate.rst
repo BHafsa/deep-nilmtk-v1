@@ -1,4 +1,4 @@
-deep\_nilmtk.disaggregate package
+Disaggregate package
 =================================
 
 
@@ -8,7 +8,7 @@ deep\_nilmtk.disaggregate package
    :undoc-members:
     
 
-deep\_nilmtk.disaggregate.nilm\_experiment module
+Nilm\_experiment class
 -------------------------------------------------
 
 .. automodule:: deep_nilmtk.disaggregate.nilm_experiment

@@ -1,4 +1,4 @@
-deep\_nilmtk.model package
+Model package
 ==========================
 
 
@@ -7,23 +7,8 @@ deep\_nilmtk.model package
    :members:
    :undoc-members:
 
-deep\_nilmtk.model module
--------------------------
 
-.. automodule:: deep_nilmtk.model
-   :members:
-   :undoc-members:
-    
-
-deep\_nilmtk.model.anp\_rnn module
-----------------------------------
-
-.. automodule:: deep_nilmtk.model.anp_rnn
-   :members:
-   :undoc-members:
-    
-
-deep\_nilmtk.model.baselines module
+baselines module
 -----------------------------------
 
 .. automodule:: deep_nilmtk.model.baselines
@@ -31,7 +16,7 @@ deep\_nilmtk.model.baselines module
    :undoc-members:
     
 
-deep\_nilmtk.model.bert4nilm module
+bert4nilm module
 -----------------------------------
 
 .. automodule:: deep_nilmtk.model.bert4nilm
@@ -39,39 +24,15 @@ deep\_nilmtk.model.bert4nilm module
    :undoc-members:
     
 
-deep\_nilmtk.model.layers module
---------------------------------
-
-.. automodule:: deep_nilmtk.model.layers
-   :members:
-   :undoc-members:
-    
-
-deep\_nilmtk.model.linear\_regression module
---------------------------------------------
-
-.. automodule:: deep_nilmtk.model.linear_regression
-   :members:
-   :undoc-members:
-    
-
-deep\_nilmtk.model.model\_pil module
-------------------------------------
-
-.. automodule:: deep_nilmtk.model.model_pil
-   :members:
-   :undoc-members:
-    
-
-deep\_nilmtk.model.ptp module
+Temporal-Pooling module
 -----------------------------
 
-.. automodule:: deep_nilmtk.model.ptp
+.. automodule:: deep_nilmtk.model.tempool
    :members:
    :undoc-members:
     
 
-deep\_nilmtk.model.unet module
+unet module
 ------------------------------
 
 .. automodule:: deep_nilmtk.model.unet
@@ -79,18 +40,19 @@ deep\_nilmtk.model.unet module
    :undoc-members:
     
 
-deep\_nilmtk.model.unet\_multi\_task module
--------------------------------------------
 
-.. automodule:: deep_nilmtk.model.unet_multi_task
-   :members:
-   :undoc-members:
-    
-
-deep\_nilmtk.model.wavenet module
+wavenet module
 ---------------------------------
 
 .. automodule:: deep_nilmtk.model.wavenet
+   :members:
+   :undoc-members:
+
+
+model\_pil module
+------------------------------------
+
+.. automodule:: deep_nilmtk.model.model_pil
    :members:
    :undoc-members:
     

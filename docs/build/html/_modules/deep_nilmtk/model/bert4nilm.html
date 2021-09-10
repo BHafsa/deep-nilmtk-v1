@@ -36,7 +36,6 @@
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
-        <script src="https://kit.fontawesome.com/##########.js"></script>
     
     <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
@@ -88,7 +87,7 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">deep_nilmtk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">Deep-NILMtk</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tutorials.html">Tutorials</a></li>
 </ul>
 
@@ -175,37 +174,28 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">mlflow</span>
 
-<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">confusion_matrix</span>
 
-<div class="viewcode-block" id="acc_precision_recall_f1_score"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.bert4nilm.acc_precision_recall_f1_score">[docs]</a><span class="k">def</span> <span class="nf">acc_precision_recall_f1_score</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">status</span><span class="p">):</span>
-    <span class="k">assert</span> <span class="n">pred</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">status</span><span class="o">.</span><span class="n">shape</span>
-
-    <span class="n">pred</span> <span class="o">=</span> <span class="n">pred</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">pred</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-    <span class="n">status</span> <span class="o">=</span> <span class="n">status</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">status</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-    <span class="n">accs</span><span class="p">,</span> <span class="n">precisions</span><span class="p">,</span> <span class="n">recalls</span><span class="p">,</span> <span class="n">f1_scores</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
-
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">status</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
-        <span class="n">tn</span><span class="p">,</span> <span class="n">fp</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">tp</span> <span class="o">=</span> <span class="n">confusion_matrix</span><span class="p">(</span><span class="n">status</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">pred</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">labels</span><span class="o">=</span><span class="p">[</span>
-                                          <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
-        <span class="n">acc</span> <span class="o">=</span> <span class="p">(</span><span class="n">tn</span> <span class="o">+</span> <span class="n">tp</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">tn</span> <span class="o">+</span> <span class="n">fp</span> <span class="o">+</span> <span class="n">fn</span> <span class="o">+</span> <span class="n">tp</span><span class="p">)</span>
-        <span class="n">precision</span> <span class="o">=</span> <span class="n">tp</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">((</span><span class="n">tp</span> <span class="o">+</span> <span class="n">fp</span><span class="p">,</span> <span class="mf">1e-9</span><span class="p">))</span>
-        <span class="n">recall</span> <span class="o">=</span> <span class="n">tp</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">((</span><span class="n">tp</span> <span class="o">+</span> <span class="n">fn</span><span class="p">,</span> <span class="mf">1e-9</span><span class="p">))</span>
-        <span class="n">f1_score</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">precision</span> <span class="o">*</span> <span class="n">recall</span><span class="p">)</span> <span class="o">/</span> \
-            <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">((</span><span class="n">precision</span> <span class="o">+</span> <span class="n">recall</span><span class="p">,</span> <span class="mf">1e-9</span><span class="p">))</span>
-
-        <span class="n">accs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">acc</span><span class="p">)</span>
-        <span class="n">precisions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">precision</span><span class="p">)</span>
-        <span class="n">recalls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">recall</span><span class="p">)</span>
-        <span class="n">f1_scores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f1_score</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">accs</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">precisions</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">recalls</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">f1_scores</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="GELU"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.bert4nilm.GELU">[docs]</a><span class="k">class</span> <span class="nc">GELU</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Gaussian Error Linear Units GLU</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 <div class="viewcode-block" id="GELU.forward"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.bert4nilm.GELU.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">x</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">torch</span><span class="o">.</span><span class="n">tanh</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="mf">0.044715</span> <span class="o">*</span> <span class="n">torch</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">3</span><span class="p">))))</span></div></div>
 
 
 <div class="viewcode-block" id="PositionalEmbedding"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.bert4nilm.PositionalEmbedding">[docs]</a><span class="k">class</span> <span class="nc">PositionalEmbedding</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Positional Embedding </span>
+<span class="sd">    </span>
+<span class="sd">    :param max_len: maximum length of the input</span>
+<span class="sd">    :type max_len: int</span>
+<span class="sd">    :param d_model: dimension of the model</span>
+<span class="sd">    :type d_model: int</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_len</span><span class="p">,</span> <span class="n">d_model</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pe</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Embedding</span><span class="p">(</span><span class="n">max_len</span><span class="p">,</span> <span class="n">d_model</span><span class="p">)</span>
@@ -216,7 +206,16 @@
 
 
 <div class="viewcode-block" id="LayerNorm"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.bert4nilm.LayerNorm">[docs]</a><span class="k">class</span> <span class="nc">LayerNorm</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Normalization layer</span>
+
+<span class="sd">    :param features: The number of input features</span>
+<span class="sd">    :type features: int</span>
+<span class="sd">    :param eps: Regularization factor, defaults to 1e-6</span>
+<span class="sd">    :type eps: float, optional</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">):</span>
+   
         <span class="nb">super</span><span class="p">(</span><span class="n">LayerNorm</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">weight</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">features</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bias</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Parameter</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">features</span><span class="p">))</span>
@@ -229,7 +228,24 @@
 
 
 <div class="viewcode-block" id="Attention"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.bert4nilm.Attention">[docs]</a><span class="k">class</span> <span class="nc">Attention</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Attention layer</span>
+
+<span class="sd">    :param query: Query values</span>
+<span class="sd">    :type query: tensor</span>
+<span class="sd">    :param key: Key values</span>
+<span class="sd">    :type key: tensor</span>
+<span class="sd">    :param value: Values</span>
+<span class="sd">    :type value: tensor</span>
+<span class="sd">    :param mask: Mask for a causal model, defaults to None</span>
+<span class="sd">    :type mask: tensor, optional</span>
+<span class="sd">    :param dropout: Dropout, defaults to None</span>
+<span class="sd">    :type dropout: float, optional</span>
+<span class="sd">    :return:  output of the attention layer and attention score</span>
+<span class="sd">    :rtype: tuple(tensor, tensor)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 <div class="viewcode-block" id="Attention.forward"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.bert4nilm.Attention.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+     
         <span class="n">scores</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">matmul</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">key</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">query</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">scores</span> <span class="o">=</span> <span class="n">scores</span><span class="o">.</span><span class="n">masked_fill</span><span class="p">(</span><span class="n">mask</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1e9</span><span class="p">)</span>
@@ -242,7 +258,22 @@
 
 
 <div class="viewcode-block" id="MultiHeadedAttention"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.bert4nilm.MultiHeadedAttention">[docs]</a><span class="k">class</span> <span class="nc">MultiHeadedAttention</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Multi headed attention layer</span>
+
+<span class="sd">    :param h: The number of heads</span>
+<span class="sd">    :type h: int</span>
+<span class="sd">    :param d_model: The dimension of the model</span>
+<span class="sd">    :type d_model: int</span>
+<span class="sd">    :param dropout: Dropout, defaults to 0.1</span>
+<span class="sd">    :type dropout: float, optional</span>
+
+<span class="sd">    .. note:</span>
+<span class="sd">       d_model should be multiple of h.</span>
+<span class="sd">        </span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">d_model</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
+        
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="k">assert</span> <span class="n">d_model</span> <span class="o">%</span> <span class="n">h</span> <span class="o">==</span> <span class="mi">0</span>
 
@@ -271,7 +302,16 @@
 
 
 <div class="viewcode-block" id="PositionwiseFeedForward"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.bert4nilm.PositionwiseFeedForward">[docs]</a><span class="k">class</span> <span class="nc">PositionwiseFeedForward</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the position wise feed forward</span>
+
+<span class="sd">    :param d_model: The dimension of the model</span>
+<span class="sd">    :type d_model: int</span>
+<span class="sd">    :param d_ff: size of hidden layer</span>
+<span class="sd">    :type d_ff: int</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d_model</span><span class="p">,</span> <span class="n">d_ff</span><span class="p">):</span>
+
         <span class="nb">super</span><span class="p">(</span><span class="n">PositionwiseFeedForward</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">w_1</span> <span class="o">=</span> <span class="n">create_linear</span><span class="p">(</span><span class="n">d_model</span><span class="p">,</span> <span class="n">d_ff</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">w_2</span> <span class="o">=</span> <span class="n">create_linear</span><span class="p">(</span><span class="n">d_ff</span><span class="p">,</span> <span class="n">d_model</span><span class="p">)</span>
@@ -282,7 +322,17 @@
 
 
 <div class="viewcode-block" id="SublayerConnection"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.bert4nilm.SublayerConnection">[docs]</a><span class="k">class</span> <span class="nc">SublayerConnection</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Performs the addition and layer normalisation</span>
+<span class="sd">    More details can be found https://arxiv.org/pdf/1706.03762.pdf</span>
+
+<span class="sd">    :param size: the size of teh input</span>
+<span class="sd">    :type size: int</span>
+<span class="sd">    :param dropout: Dropout</span>
+<span class="sd">    :type dropout: float</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">dropout</span><span class="p">):</span>
+      
         <span class="nb">super</span><span class="p">(</span><span class="n">SublayerConnection</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layer_norm</span> <span class="o">=</span> <span class="n">LayerNorm</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">dropout</span><span class="p">)</span>
@@ -292,6 +342,18 @@
 
 
 <div class="viewcode-block" id="TransformerBlock"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.bert4nilm.TransformerBlock">[docs]</a><span class="k">class</span> <span class="nc">TransformerBlock</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Tranformer decoder block.</span>
+
+<span class="sd">    :param hidden: Dimension of the model </span>
+<span class="sd">    :type hidden: int</span>
+<span class="sd">    :param attn_heads: The number of attention heads</span>
+<span class="sd">    :type attn_heads: int</span>
+<span class="sd">    :param feed_forward_hidden: The hidden size of feedforward layer</span>
+<span class="sd">    :type feed_forward_hidden: int</span>
+<span class="sd">    :param dropout: Dropout</span>
+<span class="sd">    :type dropout: float</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hidden</span><span class="p">,</span> <span class="n">attn_heads</span><span class="p">,</span> <span class="n">feed_forward_hidden</span><span class="p">,</span> <span class="n">dropout</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">attention</span> <span class="o">=</span> <span class="n">MultiHeadedAttention</span><span class="p">(</span>
@@ -337,13 +399,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">min_on</span> <span class="o">=</span> <span class="p">[</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;min_on&#39;</span><span class="p">][</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;appliances&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]]]</span> <span class="k">if</span> <span class="s1">&#39;min_on&#39;</span> <span class="ow">in</span> <span class="n">params</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">min_off</span> <span class="o">=</span> <span class="p">[</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;min_off&#39;</span><span class="p">][</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;appliances&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]]]</span> <span class="k">if</span> <span class="s1">&#39;min_off&#39;</span> <span class="ow">in</span> <span class="n">params</span> <span class="k">else</span> <span class="kc">None</span>
         
-        <span class="bp">self</span><span class="o">.</span><span class="n">C0</span> <span class="o">=</span> <span class="p">[</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;lambda&#39;</span><span class="p">][</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;appliances&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]]]</span> <span class="k">if</span> <span class="s1">&#39;lambda&#39;</span> <span class="ow">in</span> <span class="n">params</span> <span class="k">else</span> <span class="p">[</span><span class="mf">1e-6</span><span class="p">]</span>
+        <span class="c1">#self.C0 = [params[&#39;lambda&#39;][params[&#39;appliances&#39;][0]]] if &#39;lambda&#39; in params else [1e-6]</span>
         
       
         
         <span class="bp">self</span><span class="o">.</span><span class="n">set_hpramas</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cutoff</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_on</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_off</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">C0</span><span class="p">)</span>
 
-<span class="c1">#         self.C0 = torch.tensor([params[&#39;c0&#39;] if &#39;c0&#39; in params else 1.]).float()</span>
+        <span class="c1">#self.C0 = torch.tensor([params[&#39;c0&#39;] if &#39;c0&#39; in params else 1.]).float()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">latent_len</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">original_len</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dropout_rate</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;dropout&#39;</span><span class="p">]</span>
@@ -376,7 +438,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">activation</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sigmoid</span><span class="p">()</span>
 
-<span class="c1">#         self.truncated_normal_init()</span>
+
 
         <span class="bp">self</span><span class="o">.</span><span class="n">kl</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">KLDivLoss</span><span class="p">(</span><span class="n">reduction</span><span class="o">=</span><span class="s1">&#39;batchmean&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mse</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">MSELoss</span><span class="p">()</span>
@@ -385,37 +447,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">l1_on</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">L1Loss</span><span class="p">(</span><span class="n">reduction</span><span class="o">=</span><span class="s1">&#39;sum&#39;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="BERT4NILM.truncated_normal_init"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.bert4nilm.BERT4NILM.truncated_normal_init">[docs]</a>    <span class="k">def</span> <span class="nf">truncated_normal_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">std</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">lower</span><span class="o">=-</span><span class="mf">0.04</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="mf">0.04</span><span class="p">):</span>
-        <span class="n">params</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">named_parameters</span><span class="p">())</span>
-        <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
-            <span class="k">if</span> <span class="s1">&#39;layer_norm&#39;</span> <span class="ow">in</span> <span class="n">n</span><span class="p">:</span>
-                <span class="k">continue</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
-                    <span class="n">l</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">+</span> <span class="n">math</span><span class="o">.</span><span class="n">erf</span><span class="p">(((</span><span class="n">lower</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">/</span> <span class="n">std</span><span class="p">)</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.</span><span class="p">)))</span> <span class="o">/</span> <span class="mf">2.</span>
-                    <span class="n">u</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">+</span> <span class="n">math</span><span class="o">.</span><span class="n">erf</span><span class="p">(((</span><span class="n">upper</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">/</span> <span class="n">std</span><span class="p">)</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.</span><span class="p">)))</span> <span class="o">/</span> <span class="mf">2.</span>
-                    <span class="n">p</span><span class="o">.</span><span class="n">uniform_</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">l</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">u</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-                    <span class="n">p</span><span class="o">.</span><span class="n">erfinv_</span><span class="p">()</span>
-                    <span class="n">p</span><span class="o">.</span><span class="n">mul_</span><span class="p">(</span><span class="n">std</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.</span><span class="p">))</span>
-                    <span class="n">p</span><span class="o">.</span><span class="n">add_</span><span class="p">(</span><span class="n">mean</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="BERT4NILM.set_hpramas"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.bert4nilm.BERT4NILM.set_hpramas">[docs]</a>    <span class="k">def</span> <span class="nf">set_hpramas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">cutoff</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">min_on</span><span class="p">,</span> <span class="n">min_off</span><span class="p">,</span> <span class="n">C0</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">cutoff</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">cutoff</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">cutoff</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">threshold</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">threshold</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">min_on</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">min_on</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">min_on</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">min_off</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">min_off</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">min_off</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
-            
-        <span class="k">if</span> <span class="n">C0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">C0</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">C0</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span></div>
+    
 
 <div class="viewcode-block" id="BERT4NILM.forward"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.bert4nilm.BERT4NILM.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">):</span>
-        
-     
-        
         <span class="n">x_token</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">conv</span><span class="p">(</span><span class="n">sequence</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)))</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
         <span class="n">embedding</span> <span class="o">=</span> <span class="n">x_token</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="p">(</span><span class="n">sequence</span><span class="p">)</span>
@@ -433,22 +468,21 @@
         
 
 <div class="viewcode-block" id="BERT4NILM.step"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.bert4nilm.BERT4NILM.step">[docs]</a>    <span class="k">def</span> <span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">seq_type</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Disaggregates a batch of data</span>
+
+<span class="sd">        :param batch: A batch of data.</span>
+<span class="sd">        :type batch: Tensor</span>
+<span class="sd">        :return: loss function as returned form the model and MAE as returned from the model.</span>
+<span class="sd">        :rtype: tuple(float,float)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">seqs</span><span class="p">,</span> <span class="n">labels_energy</span><span class="p">,</span> <span class="n">status</span> <span class="o">=</span> <span class="n">batch</span>
         
-<span class="c1">#         print(labels_energy.mean())</span>
-<span class="c1">#         print(labels_energy.min())</span>
-<span class="c1">#         print(labels_energy.max())</span>
-<span class="c1">#         print(&#39;==================&#39;)</span>
         
         <span class="n">batch_shape</span> <span class="o">=</span> <span class="n">status</span><span class="o">.</span><span class="n">shape</span>
         <span class="n">logits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">seqs</span><span class="o">.</span><span class="n">float</span><span class="p">())</span>
             
-        <span class="n">labels</span> <span class="o">=</span> <span class="n">labels_energy</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">cutoff</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">seqs</span><span class="o">.</span><span class="n">device</span><span class="p">)</span> <span class="c1"># This the normalisation of the output data ?!!!</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="n">labels_energy</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">cutoff</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">seqs</span><span class="o">.</span><span class="n">device</span><span class="p">)</span> <span class="c1"># This the normalization of the output data ?!!!</span>
         
-<span class="c1">#         print((logits * self.cutoff.to(seqs.device)).mean())</span>
-<span class="c1">#         print((logits * self.cutoff.to(seqs.device)).min())</span>
-<span class="c1">#         print((logits * self.cutoff.to(seqs.device)).max())</span>
-<span class="c1">#         print(&#39;==================&#39;)</span>
         
         <span class="n">logits_energy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cutoff_energy</span><span class="p">(</span><span class="n">logits</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">cutoff</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">seqs</span><span class="o">.</span><span class="n">device</span><span class="p">))</span>
         <span class="n">logits_status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_status</span><span class="p">(</span><span class="n">logits_energy</span><span class="p">)</span>
@@ -485,6 +519,14 @@
         <span class="k">return</span>  <span class="n">total_loss</span><span class="p">,</span> <span class="n">mae</span></div>
 
 <div class="viewcode-block" id="BERT4NILM.cutoff_energy"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.bert4nilm.BERT4NILM.cutoff_energy">[docs]</a>    <span class="k">def</span> <span class="nf">cutoff_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Removes the spikes from the data</span>
+
+<span class="sd">        :param data: Power consumption</span>
+<span class="sd">        :type data: tesnor</span>
+<span class="sd">        :return: Updated ower consumption </span>
+<span class="sd">        :rtype: tensor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">columns</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cutoff</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -497,6 +539,14 @@
         <span class="k">return</span> <span class="n">data</span></div>
 
 <div class="viewcode-block" id="BERT4NILM.compute_status"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.bert4nilm.BERT4NILM.compute_status">[docs]</a>    <span class="k">def</span> <span class="nf">compute_status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculates teh states for the  target data based on the threshold</span>
+
+<span class="sd">        :param data: The target data</span>
+<span class="sd">        :type data: tensor</span>
+<span class="sd">        :return: The operational states</span>
+<span class="sd">        :rtype: tensor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">data_shape</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
         <span class="n">columns</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
@@ -511,6 +561,15 @@
 
     
 <div class="viewcode-block" id="BERT4NILM.predict"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.bert4nilm.BERT4NILM.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>  <span class="n">model</span><span class="p">,</span> <span class="n">test_dataloader</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Generates predictions for the test data loader</span>
+
+<span class="sd">        :param model: Pre-trained model</span>
+<span class="sd">        :type model: nn.Module</span>
+<span class="sd">        :param test_dataloader: The test data</span>
+<span class="sd">        :type test_dataloader: dataLoader</span>
+<span class="sd">        :return: Generated predictions</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">net</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
         <span class="n">num_batches</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">test_dataloader</span><span class="p">)</span>
@@ -559,35 +618,18 @@
         
         <span class="k">return</span> <span class="n">results</span></div>
     
-<div class="viewcode-block" id="BERT4NILM.suggest_hparams"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.bert4nilm.BERT4NILM.suggest_hparams">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">suggest_hparams</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Function returning list of params that will be suggested from optuna</span>
-<span class="sd">    </span>
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        trial : Optuna Trial.</span>
-<span class="sd">    </span>
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        dict: Dictionary of parameters with values suggested from optuna</span>
-<span class="sd">    </span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        
-        <span class="k">return</span> <span class="p">{</span>
-            <span class="p">}</span></div>
+
 
 <div class="viewcode-block" id="BERT4NILM.aggregate_seqs"><a class="viewcode-back" href="../../../deep_nilmtk.model.html#deep_nilmtk.model.bert4nilm.BERT4NILM.aggregate_seqs">[docs]</a>    <span class="k">def</span> <span class="nf">aggregate_seqs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prediction</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Aggregate the overleapping sequences using the mean</span>
+        <span class="sd">&quot;&quot;&quot; Aggregate the overleapping sequences using the mean</span>
 <span class="sd">        taking into consideration the stride size</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            prediction (tensor[n_samples + window_size -1 ,window_size]): test predictions of the current model</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            [type]: [description]</span>
+<span class="sd">        :param prediction: test predictions of the current model</span>
+<span class="sd">        :type prediction: tensor</span>
+<span class="sd">        :return: Aggregted sequence</span>
+<span class="sd">        :rtype: tensor</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="n">l</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">original_len</span>
         <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stride</span>
         <span class="n">n</span> <span class="o">=</span> <span class="p">(</span><span class="n">prediction</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">stride</span> <span class="o">+</span> <span class="n">l</span> <span class="c1"># this is yo take into consideration the stride</span>

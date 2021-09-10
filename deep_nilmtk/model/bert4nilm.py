@@ -17,37 +17,28 @@ from torch.nn import TransformerEncoderLayer
 import numpy as np
 import mlflow
 
-from sklearn.metrics import confusion_matrix
 
-def acc_precision_recall_f1_score(pred, status):
-    assert pred.shape == status.shape
-
-    pred = pred.reshape(-1, pred.shape[-1])
-    status = status.reshape(-1, status.shape[-1])
-    accs, precisions, recalls, f1_scores = [], [], [], []
-
-    for i in range(status.shape[-1]):
-        tn, fp, fn, tp = confusion_matrix(status[:, i], pred[:, i], labels=[
-                                          0, 1]).ravel()
-        acc = (tn + tp) / (tn + fp + fn + tp)
-        precision = tp / np.max((tp + fp, 1e-9))
-        recall = tp / np.max((tp + fn, 1e-9))
-        f1_score = 2 * (precision * recall) / \
-            np.max((precision + recall, 1e-9))
-
-        accs.append(acc)
-        precisions.append(precision)
-        recalls.append(recall)
-        f1_scores.append(f1_score)
-
-    return np.array(accs).mean(), np.array(precisions).mean(), np.array(recalls).mean(), np.array(f1_scores).mean()
 
 class GELU(nn.Module):
+    """
+    Gaussian Error Linear Units GLU
+    """
     def forward(self, x):
+        """
+        """
         return 0.5 * x * (1 + torch.tanh(math.sqrt(2 / math.pi) * (x + 0.044715 * torch.pow(x, 3))))
 
 
 class PositionalEmbedding(nn.Module):
+    """
+    Positional Embedding 
+    
+    :param max_len: maximum length of the input
+    :type max_len: int
+    :param d_model: dimension of the model
+    :type d_model: int
+
+    """
     def __init__(self, max_len, d_model):
         super().__init__()
         self.pe = nn.Embedding(max_len, d_model)
@@ -58,7 +49,16 @@ class PositionalEmbedding(nn.Module):
 
 
 class LayerNorm(nn.Module):
+    """
+    Normalization layer
+
+    :param features: The number of input features
+    :type features: int
+    :param eps: Regularization factor, defaults to 1e-6
+    :type eps: float, optional
+    """
     def __init__(self, features, eps=1e-6):
+   
         super(LayerNorm, self).__init__()
         self.weight = nn.Parameter(torch.ones(features))
         self.bias = nn.Parameter(torch.zeros(features))
@@ -71,7 +71,24 @@ class LayerNorm(nn.Module):
 
 
 class Attention(nn.Module):
+    """
+    Attention layer
+
+    :param query: Query values
+    :type query: tensor
+    :param key: Key values
+    :type key: tensor
+    :param value: Values
+    :type value: tensor
+    :param mask: Mask for a causal model, defaults to None
+    :type mask: tensor, optional
+    :param dropout: Dropout, defaults to None
+    :type dropout: float, optional
+    :return:  output of the attention layer and attention score
+    :rtype: tuple(tensor, tensor)
+    """
     def forward(self, query, key, value, mask=None, dropout=None):
+     
         scores = torch.matmul(query, key.transpose(-2, -1)) / math.sqrt(query.size(-1))
         if mask is not None:
             scores = scores.masked_fill(mask == 0, -1e9)
@@ -84,7 +101,22 @@ class Attention(nn.Module):
 
 
 class MultiHeadedAttention(nn.Module):
+    """
+    Multi headed attention layer
+
+    :param h: The number of heads
+    :type h: int
+    :param d_model: The dimension of the model
+    :type d_model: int
+    :param dropout: Dropout, defaults to 0.1
+    :type dropout: float, optional
+
+    .. note:
+       d_model should be multiple of h.
+        
+    """
     def __init__(self, h, d_model, dropout=0.1):
+        
         super().__init__()
         assert d_model % h == 0
 
@@ -113,7 +145,16 @@ class MultiHeadedAttention(nn.Module):
 
 
 class PositionwiseFeedForward(nn.Module):
+    """
+    Calculates the position wise feed forward
+
+    :param d_model: The dimension of the model
+    :type d_model: int
+    :param d_ff: size of hidden layer
+    :type d_ff: int
+    """
     def __init__(self, d_model, d_ff):
+
         super(PositionwiseFeedForward, self).__init__()
         self.w_1 = create_linear(d_model, d_ff)
         self.w_2 = create_linear(d_ff, d_model)
@@ -124,7 +165,17 @@ class PositionwiseFeedForward(nn.Module):
 
 
 class SublayerConnection(nn.Module):
+    """
+    Performs the addition and layer normalisation
+    More details can be found https://arxiv.org/pdf/1706.03762.pdf
+
+    :param size: the size of teh input
+    :type size: int
+    :param dropout: Dropout
+    :type dropout: float
+    """
     def __init__(self, size, dropout):
+      
         super(SublayerConnection, self).__init__()
         self.layer_norm = LayerNorm(size)
         self.dropout = nn.Dropout(dropout)
@@ -134,6 +185,18 @@ class SublayerConnection(nn.Module):
 
 
 class TransformerBlock(nn.Module):
+    """
+    Tranformer decoder block.
+
+    :param hidden: Dimension of the model 
+    :type hidden: int
+    :param attn_heads: The number of attention heads
+    :type attn_heads: int
+    :param feed_forward_hidden: The hidden size of feedforward layer
+    :type feed_forward_hidden: int
+    :param dropout: Dropout
+    :type dropout: float
+    """
     def __init__(self, hidden, attn_heads, feed_forward_hidden, dropout):
         super().__init__()
         self.attention = MultiHeadedAttention(
@@ -179,13 +242,13 @@ class BERT4NILM(nn.Module):
         self.min_on = [params['min_on'][params['appliances'][0]]] if 'min_on' in params else None
         self.min_off = [params['min_off'][params['appliances'][0]]] if 'min_off' in params else None
         
-        self.C0 = [params['lambda'][params['appliances'][0]]] if 'lambda' in params else [1e-6]
+        #self.C0 = [params['lambda'][params['appliances'][0]]] if 'lambda' in params else [1e-6]
         
       
         
         self.set_hpramas(self.cutoff, self.threshold, self.min_on, self.min_off, self.C0)
 
-#         self.C0 = torch.tensor([params['c0'] if 'c0' in params else 1.]).float()
+        #self.C0 = torch.tensor([params['c0'] if 'c0' in params else 1.]).float()
 
         self.latent_len = int(self.original_len / 2)
         self.dropout_rate = params['dropout']
@@ -218,7 +281,7 @@ class BERT4NILM(nn.Module):
 
         self.activation = nn.Sigmoid()
 
-#         self.truncated_normal_init()
+
 
         self.kl = nn.KLDivLoss(reduction='batchmean')
         self.mse = nn.MSELoss()
@@ -227,37 +290,10 @@ class BERT4NILM(nn.Module):
         self.l1_on = nn.L1Loss(reduction='sum')
 
 
-    def truncated_normal_init(self, mean=0, std=0.02, lower=-0.04, upper=0.04):
-        params = list(self.named_parameters())
-        for n, p in params:
-            if 'layer_norm' in n:
-                continue
-            else:
-                with torch.no_grad():
-                    l = (1. + math.erf(((lower - mean) / std) / math.sqrt(2.))) / 2.
-                    u = (1. + math.erf(((upper - mean) / std) / math.sqrt(2.))) / 2.
-                    p.uniform_(2 * l - 1, 2 * u - 1)
-                    p.erfinv_()
-                    p.mul_(std * math.sqrt(2.))
-                    p.add_(mean)
 
-    def set_hpramas(self,cutoff, threshold, min_on, min_off, C0):
-        if cutoff is not None:
-            self.cutoff = torch.tensor(cutoff).float()
-        if threshold is not None:
-            self.threshold = torch.tensor(threshold).float()
-        if min_on is not None:
-            self.min_on = torch.tensor(min_on).float()
-        if min_off is not None:
-            self.min_off = torch.tensor(min_off).float()
-            
-        if C0 is not None:
-            self.C0 = torch.tensor(C0).float()
+    
 
     def forward(self, sequence):
-        
-     
-        
         x_token = self.pool(self.conv(sequence.unsqueeze(1))).permute(0, 2, 1)
 
         embedding = x_token + self.position(sequence)
@@ -275,22 +311,21 @@ class BERT4NILM(nn.Module):
         
 
     def step(self, batch, seq_type=None):
+        """Disaggregates a batch of data
+
+        :param batch: A batch of data.
+        :type batch: Tensor
+        :return: loss function as returned form the model and MAE as returned from the model.
+        :rtype: tuple(float,float)
+        """
         seqs, labels_energy, status = batch
         
-#         print(labels_energy.mean())
-#         print(labels_energy.min())
-#         print(labels_energy.max())
-#         print('==================')
         
         batch_shape = status.shape
         logits = self.forward(seqs.float())
             
-        labels = labels_energy / self.cutoff.to(seqs.device) # This the normalisation of the output data ?!!!
+        labels = labels_energy / self.cutoff.to(seqs.device) # This the normalization of the output data ?!!!
         
-#         print((logits * self.cutoff.to(seqs.device)).mean())
-#         print((logits * self.cutoff.to(seqs.device)).min())
-#         print((logits * self.cutoff.to(seqs.device)).max())
-#         print('==================')
         
         logits_energy = self.cutoff_energy(logits * self.cutoff.to(seqs.device))
         logits_status = self.compute_status(logits_energy)
@@ -327,6 +362,14 @@ class BERT4NILM(nn.Module):
         return  total_loss, mae
 
     def cutoff_energy(self, data):
+        """
+        Removes the spikes from the data
+
+        :param data: Power consumption
+        :type data: tesnor
+        :return: Updated ower consumption 
+        :rtype: tensor
+        """
         columns = data.squeeze().shape[-1]
 
         if self.cutoff.size(0) == 0:
@@ -339,6 +382,14 @@ class BERT4NILM(nn.Module):
         return data
 
     def compute_status(self, data):
+        """
+        Calculates teh states for the  target data based on the threshold
+
+        :param data: The target data
+        :type data: tensor
+        :return: The operational states
+        :rtype: tensor
+        """
         data_shape = data.shape
         columns = data.shape[-1]
 
@@ -353,6 +404,15 @@ class BERT4NILM(nn.Module):
 
     
     def predict(self,  model, test_dataloader):
+        """Generates predictions for the test data loader
+
+        :param model: Pre-trained model
+        :type model: nn.Module
+        :param test_dataloader: The test data
+        :type test_dataloader: dataLoader
+        :return: Generated predictions
+        :rtype: dict
+        """
 
         net = model.model.eval()
         num_batches = len(test_dataloader)
@@ -401,35 +461,18 @@ class BERT4NILM(nn.Module):
         
         return results
     
-    @staticmethod
-    def suggest_hparams(self, trial):
-        '''
-        Function returning list of params that will be suggested from optuna
-    
-        Parameters
-        ----------
-        trial : Optuna Trial.
-    
-        Returns
-        -------
-        dict: Dictionary of parameters with values suggested from optuna
-    
-        '''
-        
-        return {
-            }
+
 
     def aggregate_seqs(self, prediction):
-        """
-        Aggregate the overleapping sequences using the mean
+        """ Aggregate the overleapping sequences using the mean
         taking into consideration the stride size
 
-        Args:
-            prediction (tensor[n_samples + window_size -1 ,window_size]): test predictions of the current model
-
-        Returns:
-            [type]: [description]
+        :param prediction: test predictions of the current model
+        :type prediction: tensor
+        :return: Aggregted sequence
+        :rtype: tensor
         """
+
         l = self.original_len
         s = self.stride
         n = (prediction.shape[0] -1) * self.stride + l # this is yo take into consideration the stride

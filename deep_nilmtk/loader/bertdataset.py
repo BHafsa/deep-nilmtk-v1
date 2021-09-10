@@ -5,17 +5,42 @@ import random
 
 class BERTDataset(torch.utils.data.Dataset):
     """
-    
-    This class is dataLoader correponding to the BERT4NILM 
-    model. The original code can be found here: https://github.com/Yueeeeeeee/BERT4NILM/
     .. _bertdataset:
 
+    This class is dataLoader correponding to the BERT4NILM 
+    model. The original code can be found here: https://github.com/Yueeeeeeee/BERT4NILM/
+
+    The normalization of the target applainces is performed 
+    at this level just after the generation of the operational states using predefined thresholds for the considered appliances. 
+    
+    :param inputs: The aggregate power.
+    :type inputs: np.array
+    :param targets: The target appliance(s) power consumption, defaults to None
+    :type targets: np.array, optional
+    :param params: Hyper-parameter values, defaults to {}
+    :type params: dict, optional
+    
+    
+    The hyperparameter dictionnary is expected to include the following parameters
+    
+    :param threshold:  The threshold for states generation in the target power consumption, defaults to None
+    :type threshold: List of floats
+    :param cutoff: The cutoff for states generation in the target power consumption, defaults to None
+    :type cutoff: List of floats
+    :param min_on: The min on duration for states generation in the target power consumption, defaults to None
+    :type min_on: List of floats
+    :param min_off: The min off duration for states generation in the target power consumption, defaults to None
+    :type min_off: List of floats
+    :param in_size: The length of the input sequence, defaults to 488.
+    :type in_size: int
+    :param stride: The distance between two consecutive sequences, defaults to 1.
+    :type stride: int
+    :param mask_prob: The masking probability used to generate sequences, defaults to 0.25
+    :type mask_prob: float
     """
-    def __init__(self, inputs, targets = None, params= {},main_cutoff = 6000):
-        
-        
+    def __init__(self, inputs, targets = None, params= {}):
+
         self.x = inputs 
-        self.main_cutoff = main_cutoff
         
         self.threshold = [params['threshold'][params['appliances'][0]]] if 'threshold' in params else None
         
@@ -24,7 +49,7 @@ class BERTDataset(torch.utils.data.Dataset):
         self.min_on = [params['min_on'][params['appliances'][0]]] if 'min_on' in params else None
         self.min_off = [params['min_off'][params['appliances'][0]]] if 'min_off' in params else None
         
-        self.window_size = params['context_size'] if 'context_size' in params else 480
+        self.window_size = params['in_size'] if 'in_size' in params else 480
         self.stride = params['stride'] if 'stride' in params else 1
         self.mask_prob = params['mask_prob'] if 'mask_prob' in params else 0.25
 
@@ -42,6 +67,10 @@ class BERTDataset(torch.utils.data.Dataset):
         
 
     def __len__(self):
+        """
+        :return: Returns the number of sequences.
+        :rtype: int
+        """
         return self.len
 
     def __getitem__(self, index):
@@ -90,6 +119,15 @@ class BERTDataset(torch.utils.data.Dataset):
             return torch.tensor(tokens) 
 
     def padding_seqs(self, in_array):
+        """
+        This function pads sequences with length smaller then the sequence length specified 
+        during initialization
+
+        :param in_array: Sequence of power consumption
+        :type in_array: np.array
+        :return: Padded Sequence of power cosnumption
+        :rtype: np.array
+        """
         if len(in_array) == self.window_size:
             return in_array
         try:
@@ -102,6 +140,14 @@ class BERTDataset(torch.utils.data.Dataset):
         return out_array
     
     def compute_status(self, data):
+        """
+        Generates operational status for the target power considering specified parameters.
+
+        :param data: Power consumption of target appliance 
+        :type data: np.array
+        :return: operational status
+        :rtype: np.array
+        """
         status = np.zeros(data.shape)
         if len(data.squeeze().shape) == 1:
             columns = 1

@@ -1,4 +1,4 @@
-deep\_nilmtk.loader package
+Loader package
 ===========================
 
 
@@ -6,23 +6,18 @@ deep\_nilmtk.loader package
    :members:
    :undoc-members:
 
-deep\_nilmtk.loader module
---------------------------
 
-.. automodule:: deep_nilmtk.loader
-   :members:
-   :undoc-members:
     
 
-deep\_nilmtk.loader.bertdataset module
+bertdataset class
 --------------------------------------
 
 .. automodule:: deep_nilmtk.loader.bertdataset
    :members:
-   :undoc-members:
+   :no-undoc-members:
     
 
-deep\_nilmtk.loader.generaldataset module
+generaldataset class
 -----------------------------------------
 
 .. automodule:: deep_nilmtk.loader.generaldataset
@@ -30,15 +25,15 @@ deep\_nilmtk.loader.generaldataset module
    :undoc-members:
     
 
-deep\_nilmtk.loader.ptpdataset module
+tempooldataset class
 -------------------------------------
 
-.. automodule:: deep_nilmtk.loader.ptpdataset
+.. automodule:: deep_nilmtk.loader.tempooldataset
    :members:
    :undoc-members:
     
 
-deep\_nilmtk.loader.wavenetdataset module
+wavenetdataset class
 -----------------------------------------
 
 .. automodule:: deep_nilmtk.loader.wavenetdataset

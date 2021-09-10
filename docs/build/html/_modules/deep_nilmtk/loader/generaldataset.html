@@ -36,7 +36,6 @@
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
-        <script src="https://kit.fontawesome.com/##########.js"></script>
     
     <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
@@ -163,6 +162,20 @@
 
 
 <div class="viewcode-block" id="pad_data"><a class="viewcode-back" href="../../../deep_nilmtk.loader.html#deep_nilmtk.loader.generaldataset.pad_data">[docs]</a><span class="k">def</span> <span class="nf">pad_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">context_size</span><span class="p">,</span> <span class="n">target_size</span><span class="p">,</span> <span class="n">pad_at_begin</span><span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Performs data padding for both target and aggregate consumption</span>
+
+<span class="sd">    :param data: The aggregate power</span>
+<span class="sd">    :type data: np.array</span>
+<span class="sd">    :param context_size: The input sequence length</span>
+<span class="sd">    :type context_size: int</span>
+<span class="sd">    :param target_size: The target sequence length</span>
+<span class="sd">    :type target_size: int</span>
+<span class="sd">    :param pad_at_begin: Specified how the padded values are inserted, defaults to False</span>
+<span class="sd">    :type pad_at_begin: bool, optional</span>
+<span class="sd">    :return: The padded aggregate power.</span>
+<span class="sd">    :rtype: np.array</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">sequence_length</span> <span class="o">=</span> <span class="n">context_size</span> <span class="o">+</span> <span class="n">target_size</span>
     <span class="n">units_to_pad</span> <span class="o">=</span> <span class="n">sequence_length</span> <span class="o">//</span> <span class="mi">2</span> 
     <span class="n">padding</span> <span class="o">=</span> <span class="p">(</span><span class="n">context_size</span><span class="p">,</span><span class="n">target_size</span><span class="p">)</span> <span class="k">if</span> <span class="n">pad_at_begin</span> <span class="k">else</span> <span class="p">(</span><span class="n">units_to_pad</span><span class="p">,</span><span class="n">units_to_pad</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
@@ -177,19 +190,37 @@
 
 <div class="viewcode-block" id="generalDataLoader"><a class="viewcode-back" href="../../../deep_nilmtk.loader.html#deep_nilmtk.loader.generaldataset.generalDataLoader">[docs]</a><span class="k">class</span> <span class="nc">generalDataLoader</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-
+<span class="sd">    .. _generaldataset:</span>
+<span class="sd">    </span>
 <span class="sd">    This class implements the most two common NILM data generators:</span>
 <span class="sd">    The seq-to-seq and seq-to-point. The data is generated correponding </span>
 <span class="sd">    to the sequence type. For the seq-to-point models, the position of </span>
 <span class="sd">    the point can also be specified according to the point_positon paramter. </span>
 
-<span class="sd">    .. _generaldataset</span>
+<span class="sd">    :param inputs: The aggregate power.</span>
+<span class="sd">    :type inputs: np.array</span>
+<span class="sd">    :param targets: The target appliance(s) power consumption, defaults to None</span>
+<span class="sd">    :type targets: np.array, optional</span>
+<span class="sd">    :param params: Hyper-parameter values, defaults to {}</span>
+<span class="sd">    :type params: dict, optional</span>
 
+<span class="sd">    The hyperparameter dictionnary is expected to include the following parameters</span>
+
+<span class="sd">    :param in_size: The input sequence length, defaults to 99</span>
+<span class="sd">    :type in_size: int</span>
+<span class="sd">    :param out_size: The target sequence length, defaults to 0.</span>
+<span class="sd">    :type out_size: int</span>
+<span class="sd">    :param point_position: The position of the point for sequence, defaults to seq2quantile</span>
+<span class="sd">    :type in_size: str</span>
+<span class="sd">    :param quantiles: The list of quantiles to generate, defaults to [0.1, 0.25, 0.5, 0.75, 0.90]</span>
+<span class="sd">    :type in_size: list of floats</span>
+<span class="sd">    :param pad_at_begin: Specified how the padded values are inserted, defaults to False</span>
+<span class="sd">    :type pad_at_begin: bool, optional</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span>  <span class="n">targets</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="n">params</span><span class="o">=</span> <span class="p">{}):</span>
         
-        <span class="bp">self</span><span class="o">.</span><span class="n">context_size</span><span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;context_size&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;context_size&#39;</span> <span class="ow">in</span> <span class="n">params</span>   <span class="k">else</span> <span class="mi">99</span>
-        <span class="n">target_size</span><span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;target_size&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;target_size&#39;</span> <span class="ow">in</span> <span class="n">params</span>   <span class="k">else</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">context_size</span><span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;in_size&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;in_size&#39;</span> <span class="ow">in</span> <span class="n">params</span>   <span class="k">else</span> <span class="mi">99</span>
+        <span class="n">target_size</span><span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;out_size&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;out_size&#39;</span> <span class="ow">in</span> <span class="n">params</span>   <span class="k">else</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">point_position</span><span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;point_position&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;point_position&#39;</span> <span class="ow">in</span> <span class="n">params</span>   <span class="k">else</span> <span class="s2">&quot;median&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">seq_type</span><span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;seq_type&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;seq_type&#39;</span>  <span class="ow">in</span> <span class="n">params</span>  <span class="k">else</span> <span class="s2">&quot;seq2quantile&quot;</span>
         <span class="n">quantiles</span><span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;quantiles&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;quantiles&#39;</span> <span class="ow">in</span> <span class="n">params</span>   <span class="k">else</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">,</span> <span class="mf">0.90</span><span class="p">]</span>
@@ -224,10 +255,20 @@
         
         
     <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="s1">&#39;Denotes the total number of samples&#39;</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Denotes the total number of samples</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">len</span>
     
 <div class="viewcode-block" id="generalDataLoader.get_sample"><a class="viewcode-back" href="../../../deep_nilmtk.loader.html#deep_nilmtk.loader.generaldataset.generalDataLoader.get_sample">[docs]</a>    <span class="k">def</span> <span class="nf">get_sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generate a sample of power sequence.</span>
+
+<span class="sd">        :param index: The start index of the first sequence</span>
+<span class="sd">        :type index: int</span>
+<span class="sd">        :return: Aggregate power and target consumption during training and only aggreagte power during testing</span>
+<span class="sd">        :rtype: np.array</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">indices</span><span class="p">[</span><span class="n">index</span> <span class="p">:</span> <span class="n">index</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_points</span><span class="p">]</span>
         <span class="n">inds_context</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">num_points</span><span class="o">//</span><span class="mi">2</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">num_points</span><span class="p">])</span>
         
@@ -272,81 +313,7 @@
     <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_sample</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>  </div>
     
-    
 
-
-<div class="viewcode-block" id="npsample_batch"><a class="viewcode-back" href="../../../deep_nilmtk.loader.html#deep_nilmtk.loader.generaldataset.npsample_batch">[docs]</a><span class="k">def</span> <span class="nf">npsample_batch</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Sample from numpy arrays along 2nd dim.&quot;&quot;&quot;</span>
-    <span class="n">inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">sort</span><span class="p">:</span>
-        <span class="n">inds</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
-    <span class="k">return</span> <span class="n">x</span><span class="p">[:,</span> <span class="n">inds</span><span class="p">],</span> <span class="n">y</span><span class="p">[:,</span> <span class="n">inds</span><span class="p">]</span></div>
-
-<div class="viewcode-block" id="collate_fns"><a class="viewcode-back" href="../../../deep_nilmtk.loader.html#deep_nilmtk.loader.generaldataset.collate_fns">[docs]</a><span class="k">def</span> <span class="nf">collate_fns</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">sample</span><span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    This function is responsible of generating </span>
-<span class="sd">    the dynamic sequences for each batch</span>
-<span class="sd">    </span>
-<span class="sd">    Args:</span>
-<span class="sd">        max_num_context ([int]): number of context points</span>
-<span class="sd">        max_num_extra_target ([int]): number of target points</span>
-<span class="sd">        sample ([bool]): if true sample from the static length sequence to obtain smaller sequences</span>
-<span class="sd">        sort (bool, optional): [description]. Defaults to True.</span>
-<span class="sd">        context_in_target (bool, optional): [description]. Defaults to True.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    
-    <span class="n">max_num_context</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;context_size&#39;</span><span class="p">]</span>
-    <span class="n">max_num_extra_target</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;target_size&#39;</span><span class="p">]</span>
-  
-    <span class="n">sort</span> <span class="o">=</span><span class="kc">True</span>
-    <span class="n">context_in_target</span> <span class="o">=</span> <span class="kc">True</span>
-    
-    <span class="k">def</span> <span class="nf">collate_fn</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">sample</span><span class="o">=</span><span class="n">sample</span><span class="p">):</span>
-
-        <span class="c1"># Collate</span>
-        
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">batch</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">tuple</span><span class="p">):</span>
-            <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">y</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
-            <span class="n">y_context</span> <span class="o">=</span> <span class="n">y</span><span class="p">[:,</span> <span class="p">:</span><span class="n">max_num_context</span><span class="p">]</span>
-            <span class="n">y_target_extra</span> <span class="o">=</span> <span class="n">y</span><span class="p">[:,</span> <span class="n">max_num_context</span><span class="p">:]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">batch</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
-            
-        <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
-        <span class="c1"># Sample a subset of random size</span>
-        <span class="n">num_context</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="n">max_num_context</span><span class="p">)</span>
-        <span class="n">num_extra_target</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="n">max_num_extra_target</span><span class="p">)</span>
-         
-        <span class="n">x_context</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:,</span> <span class="p">:</span><span class="n">max_num_context</span><span class="p">]</span>
-        
-    
-        <span class="n">x_target_extra</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:,</span> <span class="n">max_num_context</span><span class="p">:]</span>
-        
-        
-        <span class="k">if</span> <span class="n">sample</span><span class="p">:</span>
-
-            <span class="c1"># This is slightly differen&#39;t than normal, we are ensuring that our target point are in the future, to mimic deployment</span>
-            <span class="n">x_context</span><span class="p">,</span> <span class="n">y_context</span> <span class="o">=</span> <span class="n">npsample_batch</span><span class="p">(</span>
-                <span class="n">x_context</span><span class="p">,</span> <span class="n">y_context</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">num_context</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="n">sort</span>
-            <span class="p">)</span>
-
-            <span class="n">x_target_extra</span><span class="p">,</span> <span class="n">y_target_extra</span> <span class="o">=</span> <span class="n">npsample_batch</span><span class="p">(</span>
-                <span class="n">x_target_extra</span><span class="p">,</span> <span class="n">y_target_extra</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">num_extra_target</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="n">sort</span>
-            <span class="p">)</span>
-            
-        
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">batch</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">tuple</span><span class="p">):</span>
-            <span class="n">x_target</span> <span class="o">=</span> <span class="n">x_target_extra</span>
-            <span class="n">y_target</span> <span class="o">=</span> <span class="n">y_target_extra</span>
-            <span class="k">return</span> <span class="n">x_context</span><span class="p">,</span> <span class="n">y_context</span><span class="p">,</span> <span class="n">x_target</span><span class="p">,</span> <span class="n">y_target</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">x_target</span> <span class="o">=</span> <span class="n">x_target_extra</span>
-
-            <span class="k">return</span> <span class="n">x_context</span><span class="p">,</span> <span class="n">x_target</span>
-            
-    <span class="k">return</span> <span class="n">collate_fn</span></div>
 
 </pre></div>
 

@@ -1,4 +1,4 @@
-deep\_nilmtk.utils package
+Utils package
 ==========================
 
 .. automodule:: deep_nilmtk.utils
@@ -6,7 +6,7 @@ deep\_nilmtk.utils package
    :undoc-members:
     
 
-deep\_nilmtk.utils.log module
+log function
 -----------------------------
 
 .. automodule:: deep_nilmtk.utils.log
@@ -14,7 +14,7 @@ deep\_nilmtk.utils.log module
    :undoc-members:
     
 
-deep\_nilmtk.utils.results module
+results function
 ---------------------------------
 
 .. automodule:: deep_nilmtk.utils.results
@@ -22,7 +22,7 @@ deep\_nilmtk.utils.results module
    :undoc-members:
     
 
-deep\_nilmtk.utils.setup module
+setup function
 -------------------------------
 
 .. automodule:: deep_nilmtk.utils.setup
@@ -30,7 +30,7 @@ deep\_nilmtk.utils.setup module
    :undoc-members:
     
 
-deep\_nilmtk.utils.utils module
+utils function
 -------------------------------
 
 .. automodule:: deep_nilmtk.utils.utils

@@ -5,6 +5,15 @@ import random
 
 
 def pad_data(data, context_size):
+    """Performs data padding for both target and aggregate consumption
+
+    :param data: The aggregate power
+    :type data: np.array
+    :param context_size: The length of teh sequence.
+    :type context_size: int
+    :return: The padded aggregate power.
+    :rtype: np.array
+    """
     sequence_length = context_size 
     units_to_pad = sequence_length // 2
     padding = (units_to_pad,units_to_pad)
@@ -19,13 +28,34 @@ def pad_data(data, context_size):
 
 class WaveNetDataLoader(torch.utils.data.Dataset):
     """
-    
+    .. _wavenetdataset:
 
-    .. _wavenetdataset
+    This class is the dataLoader for the WaveNILM NILM model. The original code 
+    can be found here: https://github.com/jiejiang-jojo/fast-seq2point/
+
+    :param inputs: The aggregate power.
+    :type inputs: np.array
+    :param targets: The target appliance(s) power consumption, defaults to None
+    :type targets: np.array, optional
+    :param params: Hyper-parameter values, defaults to {}
+    :type params: dict, optional
+
+    The hyperparameter dictionnary is expected to include the following parameters
+
+    :param in_size: The input sequence length, defaults to 99
+    :type in_size: int
+    :param kernel_size: The size of teh kernel, defaults to 3.
+    :type kernel_size: int
+    :param layers: The number of layers of the model, defaults to 6.
+    :type layers: int
+
+    .. note:: 
+       This data loader generates target sequence with length L different from the input sequences
+       L = (2 ** layers - 1) * (kernel_size - 1) + 1
     """
     def __init__(self, inputs,  targets=None,  params= {}):
         
-        self.context_size= params['context_size'] if 'context_size' in params   else 99
+        self.context_size= params['in_size'] if 'in_size' in params   else 99
         
         self.kernel_size = params['kernel_size'] if 'kernel_size' in params else 3 # has to be odd integer, since even integer may break dilated conv output size
         self.layers = params['layers'] if 'layers' in params else 6
@@ -62,6 +92,14 @@ class WaveNetDataLoader(torch.utils.data.Dataset):
         return self.len
     
     def get_sample(self, index):
+        """
+        Generate a sample of power sequence.
+
+        :param index: The start index of the first sequence
+        :type index: int
+        :return: Aggregate power and target consumption during training and only aggreagte power during testing
+        :rtype: np.array
+        """
         indices = self.indices[index : index + self.num_points]
         inds_targs   = sorted(indices[self.seq_len // 2:self.num_points])
         

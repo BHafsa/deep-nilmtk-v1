@@ -86,9 +86,9 @@
               
             
             
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">deep_nilmtk</a></li>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">Deep-NILMtk</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials.html">Tutorials</a></li>
 </ul>
 
             
@@ -185,16 +185,13 @@
 
 <div class="viewcode-block" id="NILMExperiment"><a class="viewcode-back" href="../../../deep_nilmtk.disaggregate.html#deep_nilmtk.disaggregate.nilm_experiment.NILMExperiment">[docs]</a><span class="k">class</span> <span class="nc">NILMExperiment</span><span class="p">(</span><span class="n">Disaggregator</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-
 <span class="sd">    This class defines a NILM experiment. It is compatibale with both</span>
 <span class="sd">    single and multi-appliance models and offers different advanced features </span>
 <span class="sd">    like cross-validation and hyper-parametrs optimization during the </span>
 <span class="sd">    training phase. The class is independent of the deep model used for </span>
 <span class="sd">    load disaggregation. </span>
 
-<span class="sd">    ** For a PyTorch model to be compatible with this class, an entry should be </span>
-<span class="sd">    added for this model in the config module. </span>
-<span class="sd">    </span>
+<span class="sd">    .. note:: For a PyTorch model to be compatible with this class, an entry should be added for this model in the config module. </span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span> 
@@ -203,8 +200,8 @@
 <span class="sd">        hyper-parameters, it takes the default values defined in the config module </span>
 <span class="sd">        and updates only the subset of values specified in params.</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            params (dic): Dictionnary with different values of hyper-parameters.</span>
+<span class="sd">        :param params:  Dictionnary with different values of hyper-parameters.</span>
+<span class="sd">        :type params: dictionnary</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">NILMExperiment</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
         
@@ -245,10 +242,11 @@
 <span class="sd">            },</span>
 <span class="sd">            ...</span>
 <span class="sd">        }</span>
-<span class="sd">        </span>
-<span class="sd">        Args:</span>
-<span class="sd">            mains ([type]): [description]</span>
-<span class="sd">            sub_main ([type]): [description]</span>
+
+<span class="sd">        :param mains: aggregtae power consumption</span>
+<span class="sd">        :type mains: List of pd.DataFrame</span>
+<span class="sd">        :param sub_main: sub metered energy consumption</span>
+<span class="sd">        :type sub_main: List of pd.DataFrame</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Check if the data is not already loaded</span>
         
@@ -274,19 +272,21 @@
             <span class="p">}</span>
         
 <div class="viewcode-block" id="NILMExperiment.partial_fit"><a class="viewcode-back" href="../../../deep_nilmtk.disaggregate.html#deep_nilmtk.disaggregate.nilm_experiment.NILMExperiment.partial_fit">[docs]</a>    <span class="k">def</span>  <span class="nf">partial_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>  <span class="n">mains</span><span class="p">,</span> <span class="n">sub_main</span><span class="p">,</span><span class="n">do_preprocessing</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">load_kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Trains the model for appliances according to the model name specified </span>
+        <span class="sd">&quot;&quot;&quot; Trains the model for appliances according to the model name specified </span>
 <span class="sd">        in the experiment&#39;s definition. It starts with the data pre-processing and </span>
 <span class="sd">        formatting and then train the model based on the type of the model(single </span>
 <span class="sd">        or multi-task).</span>
 
 <span class="sd">        TODO: Implement the multi-appliance disaggregtaion function</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            mains ([type]): Aggregate power measurements.</span>
-<span class="sd">            sub_main ([type]): Appliances power measurements.</span>
-<span class="sd">            do_preprocessing (bool, optional): Performs pre-processing or not. Defaults to True.</span>
+<span class="sd">        :param mains: Aggregate power measurements.</span>
+<span class="sd">        :type mains: Liste of pd.DataFrame</span>
+<span class="sd">        :param sub_main: Appliances power measurements.</span>
+<span class="sd">        :type sub_main: Liste of pd.DataFrame</span>
+<span class="sd">        :param do_preprocessing: Performs pre-processing or not. Defaults to True., defaults to True</span>
+<span class="sd">        :type do_preprocessing: bool, optional</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+    
         <span class="c1"># Check if the fitting was not already done</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Data pre-processing</span>
@@ -310,15 +310,17 @@
                 <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s2">&quot;Disaggregation for multi-appliance is implemented outside nilmtkenv&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="NILMExperiment.disaggregate_chunk"><a class="viewcode-back" href="../../../deep_nilmtk.disaggregate.html#deep_nilmtk.disaggregate.nilm_experiment.NILMExperiment.disaggregate_chunk">[docs]</a>    <span class="k">def</span> <span class="nf">disaggregate_chunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">test_main_list</span><span class="p">,</span><span class="n">do_preprocessing</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Uses trained models to disaggregate the test_main_list. It is</span>
-<span class="sd">            compatible with both single and multi-appliance models. </span>
-<span class="sd">        Args:</span>
-<span class="sd">            test_main_list ([type]): Aggregate power measurements.</span>
-<span class="sd">            do_preprocessing (bool, optional): Specify if pre-processing </span>
-<span class="sd">                                need to be done or not. Defaults to True.</span>
-<span class="sd">        Returns:</span>
-<span class="sd">            [type]: Appliances power measurements.</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Uses trained models to disaggregate the test_main_list. It is compatible with both single and multi-appliance models. </span>
+
+<span class="sd">        :param test_main_list: Aggregate power measurements.</span>
+<span class="sd">        :type test_main_list: Liste of pd.DataFrame</span>
+<span class="sd">        :param do_preprocessing: Specify if pre-processing need to be done or not, defaults to True</span>
+<span class="sd">        :type do_preprocessing: bool, optional</span>
+<span class="sd">        :return: Appliances power measurements.</span>
+<span class="sd">        :rtype: list of pd.DataFrame</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;multi_appliance&#39;</span><span class="p">]:</span>
             <span class="n">test_predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">single_appliance_disaggregate</span><span class="p">(</span><span class="n">test_main_list</span><span class="p">,</span> <span class="n">do_preprocessing</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">test_predictions</span>
@@ -328,7 +330,6 @@
 
 <div class="viewcode-block" id="NILMExperiment.single_appliance_disaggregate"><a class="viewcode-back" href="../../../deep_nilmtk.disaggregate.html#deep_nilmtk.disaggregate.nilm_experiment.NILMExperiment.single_appliance_disaggregate">[docs]</a>    <span class="k">def</span> <span class="nf">single_appliance_disaggregate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_main_list</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">do_preprocessing</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        </span>
 <span class="sd">        Perfroms load disaggregtaion for single appliance models. If Optuna was used during the </span>
 <span class="sd">        training phase, it disaggregtaes the test_main_list using only the best trial. </span>
 <span class="sd">        If cross-validation is used during training, it returns the average of predictions </span>
@@ -338,16 +339,15 @@
 <span class="sd">        Alternatively, when both Optuna and cross-validation are used, it returns the average predictions </span>
 <span class="sd">        of all folds for only the best trial.</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            test_main_list ([type]): Aggregate power measurements</span>
-<span class="sd">            model (Ordered_dic, optional): Pre-trained appliance&#39;s models. Defaults to None.</span>
-<span class="sd">            do_preprocessing (bool, optional): [description]. Defaults to True.</span>
-
-
-<span class="sd">        Returns:</span>
-<span class="sd">            dict: estimated power consumption of the considered appliances.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        
+<span class="sd">        :param test_main_list: Aggregate power measurements</span>
+<span class="sd">        :type test_main_list: liste of pd.DataFrame</span>
+<span class="sd">        :param model: Pre-trained appliance&#39;s models. Defaults to None.</span>
+<span class="sd">        :type model: dict, optional</span>
+<span class="sd">        :param do_preprocessing: Specify if pre-processing need to be done or not, defaults to True</span>
+<span class="sd">        :type do_preprocessing: bool, optional</span>
+<span class="sd">        :return: estimated power consumption of the considered appliances.</span>
+<span class="sd">        :rtype: liste of dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>       
         <span class="k">if</span> <span class="n">model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">models</span> <span class="o">=</span> <span class="n">model</span>
 
@@ -485,19 +485,19 @@
         
         
 <div class="viewcode-block" id="NILMExperiment.objective"><a class="viewcode-back" href="../../../deep_nilmtk.disaggregate.html#deep_nilmtk.disaggregate.nilm_experiment.NILMExperiment.objective">[docs]</a>    <span class="k">def</span> <span class="nf">objective</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">,</span> <span class="n">train_loader</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">val_loader</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fold_idx</span><span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        The objective function to be used with optuna. This function requires the model under study to </span>
+        <span class="sd">&quot;&quot;&quot;The objective function to be used with optuna. This function requires the model under study to </span>
 <span class="sd">        implement a static function called suggest_hparams() [see the model documentation for more informations]</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            trial ([type]): Optuna.trial</span>
-<span class="sd">            train_loader ([type], optional): training dataLoader for the current experiment. Defaults to None.</span>
-<span class="sd">            val_loader ([type], optional): validation dataLoader for the current experiment. Defaults to None.</span>
-<span class="sd">            fold_idx (int, optional): Number of the fold of cross-validation is used. Defaults to None.</span>
-
-
-<span class="sd">        Returns:</span>
-<span class="sd">            [int]: The best validation loss aschieved</span>
+<span class="sd">        :param trial: Optuna.trial</span>
+<span class="sd">        :param train_loader: training dataLoader for the current experiment. Defaults to None.</span>
+<span class="sd">        :type train_loader: DataLoader, optional</span>
+<span class="sd">        :param val_loader: validation dataLoader for the current experiment. Defaults to None.</span>
+<span class="sd">        :type val_loader: DataLoader, optional</span>
+<span class="sd">        :param fold_idx: Number of the fold of cross-validation is used. Defaults to None.</span>
+<span class="sd">        :type fold_idx: int, optional</span>
+<span class="sd">        :raises Exception: In case the model does not suggest any parameters.</span>
+<span class="sd">        :return: The best validation loss aschieved</span>
+<span class="sd">        :rtype: float</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1">#</span>
         <span class="c1">#  Initialize the best_val_loss value </span>
@@ -589,16 +589,13 @@
         <span class="k">return</span> <span class="n">best_val_loss</span></div>
     
 <div class="viewcode-block" id="NILMExperiment.objective_cv"><a class="viewcode-back" href="../../../deep_nilmtk.disaggregate.html#deep_nilmtk.disaggregate.nilm_experiment.NILMExperiment.objective_cv">[docs]</a>    <span class="k">def</span> <span class="nf">objective_cv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        The objective function for Optuna when cross-validation is also used</span>
+        <span class="sd">&quot;&quot;&quot;The objective function for Optuna when cross-validation is also used</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            trial (Optuna.trial): An optuna trial</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            [type]: average of best loss validations for considered folds</span>
+<span class="sd">        :param trial: An optuna trial</span>
+<span class="sd">        :type trial: Optuna.Trial</span>
+<span class="sd">        :return: average of best loss validations for considered folds</span>
+<span class="sd">        :rtype: float</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-    
         <span class="n">fold</span> <span class="o">=</span> <span class="n">TimeSeriesSplit</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;kfolds&#39;</span><span class="p">],</span> <span class="n">test_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;test_size&#39;</span><span class="p">],</span> <span class="n">gap</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;gap&#39;</span><span class="p">])</span>
         <span class="n">scores</span> <span class="o">=</span> <span class="p">[]</span>
         
@@ -639,11 +636,10 @@
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span></div>
     
 <div class="viewcode-block" id="NILMExperiment.get_net_and_loaders"><a class="viewcode-back" href="../../../deep_nilmtk.disaggregate.html#deep_nilmtk.disaggregate.nilm_experiment.NILMExperiment.get_net_and_loaders">[docs]</a>    <span class="k">def</span> <span class="nf">get_net_and_loaders</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Returns an instance of the specified model and the correspanding dataloader</span>
+        <span class="sd">&quot;&quot;&quot;Returns an instance of the specified model and the correspanding dataloader</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">            (model, data)[ nn.Module, torch.utils.data.Dataset]: model , dataloader</span>
+<span class="sd">        :return: (model , dataloader)</span>
+<span class="sd">        :rtype: tuple(nn.Module, torch.utils.data.Dataset)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Get the class of the required model from the config file</span>
         <span class="n">net</span> <span class="o">=</span> <span class="n">NILM_MODELS</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;model_name&#39;</span><span class="p">]][</span><span class="s1">&#39;model&#39;</span><span class="p">](</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">)</span>
@@ -658,13 +654,12 @@
     
 
 <div class="viewcode-block" id="NILMExperiment.save_best_model"><a class="viewcode-back" href="../../../deep_nilmtk.disaggregate.html#deep_nilmtk.disaggregate.nilm_experiment.NILMExperiment.save_best_model">[docs]</a>    <span class="k">def</span> <span class="nf">save_best_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">study</span><span class="p">,</span> <span class="n">trial</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Keeps track of the trial giving best results</span>
+        <span class="sd">&quot;&quot;&quot;Keeps track of the trial giving best results</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            study ([type]): Optuna study</span>
-<span class="sd">            trial ([type]): Optuna trial</span>
+<span class="sd">        :param study: Optuna study</span>
+<span class="sd">        :param trial: Optuna trial</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="k">if</span> <span class="n">study</span><span class="o">.</span><span class="n">best_trial</span><span class="o">.</span><span class="n">number</span> <span class="o">==</span> <span class="n">trial</span><span class="o">.</span><span class="n">number</span><span class="p">:</span>
             <span class="n">study</span><span class="o">.</span><span class="n">set_user_attr</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="s2">&quot;trial_ID&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">trial</span><span class="o">.</span><span class="n">number</span><span class="p">)</span>
             <span class="n">study</span><span class="o">.</span><span class="n">set_user_attr</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="s2">&quot;best_run_id&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">trial</span><span class="o">.</span><span class="n">user_attrs</span><span class="p">[</span><span class="s2">&quot;best_run_id&quot;</span><span class="p">])</span>
@@ -675,9 +670,7 @@
 <span class="sd">        Train the specified models for each appliance separately taking into consideration</span>
 <span class="sd">        the use of cross-validation and hyper-parameters optimisation. The checkpoints for </span>
 <span class="sd">        each model are saved in the correspondng path.</span>
-<span class="sd">        </span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        
+<span class="sd">        &quot;&quot;&quot;</span>        
         <span class="bp">self</span><span class="o">.</span><span class="n">exp_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;model_name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">_single_appliance_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;experiment_label&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="n">original_checkpoint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;checkpoints_path&#39;</span><span class="p">]</span>
         
@@ -876,23 +869,27 @@
                     <span class="n">trial_idx</span><span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                     <span class="n">fold_idx</span><span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                     <span class="n">model</span> <span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Trains a single PyTorch model.</span>
+        <span class="sd">&quot;&quot;&quot;Trains a single PyTorch model.</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            appliance_name ([str]): Name of teh appliance to be modeled</span>
-<span class="sd">            train_loader ([DataLoader]): training dataLoader for the current appliance</span>
-<span class="sd">            val_loader (DataLoader): validation dataLoader for the current appliance</span>
-<span class="sd">            exp_name ([str]): the name of teh experiment</span>
-<span class="sd">            mean ([float], optional): mean value of the target appliance power. Defaults to None.</span>
-<span class="sd">            std ([float], optional): std value of the target applaince power. Defaults to None.</span>
-<span class="sd">            trial_idx ([int], optional): ID of teh current optuna trial if optuna is used. Defaults to None.</span>
-<span class="sd">            fold_idx ([int], optional): number of the fold if CV is used. Defaults to None.</span>
-<span class="sd">            model ([type], optional): Lightning model of the current appliance. Defaults to None.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            [int, str]: in the case of using Optuna, it return the best </span>
-<span class="sd">                        validation loss and the path to the best checkpoint.</span>
+<span class="sd">        :param appliance_name: Name of teh appliance to be modeled</span>
+<span class="sd">        :type appliance_name: str</span>
+<span class="sd">        :param train_loader: training dataLoader for the current appliance</span>
+<span class="sd">        :type train_loader: DataLoader</span>
+<span class="sd">        :param val_loader: validation dataLoader for the current appliance</span>
+<span class="sd">        :type val_loader: DataLoader</span>
+<span class="sd">        :param exp_name: the name of the experiment</span>
+<span class="sd">        :type exp_name: str</span>
+<span class="sd">        :param mean: mean value of the target appliance power. Defaults to None.</span>
+<span class="sd">        :type mean: float, optional</span>
+<span class="sd">        :param std: std value of the target applaince power. Defaults to None.</span>
+<span class="sd">        :type std: float, optional</span>
+<span class="sd">        :param trial_idx: ID of the current optuna trial if optuna is used. Defaults to None.</span>
+<span class="sd">        :type trial_idx: int, optional</span>
+<span class="sd">        :param fold_idx:  the number of the fold if CV is used. Defaults to None.</span>
+<span class="sd">        :type fold_idx: int, optional</span>
+<span class="sd">        :param model: Lightning model of the current appliance. Defaults to None.</span>
+<span class="sd">        :return: in the case of using Optuna, it return the best validation loss and the path to the best checkpoint.</span>
+<span class="sd">        :rtype:  tuple(int, str)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
         <span class="n">chkpt_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;checkpoints_path&#39;</span><span class="p">]</span>

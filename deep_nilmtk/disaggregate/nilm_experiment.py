@@ -28,16 +28,13 @@ from ..utils import DictLogger
 
 class NILMExperiment(Disaggregator):
     """
-
     This class defines a NILM experiment. It is compatibale with both
     single and multi-appliance models and offers different advanced features 
     like cross-validation and hyper-parametrs optimization during the 
     training phase. The class is independent of the deep model used for 
     load disaggregation. 
 
-    ** For a PyTorch model to be compatible with this class, an entry should be 
-    added for this model in the config module. 
-    
+    .. note:: For a PyTorch model to be compatible with this class, an entry should be added for this model in the config module. 
     """
 
     def __init__(self, params): 
@@ -46,8 +43,8 @@ class NILMExperiment(Disaggregator):
         hyper-parameters, it takes the default values defined in the config module 
         and updates only the subset of values specified in params.
 
-        Args:
-            params (dic): Dictionnary with different values of hyper-parameters.
+        :param params:  Dictionnary with different values of hyper-parameters.
+        :type params: dictionnary
         """
         super.__init__(NILMExperiment, self)
         
@@ -88,10 +85,11 @@ class NILMExperiment(Disaggregator):
             },
             ...
         }
-        
-        Args:
-            mains ([type]): [description]
-            sub_main ([type]): [description]
+
+        :param mains: aggregtae power consumption
+        :type mains: List of pd.DataFrame
+        :param sub_main: sub metered energy consumption
+        :type sub_main: List of pd.DataFrame
         """
         # Check if the data is not already loaded
         
@@ -117,19 +115,21 @@ class NILMExperiment(Disaggregator):
             }
         
     def  partial_fit(self,  mains, sub_main,do_preprocessing=True, **load_kwargs):
-        """
-        Trains the model for appliances according to the model name specified 
+        """ Trains the model for appliances according to the model name specified 
         in the experiment's definition. It starts with the data pre-processing and 
         formatting and then train the model based on the type of the model(single 
         or multi-task).
 
         TODO: Implement the multi-appliance disaggregtaion function
 
-        Args:
-            mains ([type]): Aggregate power measurements.
-            sub_main ([type]): Appliances power measurements.
-            do_preprocessing (bool, optional): Performs pre-processing or not. Defaults to True.
+        :param mains: Aggregate power measurements.
+        :type mains: Liste of pd.DataFrame
+        :param sub_main: Appliances power measurements.
+        :type sub_main: Liste of pd.DataFrame
+        :param do_preprocessing: Performs pre-processing or not. Defaults to True., defaults to True
+        :type do_preprocessing: bool, optional
         """
+    
         # Check if the fitting was not already done
         if self._data is None:
             # Data pre-processing
@@ -153,15 +153,17 @@ class NILMExperiment(Disaggregator):
                 sys.exit("Disaggregation for multi-appliance is implemented outside nilmtkenv")
 
     def disaggregate_chunk(self,test_main_list,do_preprocessing=True):
-        """Uses trained models to disaggregate the test_main_list. It is
-            compatible with both single and multi-appliance models. 
-        Args:
-            test_main_list ([type]): Aggregate power measurements.
-            do_preprocessing (bool, optional): Specify if pre-processing 
-                                need to be done or not. Defaults to True.
-        Returns:
-            [type]: Appliances power measurements.
         """
+        Uses trained models to disaggregate the test_main_list. It is compatible with both single and multi-appliance models. 
+
+        :param test_main_list: Aggregate power measurements.
+        :type test_main_list: Liste of pd.DataFrame
+        :param do_preprocessing: Specify if pre-processing need to be done or not, defaults to True
+        :type do_preprocessing: bool, optional
+        :return: Appliances power measurements.
+        :rtype: list of pd.DataFrame
+        """
+        
         if not self.hparams['multi_appliance']:
             test_predictions = self.single_appliance_disaggregate(test_main_list, do_preprocessing)
             return test_predictions
@@ -171,7 +173,6 @@ class NILMExperiment(Disaggregator):
 
     def single_appliance_disaggregate(self, test_main_list, model=None,do_preprocessing=True):
         """
-        
         Perfroms load disaggregtaion for single appliance models. If Optuna was used during the 
         training phase, it disaggregtaes the test_main_list using only the best trial. 
         If cross-validation is used during training, it returns the average of predictions 
@@ -181,16 +182,15 @@ class NILMExperiment(Disaggregator):
         Alternatively, when both Optuna and cross-validation are used, it returns the average predictions 
         of all folds for only the best trial.
 
-        Args:
-            test_main_list ([type]): Aggregate power measurements
-            model (Ordered_dic, optional): Pre-trained appliance's models. Defaults to None.
-            do_preprocessing (bool, optional): [description]. Defaults to True.
-
-
-        Returns:
-            dict: estimated power consumption of the considered appliances.
-        """
-        
+        :param test_main_list: Aggregate power measurements
+        :type test_main_list: liste of pd.DataFrame
+        :param model: Pre-trained appliance's models. Defaults to None.
+        :type model: dict, optional
+        :param do_preprocessing: Specify if pre-processing need to be done or not, defaults to True
+        :type do_preprocessing: bool, optional
+        :return: estimated power consumption of the considered appliances.
+        :rtype: liste of dict
+        """       
         if model is not None:
             self.models = model
 
@@ -328,19 +328,19 @@ class NILMExperiment(Disaggregator):
         
         
     def objective(self, trial, train_loader=None, val_loader=None, fold_idx= None):
-        """
-        The objective function to be used with optuna. This function requires the model under study to 
+        """The objective function to be used with optuna. This function requires the model under study to 
         implement a static function called suggest_hparams() [see the model documentation for more informations]
 
-        Args:
-            trial ([type]): Optuna.trial
-            train_loader ([type], optional): training dataLoader for the current experiment. Defaults to None.
-            val_loader ([type], optional): validation dataLoader for the current experiment. Defaults to None.
-            fold_idx (int, optional): Number of the fold of cross-validation is used. Defaults to None.
-
-
-        Returns:
-            [int]: The best validation loss aschieved
+        :param trial: Optuna.trial
+        :param train_loader: training dataLoader for the current experiment. Defaults to None.
+        :type train_loader: DataLoader, optional
+        :param val_loader: validation dataLoader for the current experiment. Defaults to None.
+        :type val_loader: DataLoader, optional
+        :param fold_idx: Number of the fold of cross-validation is used. Defaults to None.
+        :type fold_idx: int, optional
+        :raises Exception: In case the model does not suggest any parameters.
+        :return: The best validation loss aschieved
+        :rtype: float
         """
         #
         #  Initialize the best_val_loss value 
@@ -432,16 +432,13 @@ class NILMExperiment(Disaggregator):
         return best_val_loss
     
     def objective_cv(self, trial):
-        """
-        The objective function for Optuna when cross-validation is also used
+        """The objective function for Optuna when cross-validation is also used
 
-        Args:
-            trial (Optuna.trial): An optuna trial
-
-        Returns:
-            [type]: average of best loss validations for considered folds
+        :param trial: An optuna trial
+        :type trial: Optuna.Trial
+        :return: average of best loss validations for considered folds
+        :rtype: float
         """
-    
         fold = TimeSeriesSplit(n_splits=self.hparams['kfolds'], test_size=self.hparams['test_size'], gap = self.hparams['gap'])
         scores = []
         
@@ -482,11 +479,10 @@ class NILMExperiment(Disaggregator):
         return np.mean(scores)
     
     def get_net_and_loaders(self):
-        """
-        Returns an instance of the specified model and the correspanding dataloader
+        """Returns an instance of the specified model and the correspanding dataloader
 
-        Returns:
-            (model, data)[ nn.Module, torch.utils.data.Dataset]: model , dataloader
+        :return: (model , dataloader)
+        :rtype: tuple(nn.Module, torch.utils.data.Dataset)
         """
         # Get the class of the required model from the config file
         net = NILM_MODELS[self.hparams['model_name']]['model'](self.hparams)
@@ -501,13 +497,12 @@ class NILMExperiment(Disaggregator):
     
 
     def save_best_model(self, study, trial):
-        """
-        Keeps track of the trial giving best results
+        """Keeps track of the trial giving best results
 
-        Args:
-            study ([type]): Optuna study
-            trial ([type]): Optuna trial
+        :param study: Optuna study
+        :param trial: Optuna trial
         """
+
         if study.best_trial.number == trial.number:
             study.set_user_attr(key="trial_ID", value=trial.number)
             study.set_user_attr(key="best_run_id", value=trial.user_attrs["best_run_id"])
@@ -518,9 +513,7 @@ class NILMExperiment(Disaggregator):
         Train the specified models for each appliance separately taking into consideration
         the use of cross-validation and hyper-parameters optimisation. The checkpoints for 
         each model are saved in the correspondng path.
-        
-        """
-        
+        """        
         self.exp_name = f"{self.hparams['model_name']}_{self.hparams['data']}_single_appliance_{self.hparams['experiment_label']}"
         original_checkpoint = self.hparams['checkpoints_path']
         
@@ -719,23 +712,27 @@ class NILMExperiment(Disaggregator):
                     trial_idx= None,
                     fold_idx= None,
                     model =None):
-        """
-        Trains a single PyTorch model.
+        """Trains a single PyTorch model.
 
-        Args:
-            appliance_name ([str]): Name of teh appliance to be modeled
-            train_loader ([DataLoader]): training dataLoader for the current appliance
-            val_loader (DataLoader): validation dataLoader for the current appliance
-            exp_name ([str]): the name of teh experiment
-            mean ([float], optional): mean value of the target appliance power. Defaults to None.
-            std ([float], optional): std value of the target applaince power. Defaults to None.
-            trial_idx ([int], optional): ID of teh current optuna trial if optuna is used. Defaults to None.
-            fold_idx ([int], optional): number of the fold if CV is used. Defaults to None.
-            model ([type], optional): Lightning model of the current appliance. Defaults to None.
-
-        Returns:
-            [int, str]: in the case of using Optuna, it return the best 
-                        validation loss and the path to the best checkpoint.
+        :param appliance_name: Name of teh appliance to be modeled
+        :type appliance_name: str
+        :param train_loader: training dataLoader for the current appliance
+        :type train_loader: DataLoader
+        :param val_loader: validation dataLoader for the current appliance
+        :type val_loader: DataLoader
+        :param exp_name: the name of the experiment
+        :type exp_name: str
+        :param mean: mean value of the target appliance power. Defaults to None.
+        :type mean: float, optional
+        :param std: std value of the target applaince power. Defaults to None.
+        :type std: float, optional
+        :param trial_idx: ID of the current optuna trial if optuna is used. Defaults to None.
+        :type trial_idx: int, optional
+        :param fold_idx:  the number of the fold if CV is used. Defaults to None.
+        :type fold_idx: int, optional
+        :param model: Lightning model of the current appliance. Defaults to None.
+        :return: in the case of using Optuna, it return the best validation loss and the path to the best checkpoint.
+        :rtype:  tuple(int, str)
         """
         
         chkpt_path = self.hparams['checkpoints_path']

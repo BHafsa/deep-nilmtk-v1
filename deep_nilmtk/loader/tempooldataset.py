@@ -5,7 +5,18 @@ import numpy as np
 import pandas as pd
 from ..preprocessing import  compute_status
 
-def pad_data(data, units_to_pad, border =0, ):
+def pad_data(data, units_to_pad, border =0 ):
+    """Performs data padding for both target and aggregate consumption
+
+    :param data: The aggregate power
+    :type data: np.array
+    :param units_to_pad: The numebr of values to add to input and output sequences.
+    :type units_to_pad: tupe(int, int)
+    :param border: The delay between input and output sequence, defaults to 0
+    :type border: int, optional
+    :return: The padded aggregate power.
+    :rtype: np.array
+    """
     
     padding = (border // 2, units_to_pad - border // 2)
     if data.ndim==1:
@@ -17,23 +28,32 @@ def pad_data(data, units_to_pad, border =0, ):
             new_mains.append(np.pad(data[:,i], padding,'constant',constant_values=(0,0)))
         return np.stack(new_mains).T
 
-class ptpLoader(torch.utils.data.Dataset):
-
+class TemPoolLoader(torch.utils.data.Dataset):
     """
+    .. _ptpdataset:
 
     This class is the dataLoader for the temporal pooling NILM model. The original code 
     can be found here: https://github.com/UCA-Datalab/nilm-thresholding
 
-    .. _ptpdataset
+    :param inputs: The aggregate power.
+    :type inputs: np.array
+    :param targets: The target appliance(s) power consumption, defaults to None
+    :type targets: np.array, optional
+    :param params: Hyper-parameter values, defaults to {}
+    :type params: dict, optional
 
+    The hyperparameter dictionnary is expected to include the following parameters
+
+    :param in_size: The input sequence length, defaults to 99
+    :type in_size: int
+    :param border: The delay between the input and out sequence, defaults to 30.
+    :type border: int
     """
-    
     def __init__(
         self, inputs,  targets=None,  params= {}):
 
-        self.length = params['context_size'] if 'context_size'  in params else 512
+        self.length = params['in_size'] if 'in_size'  in params else 512
         self.border = params["border"] if "border" in params else 30
-        self.power_scale = params["power_scale"] if "power_scale" in params else 2000.0
         
         self.train = params["train"] if "train" in params else False
         

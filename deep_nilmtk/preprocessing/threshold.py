@@ -39,19 +39,18 @@ MAX_POWER = {
 
 
 def get_threshold_params(appliances, threshold_method = 'at'):
-    """
-    Given the method name and list of appliances,
+    """Given the method name and list of appliances,
     this function results the necessary Args to use the method in
     ukdale_data.load_ukdale_meter
-    
-    Args
-    ----------
-        threshold_method : str
-        appliances : list
 
-    Returns
-    -------
-        thresholds, min_off, min_on, threshold_std
+    :param appliances: List of aappliances
+    :type appliances: list
+    :param threshold_method: Thresholding method, defaults to 'at'
+    :type threshold_method: str, optional
+    :raises ValueError: Wrong thresholding method
+    :raises ValueError: Missing parameters of an applaince
+    :return: thresholds, min_off, min_on, threshold_std
+    :rtype:tuple
     """
 
     if threshold_method == 'vs':
@@ -90,22 +89,17 @@ def get_threshold_params(appliances, threshold_method = 'at'):
 
 
 def _get_cluster_centroids(ser):
-    """
-    Returns ON and OFF cluster centroids' mean and std
+    """Returns ON and OFF cluster centroids' mean and std
 
-    Args
-        ser : numpy.array
-            shape = (num_series, series_len, num_meters)
+    :param ser: An array with shape shape = (num_series, series_len, num_meters)
             - num_series : Amount of time series.
             - series_len : Length of each time series.
             - num_meters : Meters contained in the array.
-
-    Returns
-        mean : numpy.array
-            shape = (num_meters,)
-        std : numpy.array
-            shape = (num_meters,)
+    :type ser: np.array
+    :return: mean and std consumption for each applaince
+    :rtype: tuple
     """
+
     # We dont want to modify the original series
     ser = ser.copy()
 
@@ -136,29 +130,23 @@ def _get_cluster_centroids(ser):
     return mean, std
 
 def get_thresholds(ser, use_std=True, return_mean=False):
-    """
-    Returns the estimated thresholds that splits ON and OFF appliances states.
-    
-    Args
-        ser : numpy.array
-            shape = (num_series, series_len, num_meters)
+    """Returns the estimated thresholds that splits ON and OFF appliances states.
+
+    :param ser: An array with shape = (num_series, series_len, num_meters)
             - num_series : Amount of time series.
             - series_len : Length of each time series.
             - num_meters : Meters contained in the array.
-        use_std : bool, default=True
-            Consider the standard deviation of each cluster when computing the
-            threshold. If not, the threshold is set in the middle point between
-            cluster centroids.
-        return_mean : bool, default=False
-            If True, return the means as second parameter.
-    
-    Returns
-        threshold : numpy.array
-            shape = (num_meters,)
-        mean : numpy.array
-            shape = (num_meters,)
-            Only returned when return_mean is True (default False)
+    :type ser: np.array
+    :param use_std: Consider the standard deviation of each cluster when computing the threshold. If not, the threshold is set in the middle point between    cluster centroids., defaults to True
+    :type use_std: bool, optional
+    :param return_mean: If True, return the means as second parameter., defaults to False
+    :type return_mean: bool, optional
+    :return: thresholds and mean consumption for each appliance
+    :rtype: tuple 
+
+    .. note:: The eman values are  only returned when return_mean is True (default False)
     """
+
     mean, std = _get_cluster_centroids(ser)
 
     # Sigma is a value between 0 and 1

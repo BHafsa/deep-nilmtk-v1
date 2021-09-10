@@ -1,5 +1,9 @@
-deep_nilmtk
-===========
+
+Deep-NILMtk
+=======================================
+
+
+
 
 .. toctree::
    :maxdepth: 4

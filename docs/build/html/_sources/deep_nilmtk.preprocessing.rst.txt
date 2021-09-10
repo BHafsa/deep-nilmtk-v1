@@ -1,4 +1,4 @@
-deep\_nilmtk.preprocessing package
+Preprocessing package
 ==================================
 
 
@@ -7,7 +7,7 @@ deep\_nilmtk.preprocessing package
    :members:
    :undoc-members:
 
-deep\_nilmtk.preprocessing.pre\_processing module
+Pre\_processing module
 -------------------------------------------------
 
 .. automodule:: deep_nilmtk.preprocessing.pre_processing
@@ -15,7 +15,7 @@ deep\_nilmtk.preprocessing.pre\_processing module
    :undoc-members:
     
 
-deep\_nilmtk.preprocessing.states module
+States module
 ----------------------------------------
 
 .. automodule:: deep_nilmtk.preprocessing.states
@@ -23,7 +23,7 @@ deep\_nilmtk.preprocessing.states module
    :undoc-members:
     
 
-deep\_nilmtk.preprocessing.threshold module
+Threshold module
 -------------------------------------------
 
 .. automodule:: deep_nilmtk.preprocessing.threshold
