@@ -87,6 +87,7 @@ class S2P(nn.Module):
         """
         
         x, y  = batch 
+    
         out   = self(x)  # BxCxT
         
         error = (y - out)
@@ -412,7 +413,8 @@ class S2S(nn.Module):
 
         """
         super(S2S, self).__init__()
-        self.original_len = params['in_size'] if 'in_size' in params else 99
+        self.original_len = params['in_size']  if 'in_size' in params else 99
+        self.original_len += params['out_size']  if 'out_size' in params else 0
         self.target_norm = params['target_norm'] if 'target_norm' in params else 'z-norm'
         self.mean = params['mean'] if 'mean' in params else 0
         self.std = params['std'] if 'std' in params else 1
@@ -433,6 +435,8 @@ class S2S(nn.Module):
         x, y  = batch 
         out   = self(x)  # BxCxT
         
+        print(out.shape, y.shape)
+
         error = (y - out)
         loss = F.mse_loss(out, y)
         mae = error.abs().data.mean()

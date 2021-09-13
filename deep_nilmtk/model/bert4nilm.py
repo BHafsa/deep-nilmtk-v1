@@ -224,6 +224,7 @@ class BERT4NILM(nn.Module):
     Original paper can be found here: https://dl.acm.org/doi/pdf/10.1145/3427771.3429390
     Original code can be found here: https://github.com/Yueeeeeeee/BERT4NILM
 
+
     The hyperparameter dictionnary is expected to include the following parameters
     
     :param threshold:  The threshold for states generation in the target power consumption, defaults to None
@@ -246,6 +247,48 @@ class BERT4NILM(nn.Module):
     :type n_layers: int
     :params dropout: The dropout, defaults to 0.2
     :type dropout: float
+
+    it can be used as follow:
+
+    .. code-block:: python
+
+        'Bert4NILM': NILMExperiment({
+                  "model_name": 'BERT4NILM', 
+                  'in_size': 480, 
+                  'feature_type':'main',
+                  'stride':10,
+                  'max_nb_epochs':1,
+                  'cutoff':{
+                      'aggregate': 6000,
+                      'kettle': 3100,
+                      'fridge': 300,
+                      'washing machine': 2500,
+                      'microwave': 3000,
+                      'dishwasher': 2500
+                  },
+                  'threshold':{
+                     'kettle': 2000,
+                     'fridge': 50,
+                     'washing machine': 20,
+                     'microwave': 200,
+                     'dishwasher': 10
+                  },
+                  'min_on':{
+                    'kettle': 2,
+                    'fridge': 10,
+                    'washing machine': 300,
+                    'microwave': 2,
+                    'dishwasher': 300
+                  },
+                  'min_off':{
+                      'kettle': 0,
+                      'fridge': 2,
+                      'washing machine': 26,
+                      'microwave': 5,
+                      'dishwasher': 300
+                  },
+                })
+
     """
     def __init__(self, params):
 
@@ -263,13 +306,13 @@ class BERT4NILM(nn.Module):
         self.min_on = [params['min_on'][params['appliances'][0]]] if 'min_on' in params else None
         self.min_off = [params['min_off'][params['appliances'][0]]] if 'min_off' in params else None
         
-        #self.C0 = [params['lambda'][params['appliances'][0]]] if 'lambda' in params else [1e-6]
+        # self.C0 = [params['lambda'][params['appliances'][0]]] if 'lambda' in params else [1e-6]
         
       
         
-        self.set_hpramas(self.cutoff, self.threshold, self.min_on, self.min_off, self.C0)
+        self.set_hpramas(self.cutoff, self.threshold, self.min_on, self.min_off)
 
-        #self.C0 = torch.tensor([params['c0'] if 'c0' in params else 1.]).float()
+        self.C0 = torch.tensor([params['c0'] if 'c0' in params else 1.])
 
         self.latent_len = int(self.original_len / 2)
         self.dropout_rate = params['dropout'] if 'dropout' in params else 0.2
@@ -315,6 +358,7 @@ class BERT4NILM(nn.Module):
     
 
     def forward(self, sequence):
+        
         x_token = self.pool(self.conv(sequence.unsqueeze(1))).permute(0, 2, 1)
 
         embedding = x_token + self.position(sequence)
@@ -341,9 +385,9 @@ class BERT4NILM(nn.Module):
         """
         seqs, labels_energy, status = batch
         
-        
         batch_shape = status.shape
-        logits = self.forward(seqs.float())
+        
+        logits = self.forward(seqs)
             
         labels = labels_energy / self.cutoff.to(seqs.device) # This the normalization of the output data ?!!!
         
@@ -352,19 +396,20 @@ class BERT4NILM(nn.Module):
         logits_status = self.compute_status(logits_energy)
             
         mask = (status >= 0).to(seqs.device)
-        labels_masked = torch.masked_select(labels, mask).view((-1, batch_shape[-1]))
-        logits_masked = torch.masked_select(logits, mask).view((-1, batch_shape[-1]))
-        status_masked = torch.masked_select(status, mask).view((-1, batch_shape[-1]))
-        logits_status_masked = torch.masked_select(logits_status, mask).view((-1, batch_shape[-1]))
+        labels_masked = torch.masked_select(labels, mask).view((-1, batch_shape[-1])).float()
+        logits_masked = torch.masked_select(logits, mask).view((-1, batch_shape[-1])).float()
+        status_masked = torch.masked_select(status, mask).view((-1, batch_shape[-1])).float()
+        logits_status_masked = torch.masked_select(logits_status, mask).view((-1, batch_shape[-1])).float()
 
         # Calculating the Loss function 
         kl_loss = self.kl(torch.log(F.softmax(logits_masked.squeeze() / 0.1, dim=-1) + 1e-9), F.softmax(labels_masked.squeeze() / 0.1, dim=-1))
-        mse_loss = self.mse(logits_masked.contiguous().view(-1).float(),
-            labels_masked.contiguous().view(-1).float())
-        margin_loss = self.margin((logits_status_masked * 2 - 1).contiguous().view(-1).float(), 
-            (status_masked * 2 - 1).contiguous().view(-1).float())
+        mse_loss = self.mse(logits_masked.contiguous().view(-1),
+            labels_masked.contiguous().view(-1))
+            
+        margin_loss = self.margin((logits_status_masked * 2 - 1).contiguous().view(-1), 
+            (status_masked * 2 - 1).contiguous().view(-1))
+
         total_loss = kl_loss + mse_loss + margin_loss
-        #  
         on_mask = (status >= 0) * (((status == 1) + (status != logits_status.reshape(status.shape))) >= 1)
         if on_mask.sum() > 0:
             total_size = torch.tensor(on_mask.shape).prod()
@@ -374,13 +419,32 @@ class BERT4NILM(nn.Module):
                 labels_on.contiguous().view(-1))
             total_loss += self.C0.to(seqs.device)[0]  * loss_l1_on / total_size
             
-        mae = self.mae(logits_masked.contiguous().view(-1).float(),
-            labels_masked.contiguous().view(-1).float())
+        mae = self.mae(logits_masked.contiguous().view(-1),
+            labels_masked.contiguous().view(-1))
         
-        
-
-               
         return  total_loss, mae
+    
+    def set_hpramas(self,cutoff, threshold, min_on, min_off):
+        """
+        Setter for the hyper-parameters related to appliance state generation
+
+        :param cutoff: The power cutoff
+        :type cutoff: float
+        :param threshold: Threshold of target power consumption
+        :type threshold: float
+        :param min_on: Minimum on duration
+        :type min_on: float
+        :param min_off: Minimum off duration
+        :type min_off: float
+        """
+        if cutoff is not None:
+            self.cutoff = torch.tensor(cutoff)
+        if threshold is not None:
+            self.threshold = torch.tensor(threshold)
+        if min_on is not None:
+            self.min_on = torch.tensor(min_on)
+        if min_off is not None:
+            self.min_off = torch.tensor(min_off)
 
     def cutoff_energy(self, data):
         """
@@ -399,7 +463,7 @@ class BERT4NILM(nn.Module):
 
         data[data < 5] = 0
     
-        data = torch.min(data, self.cutoff.float().to(data.device))
+        data = torch.min(data, self.cutoff.to(data.device))
         return data
 
     def compute_status(self, data):
@@ -450,7 +514,7 @@ class BERT4NILM(nn.Module):
                 for batch_idx, batch in enumerate(test_dataloader):
                     seqs = batch
 
-                    logits = self.forward(seqs.float())
+                    logits = self.forward(seqs)
 
                     logits_energy = self.cutoff_energy(logits * self.cutoff.to(seqs.device)) # Denormalization
                     logits_status = self.compute_status(logits_energy)
@@ -469,8 +533,8 @@ class BERT4NILM(nn.Module):
                 pbar.close()
 
         # TODO: Denormalisation !!! Previously done ?
-        e_pred_curve = torch.cat(e_pred_curve, 0).float()
-        s_pred_curve = torch.cat(s_pred_curve, 0).float()
+        e_pred_curve = torch.cat(e_pred_curve, 0)
+        s_pred_curve = torch.cat(s_pred_curve, 0)
         
         e_pred_curve = self.aggregate_seqs(e_pred_curve.squeeze())
         s_pred_curve = self.aggregate_seqs(s_pred_curve.squeeze())

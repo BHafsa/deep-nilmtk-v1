@@ -6,7 +6,7 @@ from time import time
 import mlflow
 
 
-def setup(experiment, experiment_name, results_path= '../results', mlflow_repo ='../mlflow'):
+def setup(experiment, experiment_name, results_path= './output/results', mlflow_repo ='./output/mlruns/'):
     """Runs NILM experiments as defined with a NILMt-API
 
     :param experiment: Experiment definition
@@ -18,8 +18,8 @@ def setup(experiment, experiment_name, results_path= '../results', mlflow_repo =
     :param mlflow_repo: The path to the Mlflow folder, defaults to '../mlflow'
     :type mlflow_repo: str, optional
     """
-   
-    f = start_logging(experiment_name)
+    
+    
     print(f'run {experiment_name}')
     mlflow.set_tracking_uri(mlflow_repo)
     start = time()

@@ -65,7 +65,7 @@ NILM_MODELS = {
     # =============================================================================
     'tempPool':{
         'model': PTPNet,
-        'loader': tempooldataset,
+        'loader': TemPoolLoader,
         'extra_params':{
         }
         },

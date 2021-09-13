@@ -37,6 +37,7 @@ def create_conv1(in_channels, out_channels,
                   padding=padding,
                   padding_mode=padding_mode)
     nn.init.xavier_normal_(m.weight.data)
+    
     return m
 
 def create_deconv1(in_channels, out_channels,

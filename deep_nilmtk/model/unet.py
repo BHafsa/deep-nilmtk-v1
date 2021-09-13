@@ -9,7 +9,7 @@ from pyro.ops.stats import quantile
 from .layers import  create_conv1, create_deconv1, create_linear, elu_plus_one_plus_epsilon, Up, MDGMM
 
 
-
+import numpy as np
 
 
 class UNETNILM(nn.Module):
@@ -195,6 +195,19 @@ class UNETNILMSeq2Quantile(nn.Module):
     :param quantile: The quantiles to use during prediction, defaults to [0.1, 0.25, 0.5, 0.75, 0.9]
     :param quantile: list 
     
+    It can be used as follows:
+
+    .. code-block::python 
+    
+        'UNETNiLMSeq2Q':NILMExperiment({
+                        "model_name": 'UNETNiLMSeq2Quantile', 
+                        'in_size': 481,
+                        'feature_type':'mains', 
+                        'input_norm':'lognorm',
+                        'target_norm':'z-norm',
+                        'seq_type':'seq2quantile', 
+                        'max_nb_epochs':1
+                        }),
 
     """
        
@@ -202,7 +215,9 @@ class UNETNILMSeq2Quantile(nn.Module):
         super().__init__()
         
         out_size=len(params['appliances'])
-        seq_len= params['in_size']
+        seq_len= params['in_size'] if 'in_size' in params else 99
+        seq_len+= params['out_size'] if 'out_size' in params else 0
+        self.seq_len = seq_len
         n_channels=4 if params['feature_type']=="combined" else 1
         quantiles= params['quantiles'] if 'quantiles' in params else [0.1, 0.25, 0.5, 0.75, 0.9]
                             
@@ -301,16 +316,16 @@ class UNETNILMSeq2Quantile(nn.Module):
                     pbar.update(1)  
                 
                 pbar.close()
-         
+        pred = torch.cat(pred, 0)
         # Perform the denormalization Here
         # Denormalise the output 
         if self.target_norm == 'z-norm':
             # z-normalisation
-            pred = self.mean + self.std * pred
+            pred = self.mean + self.std * torch.tensor(pred)
             pred = torch.tensor(np.where(pred > 0, pred, 0))
         elif self.target_norm =='min-max':
             # min-max normalisation
-            pred = self.min + (self.max - self.min) * pred
+            pred = self.min + (self.max - self.min) * torch.tensor(pred)
             pred = torch.tensor(np.where(pred > 0, pred, 0))
         else:
             # log normalisation was perfomed
@@ -323,7 +338,7 @@ class UNETNILMSeq2Quantile(nn.Module):
         q_pred = torch.quantile(pred, q=q, dim=1).permute(1,0,2)
         
         
-        pred  = q_pred[:,q_pred.size(1)//2,:]
+        pred  = q_pred[self.seq_len//2:,q_pred.size(1)//2,:]
         
         
         results = {"pred":pred, "q_pred":q_pred, "pred_quantile":pred}

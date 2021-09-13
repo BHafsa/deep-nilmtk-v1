@@ -64,12 +64,12 @@ class WaveNetDataLoader(torch.utils.data.Dataset):
         self.num_points = self.context_size + self.seq_len 
 
         #pad the sequence with zeros in the beginning and at the end
-        inputs  = pad_data(inputs, self.num_points)
+        # inputs  = pad_data(inputs, self.num_points)
         
         self.inputs = torch.tensor(inputs).float()
         
         if targets is not None:
-            targets = pad_data(targets, self.num_points)
+            # targets = pad_data(targets, self.num_points)
             if  params['target_norm'] == 'z-norm':
                 self.mean = np.mean(targets)
                 self.std = np.std(targets)
@@ -100,13 +100,14 @@ class WaveNetDataLoader(torch.utils.data.Dataset):
         :return: Aggregate power and target consumption during training and only aggreagte power during testing
         :rtype: np.array
         """
-        indices = self.indices[index : index + self.num_points]
-        inds_targs   = sorted(indices[self.seq_len // 2:self.num_points])
-        
-        
+        indices = self.indices[index : index + self.num_points]        
+        indices_target = indices[self.seq_len//2 :]
+
         inputs = self.inputs[sorted(indices)]
+        inputs = pad_data(inputs , self.num_points)
         if self.targets is not None:
-            targets = self.targets[sorted(inds_targs)]
+            targets = self.targets[sorted(indices)]
+            targets = pad_data(targets, self.seq_len)
             return inputs,  targets
         else:
             return inputs

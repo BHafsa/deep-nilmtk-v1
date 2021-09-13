@@ -19,7 +19,7 @@ class pilModel(pl.LightningModule):
         return self.model(x)
 
     
-    def training_step(self, batch):
+    def training_step(self, batch, batch_idx):
         
         loss, mae = self.model.step(batch)
         self.log("train_loss", loss, on_step=False, on_epoch=True, prog_bar=True, logger=True)
@@ -29,8 +29,7 @@ class pilModel(pl.LightningModule):
 
     
     
-    def validation_step(self, batch):
-        
+    def validation_step(self, batch, batch_idx):
         loss, mae = self.model.step(batch)
         self.model.sample_id = 1
         self.log("val_loss", loss, on_step=False, on_epoch=True, prog_bar=True, logger=True)
@@ -56,7 +55,7 @@ class pilModel(pl.LightningModule):
             raise ValueError
                 
         sched = torch.optim.lr_scheduler.ReduceLROnPlateau(optim, 
-                                                           patience=self.hparams['patient'], 
+                                                           patience=self.hparams['patience_optim'], 
                                                            verbose=True, mode="min")
         scheduler = {'scheduler':sched, 
                  'monitor': 'val_mae',

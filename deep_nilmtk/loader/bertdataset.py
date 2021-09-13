@@ -10,6 +10,9 @@ class BERTDataset(torch.utils.data.Dataset):
     This class is dataLoader correponding to the BERT4NILM 
     model. The original code can be found here: https://github.com/Yueeeeeeee/BERT4NILM/
 
+    
+
+
     The normalization of the target applainces is performed 
     at this level just after the generation of the operational states using predefined thresholds for the considered appliances. 
     
@@ -108,7 +111,8 @@ class BERTDataset(torch.utils.data.Dataset):
                     labels.append(temp)
                     on_offs.append(temp)
 
-            return torch.tensor(tokens), torch.tensor(labels), torch.tensor(on_offs)
+            
+            return torch.tensor(tokens).float(), torch.tensor(labels).float(), torch.tensor(on_offs).float()
         else :
             # Testing Phase
             tokens = []
@@ -116,7 +120,7 @@ class BERTDataset(torch.utils.data.Dataset):
                 tokens.append(x[i])
             
             
-            return torch.tensor(tokens) 
+            return torch.tensor(tokens).float()
 
     def padding_seqs(self, in_array):
         """

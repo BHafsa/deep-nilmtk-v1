@@ -10,13 +10,13 @@ import sys
 import mlflow
 import json
 
-def start_logging(filename):
+def start_logging(filename, params):
     """Logs the output of the execution in the specified file
 
     :param filename: The name of the log file
     :type filename: str
     """
-    f = open('../logs/experiment-{}.txt'.format(filename), 'w')
+    f = open(f'{params["logs_path"]}/experiment-{filename}.txt' , 'w')
     sys.stdout = f
     return f
 

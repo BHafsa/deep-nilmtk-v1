@@ -123,6 +123,25 @@ class PTPNet(nn.Module):
     :type mean: float
     :param std: The STD consumption of the target power, defaults to 1
     :type std: float
+
+    It can be used as follows:
+
+    .. code-block::python
+
+       'tempPool': NILMExperiment({
+               "model_name": 'tempPool', 
+               'experiment_label':'regression',
+               'in_size': 480, 
+               'input_norm':'z-norm',
+               'target_norm':'z-norm',
+               'feature_type':'mains',
+               'max_nb_epochs':max_nb_epochs,
+               'task_type':'regression',
+               'hidden_dim':64,
+               }), 
+
+
+
     """
     def __init__(self, params):
         super(PTPNet, self).__init__()
@@ -340,7 +359,7 @@ class PTPNet(nn.Module):
             'pred': pred[self.border//2:], # this done to remove the data that was added 
                                            # during padding, data at the end will automatically 
                                            # be removed by the API
-            'pred_states': torch.tensor(s_hat)
+            'pred_states': torch.tensor(s_hat)[self.border//2:]
         }
         
         return results

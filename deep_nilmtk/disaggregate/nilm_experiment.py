@@ -46,7 +46,7 @@ class NILMExperiment(Disaggregator):
         :param params:  Dictionnary with different values of hyper-parameters.
         :type params: dictionnary
         """
-        super.__init__(NILMExperiment, self)
+        super().__init__()
         
         hparams = get_exp_parameters()
         hparams = vars(hparams.parse_args())
@@ -165,7 +165,7 @@ class NILMExperiment(Disaggregator):
         """
         
         if not self.hparams['multi_appliance']:
-            test_predictions = self.single_appliance_disaggregate(test_main_list, do_preprocessing)
+            test_predictions = self.single_appliance_disaggregate(test_main_list, do_preprocessing = do_preprocessing)
             return test_predictions
         else:
             sys.exit("Disaggregation for multi-appliance is implemented outside nilmtkenv")
@@ -190,9 +190,12 @@ class NILMExperiment(Disaggregator):
         :type do_preprocessing: bool, optional
         :return: estimated power consumption of the considered appliances.
         :rtype: liste of dict
-        """       
+        """    
+          
         if model is not None:
             self.models = model
+
+        
 
         if do_preprocessing:
             test_main_list = data_preprocessing(test_main_list, None,
@@ -211,7 +214,7 @@ class NILMExperiment(Disaggregator):
             result_dict = {}
 
             
-
+            
             for appliance in self.models:
             
                 dataloader = self.data_loaders[appliance]
@@ -657,6 +660,8 @@ class NILMExperiment(Disaggregator):
                     # Retrain the particular appliance
                     else:
                         print("Started Retraining model for", appliance_name)
+                    
+                    
 
                     dataloader  = self.data_loaders[appliance_name]
             
@@ -701,6 +706,7 @@ class NILMExperiment(Disaggregator):
 
         new_params = {"checkpoints_path": original_checkpoint }
         self.hparams.update(new_params)
+        
 
     def train_model(self,
                     appliance_name,
@@ -765,7 +771,7 @@ class NILMExperiment(Disaggregator):
         
         early_stop_callback = pl.callbacks.EarlyStopping(monitor ='val_mae',
                                              min_delta=1e-4,
-                                             patience = self.hparams['num_patience'], 
+                                             patience = self.hparams['patience_check'], 
                                              mode="min")
                                              
         logger  = DictLogger(self.hparams['logs_path'],
@@ -774,9 +780,9 @@ class NILMExperiment(Disaggregator):
         
         trainer = pl.Trainer(logger = logger,
                 gradient_clip_val=self.hparams['clip_value'],
-                checkpoint_callback=checkpoint_callback,
+                # checkpoint_callback=checkpoint_callback,
                 max_epochs = self.hparams['max_nb_epochs'],
-                callbacks=[checkpoint_callback, early_stop_callback],
+                callbacks=[early_stop_callback, checkpoint_callback],
                 gpus=-1 if torch.cuda.is_available() else None,
                 resume_from_checkpoint=best_checkpoint if not self.hparams['use_optuna'] else None) 
         

@@ -192,7 +192,9 @@ class DilatedResidualBlock(nn.Module):
         self.residual_channels = residual_channels
         self.dilation_channels = dilation_channels
         self.skip_channels = skip_channels
-        self.dilated_conv = nn.Conv1d(residual_channels, 2 * dilation_channels, kernel_size=kernel_size, dilation=dilation, padding=dilation, bias=bias)
+        self.dilation = dilation
+        self.dilated_conv = nn.Conv1d(residual_channels, 2 * dilation_channels, kernel_size=kernel_size, dilation=dilation, padding=dilation)
+
         self.mixing_conv = nn.Conv1d(dilation_channels, residual_channels + skip_channels, kernel_size=1, bias=False)
         self.init_weights()
 
@@ -203,6 +205,7 @@ class DilatedResidualBlock(nn.Module):
     def forward(self, data_in):
 
         out = self.dilated_conv(data_in)
+
         out1 = out.narrow(-2, 0, self.dilation_channels)
         out2 = out.narrow(-2, self.dilation_channels, self.dilation_channels)
         tanh_out = torch.tanh(out1)
@@ -221,6 +224,7 @@ class DilatedResidualBlock2(nn.Module):
         self.residual_channels = residual_channels
         self.dilation_channels = dilation_channels
         self.skip_channels = skip_channels
+        
         self.dilated_conv_tanh = nn.Conv1d(residual_channels, dilation_channels, kernel_size=kernel_size, dilation=dilation, padding=dilation, bias=bias)
         self.dilated_conv_sigmoid = nn.Conv1d(residual_channels, dilation_channels, kernel_size=kernel_size, dilation=dilation, padding=dilation, bias=bias)
         self.res = nn.Conv1d(dilation_channels, residual_channels, kernel_size=1, bias=True)
@@ -290,6 +294,7 @@ class WaveNet(S2S):
         init_layer(self.final_conv)
 
     def forward(self, data_in):
+        print(data_in.shape)
         data_in = data_in.view(data_in.shape[0], 1, data_in.shape[1])
         data_out = self.causal_conv(data_in)
         skip_connections = []
@@ -305,8 +310,11 @@ class WaveNet(S2S):
         data_out = self.final_conv(data_out)
         data_out = data_out.narrow(-1, self.seq_len//2, data_out.size()[-1]-self.seq_len+1)
         data_out = data_out.view(data_out.shape[0], data_out.shape[2])
+        print(data_out.shape)
+        print(self.seq_len)
         if self.to_binary:
             return torch.sigmoid(data_out)
+
         return data_out
     
 
