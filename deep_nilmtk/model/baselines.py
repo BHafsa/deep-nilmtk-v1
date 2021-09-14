@@ -435,7 +435,6 @@ class S2S(nn.Module):
         x, y  = batch 
         out   = self(x)  # BxCxT
         
-        print(out.shape, y.shape)
 
         error = (y - out)
         loss = F.mse_loss(out, y)

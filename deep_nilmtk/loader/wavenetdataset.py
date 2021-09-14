@@ -50,7 +50,7 @@ class WaveNetDataLoader(torch.utils.data.Dataset):
     :type layers: int
 
     .. note:: 
-       This data loader generates target sequence with length L different from the input sequences
+       This data loader generates target sequence cenetred in the input sequence with a length difference  L between input and output sequence
        L = (2 ** layers - 1) * (kernel_size - 1) + 1
     """
     def __init__(self, inputs,  targets=None,  params= {}):
@@ -64,12 +64,12 @@ class WaveNetDataLoader(torch.utils.data.Dataset):
         self.num_points = self.context_size + self.seq_len 
 
         #pad the sequence with zeros in the beginning and at the end
-        # inputs  = pad_data(inputs, self.num_points)
+        inputs  = pad_data(inputs, self.num_points)
         
         self.inputs = torch.tensor(inputs).float()
         
         if targets is not None:
-            # targets = pad_data(targets, self.num_points)
+            targets = pad_data(targets, self.num_points)
             if  params['target_norm'] == 'z-norm':
                 self.mean = np.mean(targets)
                 self.std = np.std(targets)
@@ -101,13 +101,13 @@ class WaveNetDataLoader(torch.utils.data.Dataset):
         :rtype: np.array
         """
         indices = self.indices[index : index + self.num_points]        
-        indices_target = indices[self.seq_len//2 :]
+        indices_target = indices[self.seq_len//2 : - self.seq_len//2 ]
 
         inputs = self.inputs[sorted(indices)]
-        inputs = pad_data(inputs , self.num_points)
+        
         if self.targets is not None:
-            targets = self.targets[sorted(indices)]
-            targets = pad_data(targets, self.seq_len)
+            targets = self.targets[sorted(indices_target)]
+            
             return inputs,  targets
         else:
             return inputs

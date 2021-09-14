@@ -255,6 +255,9 @@ class WaveNet(S2S):
     .. _wavenilm:
 
     WaveNet model for load disaggregtion using residual and dilated convolutions.
+    This model a sequence to subsequence model where:
+    Output_sequence_length = Input_sequence_length - L
+    L = (2 ** layers - 1) * (kernel_size - 1) + 1
 
     
     """
@@ -294,7 +297,7 @@ class WaveNet(S2S):
         init_layer(self.final_conv)
 
     def forward(self, data_in):
-        print(data_in.shape)
+        
         data_in = data_in.view(data_in.shape[0], 1, data_in.shape[1])
         data_out = self.causal_conv(data_in)
         skip_connections = []
@@ -305,13 +308,15 @@ class WaveNet(S2S):
         for skip_other in skip_connections[1:]:
             skip_out = skip_out + skip_other
         data_out = F.relu(skip_out)
+        
         data_out = self.penultimate_conv(data_out)
         #data_out = F.relu(data_out)
         data_out = self.final_conv(data_out)
-        data_out = data_out.narrow(-1, self.seq_len//2, data_out.size()[-1]-self.seq_len+1)
-        data_out = data_out.view(data_out.shape[0], data_out.shape[2])
-        print(data_out.shape)
-        print(self.seq_len)
+        
+        data_out = data_out.narrow(-1, self.seq_len//2, data_out.size()[-1]-self.seq_len)
+        # data_out = data_out.view(data_out.shape[0], data_out.shape[2])
+        
+       
         if self.to_binary:
             return torch.sigmoid(data_out)
 
