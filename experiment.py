@@ -14,7 +14,7 @@ experiment = {
    'methods': {
           'WAVENET': NILMExperiment({
                "model_name": 'WAVENILM', 
-               'in_size': 481, 
+               'in_size': 480, 
                'input_norm':'z-norm',
                'target_norm':'z-norm',
                'feature_type':'mains',
@@ -27,7 +27,7 @@ experiment = {
    'train': {
      'datasets': {
       'ukdale': {
-         'path': '../Deep-NILMtk/data/REFIT.h5',
+         'path': '../ADL-DEEP-NILM/data/REFIT/REFIT.h5',
          'buildings': {
                1: {
                      'start_time': '2015-01-04',
@@ -41,7 +41,7 @@ experiment = {
      'datasets': {
 
        'ukdale': {
-         'path': '../Deep-NILMtk/data/REFIT.h5',
+         'path': '../ADL-DEEP-NILM/data/REFIT/REFIT.h5',
          'buildings': {
                1: {
                      'start_time': '2015-04-16',
