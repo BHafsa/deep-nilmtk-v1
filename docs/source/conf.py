@@ -34,6 +34,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
     'sphinx.ext.graphviz',
+    'sphinx.ext.githubpages',
     'sphinx.ext.mathjax',
     'sphinx.ext.autosectionlabel'
 ]
