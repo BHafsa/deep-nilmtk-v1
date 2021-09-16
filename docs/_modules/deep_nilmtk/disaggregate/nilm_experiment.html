@@ -223,7 +223,6 @@
         <span class="c1"># Parameter for appliances</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">appliance_params</span> <span class="o">=</span><span class="p">{}</span>
         
-        
     <span class="k">def</span> <span class="nf">_prepare_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mains</span><span class="p">,</span> <span class="n">sub_main</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Performs data pre-processing and formating. By default, the default pre-processing </span>
@@ -277,7 +276,6 @@
 <span class="sd">        formatting and then train the model based on the type of the model(single </span>
 <span class="sd">        or multi-task).</span>
 
-<span class="sd">        TODO: Implement the multi-appliance disaggregtaion function</span>
 
 <span class="sd">        :param mains: Aggregate power measurements.</span>
 <span class="sd">        :type mains: Liste of pd.DataFrame</span>
@@ -307,7 +305,7 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;multi_appliance&#39;</span><span class="p">]:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">single_appliance_fit</span><span class="p">()</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s2">&quot;Disaggregation for multi-appliance is implemented outside nilmtkenv&quot;</span><span class="p">)</span></div>
+                <span class="bp">self</span><span class="o">.</span><span class="n">multi_appliance_fit</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="NILMExperiment.disaggregate_chunk"><a class="viewcode-back" href="../../../deep_nilmtk.disaggregate.html#deep_nilmtk.disaggregate.nilm_experiment.NILMExperiment.disaggregate_chunk">[docs]</a>    <span class="k">def</span> <span class="nf">disaggregate_chunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">test_main_list</span><span class="p">,</span><span class="n">do_preprocessing</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -325,8 +323,8 @@
             <span class="n">test_predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">single_appliance_disaggregate</span><span class="p">(</span><span class="n">test_main_list</span><span class="p">,</span> <span class="n">do_preprocessing</span> <span class="o">=</span> <span class="n">do_preprocessing</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">test_predictions</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s2">&quot;Disaggregation for multi-appliance is implemented outside nilmtkenv&quot;</span><span class="p">)</span></div>
-
+            <span class="n">test_predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">multi_appliance_disaggregate</span><span class="p">(</span><span class="n">test_main_list</span><span class="p">,</span> <span class="n">do_preprocessing</span> <span class="o">=</span> <span class="n">do_preprocessing</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">test_predictions</span></div>
 
 <div class="viewcode-block" id="NILMExperiment.single_appliance_disaggregate"><a class="viewcode-back" href="../../../deep_nilmtk.disaggregate.html#deep_nilmtk.disaggregate.nilm_experiment.NILMExperiment.single_appliance_disaggregate">[docs]</a>    <span class="k">def</span> <span class="nf">single_appliance_disaggregate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_main_list</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">do_preprocessing</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -485,8 +483,7 @@
         <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;results_path&#39;</span><span class="p">]</span><span class="o">+</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">exp_name</span><span class="si">}</span><span class="s2">.npy&quot;</span><span class="p">,</span> <span class="n">test_results</span><span class="p">)</span>   
          
         <span class="k">return</span> <span class="n">test_predictions</span></div>
-        
-        
+           
 <div class="viewcode-block" id="NILMExperiment.objective"><a class="viewcode-back" href="../../../deep_nilmtk.disaggregate.html#deep_nilmtk.disaggregate.nilm_experiment.NILMExperiment.objective">[docs]</a>    <span class="k">def</span> <span class="nf">objective</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">,</span> <span class="n">train_loader</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">val_loader</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fold_idx</span><span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;The objective function to be used with optuna. This function requires the model under study to </span>
 <span class="sd">        implement a static function called suggest_hparams() [see the model documentation for more informations]</span>
@@ -653,8 +650,6 @@
                 <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">net</span><span class="p">,</span> <span class="n">data</span> </div>
-
-    
 
 <div class="viewcode-block" id="NILMExperiment.save_best_model"><a class="viewcode-back" href="../../../deep_nilmtk.disaggregate.html#deep_nilmtk.disaggregate.nilm_experiment.NILMExperiment.save_best_model">[docs]</a>    <span class="k">def</span> <span class="nf">save_best_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">study</span><span class="p">,</span> <span class="n">trial</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Keeps track of the trial giving best results</span>
@@ -864,7 +859,6 @@
         <span class="n">new_params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;checkpoints_path&quot;</span><span class="p">:</span> <span class="n">original_checkpoint</span> <span class="p">}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">new_params</span><span class="p">)</span></div>
         
-
 <div class="viewcode-block" id="NILMExperiment.train_model"><a class="viewcode-back" href="../../../deep_nilmtk.disaggregate.html#deep_nilmtk.disaggregate.nilm_experiment.NILMExperiment.train_model">[docs]</a>    <span class="k">def</span> <span class="nf">train_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                     <span class="n">appliance_name</span><span class="p">,</span>
                     <span class="n">train_loader</span><span class="p">,</span> 
@@ -949,8 +943,195 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">logger</span><span class="o">.</span><span class="n">metrics</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;use_optuna&#39;</span><span class="p">]:</span>
                 <span class="c1"># TODO: Get the minimal validation loss and not the last one</span>
-                <span class="k">return</span> <span class="n">logger</span><span class="o">.</span><span class="n">metrics</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">][</span><span class="s2">&quot;val_loss&quot;</span><span class="p">],</span> <span class="n">checkpoint_callback</span><span class="o">.</span><span class="n">best_model_path</span></div></div>
+                <span class="k">return</span> <span class="n">logger</span><span class="o">.</span><span class="n">metrics</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">][</span><span class="s2">&quot;val_loss&quot;</span><span class="p">],</span> <span class="n">checkpoint_callback</span><span class="o">.</span><span class="n">best_model_path</span></div>
+
+<div class="viewcode-block" id="NILMExperiment.multi_appliance_disaggregate"><a class="viewcode-back" href="../../../deep_nilmtk.disaggregate.html#deep_nilmtk.disaggregate.nilm_experiment.NILMExperiment.multi_appliance_disaggregate">[docs]</a>    <span class="k">def</span> <span class="nf">multi_appliance_disaggregate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">test_main_list</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">do_preprocessing</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="NILMExperiment.multi_appliance_fit"><a class="viewcode-back" href="../../../deep_nilmtk.disaggregate.html#deep_nilmtk.disaggregate.nilm_experiment.NILMExperiment.multi_appliance_fit">[docs]</a>    <span class="k">def</span> <span class="nf">multi_appliance_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Train the specified models for each appliance separately taking into consideration</span>
+<span class="sd">        the use of cross-validation and hyper-parameters optimisation. The checkpoints for </span>
+<span class="sd">        each model are saved in the correspondng path.</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="bp">self</span><span class="o">.</span><span class="n">exp_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;model_name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">_single_appliance_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;experiment_label&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">original_checkpoint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;checkpoints_path&#39;</span><span class="p">]</span>
+        
+        
+        <span class="n">exp_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">exp_name</span><span class="si">}</span><span class="s2">_multi_app&quot;</span>
+        <span class="n">checkpoints</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">original_checkpoint</span> <span class="o">+</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">exp_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">checkpoints</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1">#update checkpoint path</span>
+        <span class="n">new_params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;checkpoints_path&quot;</span><span class="p">:</span> <span class="n">original_checkpoint</span> <span class="o">+</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">exp_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">new_params</span><span class="p">)</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;fit model for </span><span class="si">{</span><span class="n">exp_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;use_optuna&#39;</span><span class="p">]:</span>
+            <span class="c1"># Use Optuna fot parameter optimisation of the model</span>
+            <span class="n">study</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span><span class="n">create_study</span><span class="p">(</span><span class="n">study_name</span><span class="o">=</span><span class="n">exp_name</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s2">&quot;minimize&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">optuna_params</span> <span class="o">=</span><span class="p">{</span>
+                <span class="s1">&#39;power&#39;</span> <span class="p">:</span><span class="n">power</span><span class="p">,</span>
+                <span class="s1">&#39;appliance_name&#39;</span><span class="p">:</span><span class="n">appliance_name</span><span class="p">,</span>
+                <span class="s1">&#39;exp_name&#39;</span><span class="p">:</span> <span class="n">exp_name</span>
+                <span class="p">}</span>
             
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;kfolds&#39;</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">study</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objective</span><span class="p">,</span> <span class="n">n_trials</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;n_trials&#39;</span><span class="p">],</span> <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">save_best_model</span><span class="p">])</span>
+                <span class="c1"># Load weights of the model</span>
+                <span class="n">app_model</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_net_and_loaders</span><span class="p">()</span>
+                <span class="c1">#TODO: load checkpoints</span>
+                <span class="n">chechpoint</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">study</span><span class="o">.</span><span class="n">user_attrs</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">])</span>
+                
+                <span class="n">model</span> <span class="o">=</span> <span class="n">pilModel</span><span class="p">(</span><span class="n">app_model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">)</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;checkpoint_path&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">study</span><span class="o">.</span><span class="n">user_attrs</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">]</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">chechpoint</span><span class="p">[</span><span class="s1">&#39;state_dict&#39;</span><span class="p">])</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+        
+                <span class="c1"># Save best model for testing time</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">appliance_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">study</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objective_cv</span><span class="p">,</span> <span class="n">n_trials</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;n_trials&#39;</span><span class="p">],</span> <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">save_best_model</span><span class="p">])</span>
+            
+            <span class="c1"># Save figures</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">fig1</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span><span class="n">visualization</span><span class="o">.</span><span class="n">plot_param_importances</span><span class="p">(</span><span class="n">study</span><span class="p">)</span>
+                <span class="n">fig2</span> <span class="o">=</span> <span class="n">optuna</span><span class="o">.</span><span class="n">visualization</span><span class="o">.</span><span class="n">plot_parallel_coordinate</span><span class="p">(</span><span class="n">study</span><span class="p">)</span>
+                
+                <span class="n">fig2</span><span class="o">.</span><span class="n">write_image</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;checkpoints_path&#39;</span><span class="p">]</span> <span class="o">+</span><span class="s1">&#39;/_parallel_coordinate.pdf&#39;</span><span class="p">)</span>
+                <span class="n">fig1</span><span class="o">.</span><span class="n">write_image</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;checkpoints_path&#39;</span><span class="p">]</span> <span class="o">+</span><span class="s1">&#39;/_param_importance.pdf&#39;</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="n">results_df</span> <span class="o">=</span> <span class="n">study</span><span class="o">.</span><span class="n">trials_dataframe</span><span class="p">()</span>
+            <span class="n">results_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s2">&quot;checkpoints_path&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/Seq2Point_Study_</span><span class="si">{</span><span class="n">exp_name</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">appliance_name</span><span class="si">}</span><span class="s1">.csv&#39;</span><span class="p">)</span>
+            <span class="n">joblib</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">study</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s2">&quot;checkpoints_path&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">/Seq2Point_Study_</span><span class="si">{</span><span class="n">exp_name</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">appliance_name</span><span class="si">}</span><span class="s1">.pkl&#39;</span><span class="p">)</span>
+            
+            <span class="c1"># Restoring the best model and use it for the testing</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">best_trials</span><span class="p">[</span><span class="n">appliance_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">study</span><span class="o">.</span><span class="n">best_trial</span><span class="o">.</span><span class="n">number</span> 
+            <span class="n">app_model</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_net_and_loaders</span><span class="p">()</span>
+            <span class="c1">#TODO: load checkpoints</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">run_id</span><span class="p">[</span><span class="n">appliance_name</span><span class="p">]</span> <span class="o">=</span>  <span class="n">study</span><span class="o">.</span><span class="n">user_attrs</span><span class="p">[</span><span class="s2">&quot;best_run_id&quot;</span><span class="p">]</span>
+            
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Check if the appliance was already trained. If not then create a new model for it</span>
+            
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;kfolds&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">appliance_name</span><span class="p">]</span> <span class="o">=</span><span class="p">{}</span>
+                <span class="c1"># Getting the required data for the appliance</span>
+                <span class="n">_</span><span class="p">,</span> <span class="n">dataloader</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_net_and_loaders</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data_loaders</span><span class="p">[</span><span class="n">appliance_name</span><span class="p">]</span><span class="o">=</span><span class="n">dataloader</span>
+                <span class="n">dataset</span> <span class="o">=</span> <span class="n">dataloader</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="s1">&#39;features&#39;</span><span class="p">],</span> <span class="n">targets</span><span class="o">=</span><span class="n">power</span><span class="p">)</span>
+                
+                <span class="c1"># Splitting the data into several folds</span>
+                <span class="n">fold</span> <span class="o">=</span> <span class="n">TimeSeriesSplit</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;kfolds&#39;</span><span class="p">],</span> <span class="n">test_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;test_size&#39;</span><span class="p">],</span> <span class="n">gap</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;gap&#39;</span><span class="p">])</span>
+                <span class="n">scores</span> <span class="o">=</span> <span class="p">[]</span>
+                
+                <span class="c1"># Using each fold as a validation data</span>
+                <span class="k">for</span> <span class="n">fold_idx</span><span class="p">,</span> <span class="p">(</span><span class="n">train_idx</span><span class="p">,</span> <span class="n">valid_idx</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">fold</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="p">)))):</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;started training for the fold </span><span class="si">{</span><span class="n">fold_idx</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
+                    <span class="n">app_model</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_net_and_loaders</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">appliance_name</span><span class="p">][</span><span class="sa">f</span><span class="s1">&#39;fold_</span><span class="si">{</span><span class="n">fold_idx</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pilModel</span><span class="p">(</span><span class="n">app_model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">)</span>
+                    <span class="n">train_data</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Subset</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">train_idx</span><span class="p">)</span>
+                    <span class="n">val_data</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Subset</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">valid_idx</span><span class="p">)</span>
+                    
+                    <span class="n">train_loader</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span><span class="n">train_data</span><span class="p">,</span> 
+                                                               <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;batch_size&#39;</span><span class="p">],</span> 
+                                                               <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
+                                                               <span class="n">collate_fn</span><span class="o">=</span> 
+                                                                <span class="n">NILM_MODELS</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;model_name&#39;</span><span class="p">]][</span><span class="s1">&#39;extra_params&#39;</span><span class="p">][</span><span class="s1">&#39;collate_fns&#39;</span><span class="p">](</span>
+                                                                    <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">,</span> <span class="n">sample</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="k">if</span> <span class="s1">&#39;collate_fns&#39;</span> <span class="ow">in</span>  <span class="n">NILM_MODELS</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;model_name&#39;</span><span class="p">]][</span><span class="s1">&#39;extra_params&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                                                               <span class="n">num_workers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;num_workers&#39;</span><span class="p">])</span>
+                    
+                    <span class="n">val_loader</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span><span class="n">val_data</span><span class="p">,</span> 
+                                                        <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;batch_size&#39;</span><span class="p">],</span> 
+                                                        <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+                                                        <span class="n">collate_fn</span><span class="o">=</span> 
+                                                                <span class="n">NILM_MODELS</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;model_name&#39;</span><span class="p">]][</span><span class="s1">&#39;extra_params&#39;</span><span class="p">][</span><span class="s1">&#39;collate_fns&#39;</span><span class="p">](</span>
+                                                                    <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">,</span> <span class="n">sample</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>  <span class="k">if</span> <span class="s1">&#39;collate_fns&#39;</span> <span class="ow">in</span>  <span class="n">NILM_MODELS</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;model_name&#39;</span><span class="p">]][</span><span class="s1">&#39;extra_params&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                                                        <span class="n">num_workers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;num_workers&#39;</span><span class="p">])</span>
+                
+                    <span class="c1"># select experiment if does not exist create it </span>
+                    <span class="c1"># an experiment is created for each appliance</span>
+                    <span class="n">mlflow</span><span class="o">.</span><span class="n">set_experiment</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">appliance_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                    
+                    
+            
+                    <span class="c1"># Start a new for the current appliance</span>
+                    <span class="k">with</span> <span class="n">mlflow</span><span class="o">.</span><span class="n">start_run</span><span class="p">(</span><span class="n">run_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;model_name&#39;</span><span class="p">]):</span> 
+                        <span class="c1"># Auto log all MLflow from lightening</span>
+                        <span class="n">mlflow</span><span class="o">.</span><span class="n">pytorch</span><span class="o">.</span><span class="n">autolog</span><span class="p">()</span>  
+                        <span class="c1"># Save the run ID to use in testing phase</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">run_id</span><span class="p">[</span><span class="n">appliance_name</span><span class="p">]</span> <span class="o">=</span>  <span class="n">mlflow</span><span class="o">.</span><span class="n">active_run</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">run_id</span>
+                        <span class="c1"># Log parameters of current run </span>
+                        <span class="n">mlflow</span><span class="o">.</span><span class="n">log_params</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">)</span>
+                        <span class="c1"># Model Training</span>
+                        <span class="n">mae_loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_model</span><span class="p">(</span><span class="n">appliance_name</span><span class="p">,</span> 
+                                                    <span class="n">train_loader</span><span class="p">,</span> 
+                                                    <span class="n">val_loader</span><span class="p">,</span>
+                                                    <span class="n">exp_name</span><span class="p">,</span>
+                                                    <span class="n">dataset</span><span class="o">.</span><span class="n">mean</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;target_norm&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;z-norm&#39;</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                                                    <span class="n">dataset</span><span class="o">.</span><span class="n">std</span>  <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;target_norm&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;z-norm&#39;</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                                                    <span class="n">fold_idx</span> <span class="o">=</span> <span class="n">fold_idx</span><span class="p">,</span>
+                                                    <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="n">appliance_name</span><span class="p">][</span><span class="sa">f</span><span class="s1">&#39;fold_</span><span class="si">{</span><span class="n">fold_idx</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">])</span>
+                    
+                    <span class="n">scores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mae_loss</span><span class="p">)</span>
+                                        
+                
+        
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s1">&#39;Multi-appliance&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;First model training for Multi-appliance model&quot;</span><span class="p">)</span>
+                    <span class="c1">#select model and data loaders to use</span>
+                    <span class="n">net</span><span class="p">,</span> <span class="n">dataloader</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_net_and_loaders</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="s1">&#39;Multi-appliance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pilModel</span><span class="p">(</span><span class="n">net</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data_loaders</span><span class="p">[</span><span class="s1">&#39;Multi-appliance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataloader</span>
+                <span class="c1"># Retrain the particular appliance</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Started Retraining Muti-appliance model&quot;</span><span class="p">)</span>
+                
+                
+                <span class="n">dataloader</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_loaders</span><span class="p">[</span><span class="s1">&#39;Multi-appliance&#39;</span><span class="p">]</span>
+        
+                <span class="n">data</span> <span class="o">=</span> <span class="n">dataloader</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="s1">&#39;features&#39;</span><span class="p">],</span> <span class="n">targets</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="s1">&#39;targets&#39;</span><span class="p">])</span>
+                
+                <span class="n">train_data</span><span class="p">,</span> <span class="n">val_data</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">random_split</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> 
+                                                     <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">len</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="mf">0.15</span><span class="p">)),</span> <span class="n">data</span><span class="o">.</span><span class="n">len</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">len</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="mf">0.15</span><span class="p">))],</span> 
+                                                     <span class="n">generator</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">Generator</span><span class="p">()</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="mi">42</span><span class="p">))</span>
+                <span class="n">train_loader</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span><span class="n">train_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;batch_size&#39;</span><span class="p">],</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
+                                                           <span class="n">collate_fn</span><span class="o">=</span> 
+                                                            <span class="n">NILM_MODELS</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;model_name&#39;</span><span class="p">]][</span><span class="s1">&#39;extra_params&#39;</span><span class="p">][</span><span class="s1">&#39;collate_fns&#39;</span><span class="p">](</span>
+                                                                <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">,</span> <span class="n">sample</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="k">if</span> <span class="s1">&#39;collate_fns&#39;</span> <span class="ow">in</span>  <span class="n">NILM_MODELS</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;model_name&#39;</span><span class="p">]][</span><span class="s1">&#39;extra_params&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                                                           <span class="n">num_workers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;num_workers&#39;</span><span class="p">])</span>
+                <span class="n">val_loader</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span><span class="n">val_data</span><span class="p">,</span> 
+                                                    <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;batch_size&#39;</span><span class="p">],</span> 
+                                                    <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+                                                    <span class="n">collate_fn</span><span class="o">=</span> 
+                                                            <span class="n">NILM_MODELS</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;model_name&#39;</span><span class="p">]][</span><span class="s1">&#39;extra_params&#39;</span><span class="p">][</span><span class="s1">&#39;collate_fns&#39;</span><span class="p">](</span>
+                                                                <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">,</span> <span class="n">sample</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>  <span class="k">if</span> <span class="s1">&#39;collate_fns&#39;</span> <span class="ow">in</span>  <span class="n">NILM_MODELS</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;model_name&#39;</span><span class="p">]][</span><span class="s1">&#39;extra_params&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                                                    <span class="n">num_workers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;num_workers&#39;</span><span class="p">])</span>
+                
+                <span class="c1"># select experiment if does not exist create it </span>
+                <span class="c1"># an experiment is created for each appliance</span>
+                <span class="n">mlflow</span><span class="o">.</span><span class="n">set_experiment</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Multi-appliance&#39;</span><span class="p">)</span>
+                
+                <span class="c1"># Start a new for the current appliance</span>
+                <span class="k">with</span> <span class="n">mlflow</span><span class="o">.</span><span class="n">start_run</span><span class="p">():</span> 
+                    <span class="c1"># Auto log all MLflow from lightening</span>
+                    <span class="n">mlflow</span><span class="o">.</span><span class="n">pytorch</span><span class="o">.</span><span class="n">autolog</span><span class="p">()</span>  
+                    <span class="c1"># Save the run ID to use in testing phase</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">run_id</span><span class="p">[</span><span class="s1">&#39;Multi-appliance&#39;</span><span class="p">]</span> <span class="o">=</span>  <span class="n">mlflow</span><span class="o">.</span><span class="n">active_run</span><span class="p">()</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">run_id</span>
+                    <span class="c1"># Log parameters of current run </span>
+                    <span class="n">mlflow</span><span class="o">.</span><span class="n">log_params</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">)</span>
+                    <span class="c1"># Model Training</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">train_model</span><span class="p">(</span>
+                        <span class="s1">&#39;Multi-appliance&#39;</span><span class="p">,</span> 
+                        <span class="n">train_loader</span><span class="p">,</span> 
+                        <span class="n">val_loader</span><span class="p">,</span>
+                        <span class="n">exp_name</span><span class="p">,</span>
+                        <span class="n">data</span><span class="o">.</span><span class="n">mean</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;target_norm&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;z-norm&#39;</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
+                        <span class="n">data</span><span class="o">.</span><span class="n">std</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="p">[</span><span class="s1">&#39;target_norm&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;z-norm&#39;</span> <span class="k">else</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">new_params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;checkpoints_path&quot;</span><span class="p">:</span> <span class="n">original_checkpoint</span> <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hparams</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">new_params</span><span class="p">)</span>   </div></div>
 
         
         

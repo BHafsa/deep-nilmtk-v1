@@ -354,14 +354,15 @@
 <span class="sd">    </span>
 <span class="sd">    It can be used as follows:</span>
 
-<span class="sd">    .. code-block::python </span>
+<span class="sd">    .. code-block:: python</span>
 <span class="sd">    </span>
 <span class="sd">        &#39;UNETNiLMSeq2Q&#39;:NILMExperiment({</span>
 <span class="sd">                        &quot;model_name&quot;: &#39;UNETNiLMSeq2Quantile&#39;, </span>
-<span class="sd">                        &#39;in_size&#39;: 481,</span>
+<span class="sd">                        &#39;in_size&#39;: 480,</span>
 <span class="sd">                        &#39;feature_type&#39;:&#39;mains&#39;, </span>
-<span class="sd">                        &#39;input_norm&#39;:&#39;lognorm&#39;,</span>
+<span class="sd">                        &#39;input_norm&#39;:&#39;z-norm&#39;,</span>
 <span class="sd">                        &#39;target_norm&#39;:&#39;z-norm&#39;,</span>
+<span class="sd">                        &#39;kfolds&#39;:3,</span>
 <span class="sd">                        &#39;seq_type&#39;:&#39;seq2quantile&#39;, </span>
 <span class="sd">                        &#39;max_nb_epochs&#39;:1</span>
 <span class="sd">                        }),</span>

@@ -1289,6 +1289,18 @@ The orginal paper can be found here: <a class="reference external" href="https:/
 </dd>
 </dl>
 <p>It can be used as follows:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;UNETNiLMSeq2Q&#39;</span><span class="p">:</span><span class="n">NILMExperiment</span><span class="p">({</span>
+                <span class="s2">&quot;model_name&quot;</span><span class="p">:</span> <span class="s1">&#39;UNETNiLMSeq2Quantile&#39;</span><span class="p">,</span> 
+                <span class="s1">&#39;in_size&#39;</span><span class="p">:</span> <span class="mi">480</span><span class="p">,</span>
+                <span class="s1">&#39;feature_type&#39;</span><span class="p">:</span><span class="s1">&#39;mains&#39;</span><span class="p">,</span> 
+                <span class="s1">&#39;input_norm&#39;</span><span class="p">:</span><span class="s1">&#39;z-norm&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;target_norm&#39;</span><span class="p">:</span><span class="s1">&#39;z-norm&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;kfolds&#39;</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span>
+                <span class="s1">&#39;seq_type&#39;</span><span class="p">:</span><span class="s1">&#39;seq2quantile&#39;</span><span class="p">,</span> 
+                <span class="s1">&#39;max_nb_epochs&#39;</span><span class="p">:</span><span class="mi">1</span>
+                <span class="p">}),</span>
+</pre></div>
+</div>
 <dl class="py method">
 <dt class="sig sig-object py" id="deep_nilmtk.model.unet.UNETNILMSeq2Quantile.forward">
 <span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/deep_nilmtk/model/unet.html#UNETNILMSeq2Quantile.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#deep_nilmtk.model.unet.UNETNILMSeq2Quantile.forward" title="Permalink to this definition">¶</a></dt>
