@@ -273,8 +273,10 @@ class WaveNet(S2S):
         assert self.kernel_size % 2 == 1, f'kernel_size ({self.kernel_size}) must be odd'
 
         self.to_binary = params['to_binary'] if 'to_binary' in params else False
-        
 
+        self.n_appliances = len(params['appliances']) if 'appliances' in params else 1
+        
+        self.in_features = 1 # TODO: fix this whith according to input features
 
         self.seq_len = (2 ** self.layers - 1) * (self.kernel_size - 1) + 1
 
@@ -288,7 +290,7 @@ class WaveNet(S2S):
         for i, block in enumerate(self.blocks):
             self.add_module(f"dilatedConv{i}", block)
         self.penultimate_conv = nn.Conv1d(self.skip_channels, self.skip_channels, kernel_size=self.kernel_size, padding=(self.kernel_size-1)//2, bias=True)
-        self.final_conv = nn.Conv1d(self.skip_channels, 1, kernel_size=self.kernel_size, padding=(self.kernel_size-1)//2, bias=True)
+        self.final_conv = nn.Conv1d(self.skip_channels, self.n_appliances, kernel_size=self.kernel_size, padding=(self.kernel_size-1)//2, bias=True)
         self.init_weights()
 
     def init_weights(self):
@@ -298,12 +300,13 @@ class WaveNet(S2S):
 
     def forward(self, data_in):
         
-        data_in = data_in.view(data_in.shape[0], 1, data_in.shape[1])
+        data_in = data_in.view(data_in.shape[0], self.in_features, data_in.shape[1])
         data_out = self.causal_conv(data_in)
         skip_connections = []
         for block in self.blocks:
             data_out, skip_out = block(data_out)
             skip_connections.append(skip_out)
+            
         skip_out = skip_connections[0]
         for skip_other in skip_connections[1:]:
             skip_out = skip_out + skip_other
@@ -316,7 +319,6 @@ class WaveNet(S2S):
         data_out = data_out.narrow(-1, self.seq_len//2, data_out.size()[-1]-self.seq_len)
         # data_out = data_out.view(data_out.shape[0], data_out.shape[2])
         
-       
         if self.to_binary:
             return torch.sigmoid(data_out)
 

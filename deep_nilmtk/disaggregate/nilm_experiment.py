@@ -66,7 +66,6 @@ class NILMExperiment(Disaggregator):
         # Parameter for appliances
         self.appliance_params ={}
         
-        
     def _prepare_data(self, mains, sub_main):
         """
         Performs data pre-processing and formating. By default, the default pre-processing 
@@ -120,7 +119,6 @@ class NILMExperiment(Disaggregator):
         formatting and then train the model based on the type of the model(single 
         or multi-task).
 
-        TODO: Implement the multi-appliance disaggregtaion function
 
         :param mains: Aggregate power measurements.
         :type mains: Liste of pd.DataFrame
@@ -150,7 +148,7 @@ class NILMExperiment(Disaggregator):
             if not self.hparams['multi_appliance']:
                 self.single_appliance_fit()
             else:
-                sys.exit("Disaggregation for multi-appliance is implemented outside nilmtkenv")
+                self.multi_appliance_fit()
 
     def disaggregate_chunk(self,test_main_list,do_preprocessing=True):
         """
@@ -168,8 +166,8 @@ class NILMExperiment(Disaggregator):
             test_predictions = self.single_appliance_disaggregate(test_main_list, do_preprocessing = do_preprocessing)
             return test_predictions
         else:
-            sys.exit("Disaggregation for multi-appliance is implemented outside nilmtkenv")
-
+            test_predictions = self.multi_appliance_disaggregate(test_main_list, do_preprocessing = do_preprocessing)
+            return test_predictions
 
     def single_appliance_disaggregate(self, test_main_list, model=None,do_preprocessing=True):
         """
@@ -328,8 +326,7 @@ class NILMExperiment(Disaggregator):
         np.save(self.hparams['results_path']+f"{self.exp_name}.npy", test_results)   
          
         return test_predictions
-        
-        
+           
     def objective(self, trial, train_loader=None, val_loader=None, fold_idx= None):
         """The objective function to be used with optuna. This function requires the model under study to 
         implement a static function called suggest_hparams() [see the model documentation for more informations]
@@ -496,8 +493,6 @@ class NILMExperiment(Disaggregator):
                 params = self.hparams)
 
         return net, data 
-
-    
 
     def save_best_model(self, study, trial):
         """Keeps track of the trial giving best results
@@ -707,7 +702,6 @@ class NILMExperiment(Disaggregator):
         new_params = {"checkpoints_path": original_checkpoint }
         self.hparams.update(new_params)
         
-
     def train_model(self,
                     appliance_name,
                     train_loader, 
@@ -793,7 +787,194 @@ class NILMExperiment(Disaggregator):
             if self.hparams['use_optuna']:
                 # TODO: Get the minimal validation loss and not the last one
                 return logger.metrics[-2]["val_loss"], checkpoint_callback.best_model_path
+
+    def multi_appliance_disaggregate(self, test_main_list, model=None,do_preprocessing=True):
+        return None
+
+    def multi_appliance_fit(self):
+        """
+        Train the specified models for each appliance separately taking into consideration
+        the use of cross-validation and hyper-parameters optimisation. The checkpoints for 
+        each model are saved in the correspondng path.
+        """        
+        self.exp_name = f"{self.hparams['model_name']}_{self.hparams['data']}_single_appliance_{self.hparams['experiment_label']}"
+        original_checkpoint = self.hparams['checkpoints_path']
+        
+        
+        exp_name = f"{self.exp_name}_multi_app"
+        checkpoints = Path(original_checkpoint +f"{exp_name}")
+        checkpoints.mkdir(parents=True, exist_ok=True)
+        #update checkpoint path
+        new_params = {"checkpoints_path": original_checkpoint +f"{exp_name}"}
+        self.hparams.update(new_params)
+        
+        print(f"fit model for {exp_name}")
+        
+        if self.hparams['use_optuna']:
+            # Use Optuna fot parameter optimisation of the model
+            study = optuna.create_study(study_name=exp_name, direction="minimize")
+            self.optuna_params ={
+                'power' :power,
+                'appliance_name':appliance_name,
+                'exp_name': exp_name
+                }
             
+            if self.hparams['kfolds'] <= 1:
+                study.optimize(self.objective, n_trials=self.hparams['n_trials'], callbacks=[self.save_best_model])
+                # Load weights of the model
+                app_model, _ = self.get_net_and_loaders()
+                #TODO: load checkpoints
+                chechpoint=torch.load(study.user_attrs["path"])
+                
+                model = pilModel(app_model, self.hparams)
+                model.hparams['checkpoint_path'] = study.user_attrs["path"]
+                model.load_state_dict(chechpoint['state_dict'])
+                model.eval()
+        
+                # Save best model for testing time
+                self.models[appliance_name] = model
+            else:
+                study.optimize(self.objective_cv, n_trials=self.hparams['n_trials'], callbacks=[self.save_best_model])
+            
+            # Save figures
+            try:
+                fig1 = optuna.visualization.plot_param_importances(study)
+                fig2 = optuna.visualization.plot_parallel_coordinate(study)
+                
+                fig2.write_image(self.hparams['checkpoints_path'] +'/_parallel_coordinate.pdf')
+                fig1.write_image(self.hparams['checkpoints_path'] +'/_param_importance.pdf')
+            except:
+                pass
+            results_df = study.trials_dataframe()
+            results_df.to_csv( f'{self.hparams["checkpoints_path"]}/Seq2Point_Study_{exp_name}_{appliance_name}.csv')
+            joblib.dump(study, f'{self.hparams["checkpoints_path"]}/Seq2Point_Study_{exp_name}_{appliance_name}.pkl')
+            
+            # Restoring the best model and use it for the testing
+            self.best_trials[appliance_name] = study.best_trial.number 
+            app_model, _ = self.get_net_and_loaders()
+            #TODO: load checkpoints
+            self.run_id[appliance_name] =  study.user_attrs["best_run_id"]
+            
+        else:
+            # Check if the appliance was already trained. If not then create a new model for it
+            
+            if self.hparams['kfolds'] > 1:
+                self.models[appliance_name] ={}
+                # Getting the required data for the appliance
+                _, dataloader = self.get_net_and_loaders()
+                self.data_loaders[appliance_name]=dataloader
+                dataset = dataloader(inputs=self._data['features'], targets=power)
+                
+                # Splitting the data into several folds
+                fold = TimeSeriesSplit(n_splits=self.hparams['kfolds'], test_size=self.hparams['test_size'], gap = self.hparams['gap'])
+                scores = []
+                
+                # Using each fold as a validation data
+                for fold_idx, (train_idx, valid_idx) in enumerate(fold.split(range(len(dataset)))):
+                    print(f'started training for the fold {fold_idx}.')
+                    app_model, _ = self.get_net_and_loaders()
+                    self.models[appliance_name][f'fold_{fold_idx}'] = pilModel(app_model, self.hparams)
+                    train_data = torch.utils.data.Subset(dataset, train_idx)
+                    val_data = torch.utils.data.Subset(dataset, valid_idx)
+                    
+                    train_loader = torch.utils.data.DataLoader(train_data, 
+                                                               self.hparams['batch_size'], 
+                                                               shuffle=True, 
+                                                               collate_fn= 
+                                                                NILM_MODELS[self.hparams['model_name']]['extra_params']['collate_fns'](
+                                                                    self.hparams, sample=True)  if 'collate_fns' in  NILM_MODELS[self.hparams['model_name']]['extra_params'] else None,
+                                                               num_workers=self.hparams['num_workers'])
+                    
+                    val_loader = torch.utils.data.DataLoader(val_data, 
+                                                        self.hparams['batch_size'], 
+                                                        shuffle=False, 
+                                                        collate_fn= 
+                                                                NILM_MODELS[self.hparams['model_name']]['extra_params']['collate_fns'](
+                                                                    self.hparams, sample=False)  if 'collate_fns' in  NILM_MODELS[self.hparams['model_name']]['extra_params'] else None,
+                                                        num_workers=self.hparams['num_workers'])
+                
+                    # select experiment if does not exist create it 
+                    # an experiment is created for each appliance
+                    mlflow.set_experiment(f'{appliance_name}')
+                    
+                    
+            
+                    # Start a new for the current appliance
+                    with mlflow.start_run(run_name=self.hparams['model_name']): 
+                        # Auto log all MLflow from lightening
+                        mlflow.pytorch.autolog()  
+                        # Save the run ID to use in testing phase
+                        self.run_id[appliance_name] =  mlflow.active_run().info.run_id
+                        # Log parameters of current run 
+                        mlflow.log_params(self.hparams)
+                        # Model Training
+                        mae_loss = self.train_model(appliance_name, 
+                                                    train_loader, 
+                                                    val_loader,
+                                                    exp_name,
+                                                    dataset.mean if self.hparams['target_norm'] == 'z-norm' else None,
+                                                    dataset.std  if self.hparams['target_norm'] == 'z-norm' else None,
+                                                    fold_idx = fold_idx,
+                                                    model=self.models[appliance_name][f'fold_{fold_idx}'])
+                    
+                    scores.append(mae_loss)
+                                        
+                
+        
+            else:
+                if 'Multi-appliance' not in self.models:
+                    print("First model training for Multi-appliance model")
+                    #select model and data loaders to use
+                    net, dataloader = self.get_net_and_loaders()
+                    self.models['Multi-appliance'] = pilModel(net, self.hparams)
+                    self.data_loaders['Multi-appliance'] = dataloader
+                # Retrain the particular appliance
+                else:
+                    print("Started Retraining Muti-appliance model")
+                
+                
+                dataloader  = self.data_loaders['Multi-appliance']
+        
+                data = dataloader(inputs=self._data['features'], targets=self._data['targets'])
+                
+                train_data, val_data=torch.utils.data.random_split(data, 
+                                                     [int(data.len*(1-0.15)), data.len - int(data.len*(1-0.15))], 
+                                                     generator=torch.Generator().manual_seed(42))
+                train_loader = torch.utils.data.DataLoader(train_data, self.hparams['batch_size'], shuffle=True, 
+                                                           collate_fn= 
+                                                            NILM_MODELS[self.hparams['model_name']]['extra_params']['collate_fns'](
+                                                                self.hparams, sample=True)  if 'collate_fns' in  NILM_MODELS[self.hparams['model_name']]['extra_params'] else None,
+                                                           num_workers=self.hparams['num_workers'])
+                val_loader = torch.utils.data.DataLoader(val_data, 
+                                                    self.hparams['batch_size'], 
+                                                    shuffle=False, 
+                                                    collate_fn= 
+                                                            NILM_MODELS[self.hparams['model_name']]['extra_params']['collate_fns'](
+                                                                self.hparams, sample=False)  if 'collate_fns' in  NILM_MODELS[self.hparams['model_name']]['extra_params'] else None,
+                                                    num_workers=self.hparams['num_workers'])
+                
+                # select experiment if does not exist create it 
+                # an experiment is created for each appliance
+                mlflow.set_experiment(f'Multi-appliance')
+                
+                # Start a new for the current appliance
+                with mlflow.start_run(): 
+                    # Auto log all MLflow from lightening
+                    mlflow.pytorch.autolog()  
+                    # Save the run ID to use in testing phase
+                    self.run_id['Multi-appliance'] =  mlflow.active_run().info.run_id
+                    # Log parameters of current run 
+                    mlflow.log_params(self.hparams)
+                    # Model Training
+                    self.train_model(
+                        'Multi-appliance', 
+                        train_loader, 
+                        val_loader,
+                        exp_name,
+                        data.mean if self.hparams['target_norm'] == 'z-norm' else 0,
+                        data.std if self.hparams['target_norm'] == 'z-norm' else 1)
+        new_params = {"checkpoints_path": original_checkpoint }
+        self.hparams.update(new_params)   
 
         
         
