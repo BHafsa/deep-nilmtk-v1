@@ -141,6 +141,11 @@ class generalDataLoader(torch.utils.data.Dataset):
             
             elif self.seq_type =="seq2quantile":
                 targets=torch.quantile(self.targets[indices], q=self.q, dim=0)
+                print(f"""
+                
+                {targets.shape}
+                
+                """)
                 return inputs,  targets
             
             else:

@@ -197,14 +197,15 @@ class UNETNILMSeq2Quantile(nn.Module):
     
     It can be used as follows:
 
-    .. code-block::python 
+    .. code-block:: python
     
         'UNETNiLMSeq2Q':NILMExperiment({
                         "model_name": 'UNETNiLMSeq2Quantile', 
-                        'in_size': 481,
+                        'in_size': 480,
                         'feature_type':'mains', 
-                        'input_norm':'lognorm',
+                        'input_norm':'z-norm',
                         'target_norm':'z-norm',
+                        'kfolds':3,
                         'seq_type':'seq2quantile', 
                         'max_nb_epochs':1
                         }),
@@ -338,7 +339,7 @@ class UNETNILMSeq2Quantile(nn.Module):
         q_pred = torch.quantile(pred, q=q, dim=1).permute(1,0,2)
         
         
-        pred  = q_pred[self.seq_len//2:,q_pred.size(1)//2,:]
+        pred  = q_pred[:,q_pred.size(1)//2,:]
         
         
         results = {"pred":pred, "q_pred":q_pred, "pred_quantile":pred}

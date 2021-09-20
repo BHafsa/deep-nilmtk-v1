@@ -339,7 +339,7 @@ class BERT4NILM(nn.Module):
             self.hidden, self.heads, self.hidden * 4, self.dropout_rate) for _ in range(self.n_layers)])
 
         self.deconv = create_deconv1(
-            in_channels=self.hidden, out_channels=self.hidden, kernel_size=4, stride=2, padding=1)
+            in_channels=self.hidden, out_channels=self.hidden, kernel_size=4, stride=2, padding= 1, output_padding= 0 if self.original_len % 2 ==0 else 1)
         self.linear1 = create_linear(self.hidden, 128)
         self.linear2 = create_linear(128, self.output_size)
 
@@ -396,6 +396,7 @@ class BERT4NILM(nn.Module):
         logits_status = self.compute_status(logits_energy)
             
         mask = (status >= 0).to(seqs.device)
+       
         labels_masked = torch.masked_select(labels, mask).view((-1, batch_shape[-1])).float()
         logits_masked = torch.masked_select(logits, mask).view((-1, batch_shape[-1])).float()
         status_masked = torch.masked_select(status, mask).view((-1, batch_shape[-1])).float()

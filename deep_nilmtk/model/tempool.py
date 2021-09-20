@@ -64,14 +64,16 @@ class TemporalPooling(nn.Module):
 
     def forward(self, x):
         # TODO: verify that the inputs are in the right shape
+        size= x.shape[2]
         x = self.pool(x)
         
         x = self.conv(x)
-
-        x = self.bn(F.relu(x))
         
-        x = self.drop(F.interpolate(x, scale_factor=self.kernel_size,
-                                    mode='linear', align_corners=True))
+        x = self.bn(F.relu(x))
+        x= F.interpolate(x, size=size,
+                                    mode='linear', align_corners=True)
+        
+        x = self.drop(x)
         return x
 
 
@@ -79,10 +81,10 @@ class Decoder(nn.Module):
     """
     Decoder block of the Temporal_pooling layer 
     """
-    def __init__(self, in_features=3, out_features=1, kernel_size=2, stride=2):
+    def __init__(self, in_features=3, out_features=1, kernel_size=2, stride=2, padding=0, output_padding=0):
         super(Decoder, self).__init__()
         self.conv = nn.ConvTranspose1d(in_features, out_features,
-                                       kernel_size=kernel_size, stride=stride,
+                                       kernel_size=kernel_size, stride=stride, padding=padding, output_padding=output_padding,
                                        bias=False)
         self.bn = nn.BatchNorm1d(out_features)
 
@@ -152,7 +154,6 @@ class PTPNet(nn.Module):
         input_features= 4 if params['feature_type'] == 'combined' else 1
         features = params['init_features'] if 'init_features' in params else 32
         dropout=params['dropout'] if 'dropout' in params else 0.1
-        self.border = params['border'] if 'border' in params else 16
         
         self.seq_len = output_len
         
@@ -164,24 +165,24 @@ class PTPNet(nn.Module):
         k = 1
 
         self.encoder1 = Encoder(input_features, features, kernel_size=3,
-                                 padding=0, dropout=dropout)
+                                 padding=1, dropout=dropout)
                         
                         
-        # (batch, input_len - 2, 32)
+        # (batch, input_len , 32)
         self.pool1 = nn.MaxPool1d(kernel_size=p, stride=p)
 
         self.encoder2 = Encoder(features * 1 ** k, features * 2 ** k,
-                                 kernel_size=3, padding=0, dropout=dropout)
-        # (batch, [input_len - 6] / 2, 64)
+                                 kernel_size=3, padding=1, dropout=dropout)
+        # (batch, input_len  / 2, 64)
         self.pool2 = nn.MaxPool1d(kernel_size=p, stride=p)
 
         self.encoder3 = Encoder(features * 2 ** k, features * 4 ** k,
-                                 kernel_size=3, padding=0, dropout=dropout)
+                                 kernel_size=3, padding=1, dropout=dropout)
         # (batch, [input_len - 12] / 4, 128)
         self.pool3 = nn.MaxPool1d(kernel_size=p, stride=p)
 
         self.encoder4 = Encoder(features * 4 ** k, features * 8 ** k,
-                                 kernel_size=3, padding=0, dropout=dropout)
+                                 kernel_size=3, padding=1, dropout=dropout)
         # (batch, [input_len - 30] / 8, 256)
 
         # Compute the output size of the encoder4 layer
@@ -209,8 +210,14 @@ class PTPNet(nn.Module):
                                        kernel_size=int(s / 2) - int(s / 2) % 2  if int(s/ 2) > 0 else 1,
                                       dropout=dropout)
 
-        self.decoder = Decoder(2 * features * 8 ** k, features * 1 ** k,
-                                kernel_size=p ** 3, stride=p ** 3)
+        padding = ( ((self.seq_len +self.border) // p ** 3) * p ** 3 - self.seq_len) // 2
+        
+        if self.seq_len % 2 == 0:
+            self.decoder = Decoder(2 * features * 8 ** k, features * 1 ** k,
+                                kernel_size=p ** 3, stride=p ** 3, padding=padding)
+        else:
+            self.decoder = Decoder(2 * features * 8 ** k, features * 1 ** k,
+                                kernel_size=p ** 3, stride=p ** 3, padding=padding+1, output_padding = 1)
 
         self.activation = nn.Conv1d(features * 1 ** k, out_channels,
                                     kernel_size=1, padding=0)
@@ -237,6 +244,7 @@ class PTPNet(nn.Module):
        
         enc1 = self.encoder1(x)
         
+        
         enc2 = self.encoder2(self.pool1(enc1))
         
         enc3 = self.encoder3(self.pool2(enc2))
@@ -250,7 +258,6 @@ class PTPNet(nn.Module):
         
         
         dec = self.decoder(torch.cat([enc4, tp1, tp2, tp3, tp4], dim=1))
-        
        
         
         pw = self.power(dec)

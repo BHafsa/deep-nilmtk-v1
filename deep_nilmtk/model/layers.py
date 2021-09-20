@@ -42,13 +42,14 @@ def create_conv1(in_channels, out_channels,
 
 def create_deconv1(in_channels, out_channels,
                    kernel_size, bias=True,
-                   stride=2, padding = 0):
+                   stride=2, padding = 0, output_padding=0):
     m = nn.ConvTranspose1d(in_channels,
                            out_channels, 
                            kernel_size, 
                            bias=bias, 
                            stride=stride,
-                           padding=padding)
+                           padding=padding,
+                           output_padding=output_padding)
     nn.init.xavier_normal_(m.weight.data)
     return m
 
