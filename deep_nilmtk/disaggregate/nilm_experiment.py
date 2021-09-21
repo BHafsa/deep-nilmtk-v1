@@ -148,6 +148,11 @@ class NILMExperiment(Disaggregator):
             if not self.hparams['multi_appliance']:
                 self.single_appliance_fit()
             else:
+                print("""
+                
+                This is partial fit with multi-applaince
+                
+                """)
                 self.multi_appliance_fit()
 
     def disaggregate_chunk(self,test_main_list,do_preprocessing=True):
@@ -192,8 +197,6 @@ class NILMExperiment(Disaggregator):
           
         if model is not None:
             self.models = model
-
-        
 
         if do_preprocessing:
             test_main_list = data_preprocessing(test_main_list, None,
@@ -322,6 +325,8 @@ class NILMExperiment(Disaggregator):
             
             test_predictions.append(results)
             test_results.append(result_dict)
+
+
 
         np.save(self.hparams['results_path']+f"{self.exp_name}.npy", test_results)   
          
@@ -797,7 +802,7 @@ class NILMExperiment(Disaggregator):
         the use of cross-validation and hyper-parameters optimisation. The checkpoints for 
         each model are saved in the correspondng path.
         """        
-        self.exp_name = f"{self.hparams['model_name']}_{self.hparams['data']}_single_appliance_{self.hparams['experiment_label']}"
+        self.exp_name = f"{self.hparams['model_name']}_{self.hparams['data']}_{self.hparams['experiment_label']}"
         original_checkpoint = self.hparams['checkpoints_path']
         
         
@@ -814,8 +819,8 @@ class NILMExperiment(Disaggregator):
             # Use Optuna fot parameter optimisation of the model
             study = optuna.create_study(study_name=exp_name, direction="minimize")
             self.optuna_params ={
-                'power' :power,
-                'appliance_name':appliance_name,
+                'power' :self._data['targets'],
+                'appliance_name':'Multi-appliance',
                 'exp_name': exp_name
                 }
             
@@ -832,7 +837,7 @@ class NILMExperiment(Disaggregator):
                 model.eval()
         
                 # Save best model for testing time
-                self.models[appliance_name] = model
+                self.models['Multi-appliance'] = model
             else:
                 study.optimize(self.objective_cv, n_trials=self.hparams['n_trials'], callbacks=[self.save_best_model])
             
@@ -846,24 +851,24 @@ class NILMExperiment(Disaggregator):
             except:
                 pass
             results_df = study.trials_dataframe()
-            results_df.to_csv( f'{self.hparams["checkpoints_path"]}/Seq2Point_Study_{exp_name}_{appliance_name}.csv')
-            joblib.dump(study, f'{self.hparams["checkpoints_path"]}/Seq2Point_Study_{exp_name}_{appliance_name}.pkl')
+            results_df.to_csv( f'{self.hparams["checkpoints_path"]}/Seq2Point_Study_{exp_name}_Multi-appliance.csv')
+            joblib.dump(study, f'{self.hparams["checkpoints_path"]}/Seq2Point_Study_{exp_name}_Multi-appliance.pkl')
             
             # Restoring the best model and use it for the testing
-            self.best_trials[appliance_name] = study.best_trial.number 
+            self.best_trials['Multi-appliance'] = study.best_trial.number 
             app_model, _ = self.get_net_and_loaders()
             #TODO: load checkpoints
-            self.run_id[appliance_name] =  study.user_attrs["best_run_id"]
+            self.run_id['Multi-appliance'] =  study.user_attrs["best_run_id"]
             
         else:
             # Check if the appliance was already trained. If not then create a new model for it
             
             if self.hparams['kfolds'] > 1:
-                self.models[appliance_name] ={}
+                self.models['Multi-appliance'] ={}
                 # Getting the required data for the appliance
                 _, dataloader = self.get_net_and_loaders()
-                self.data_loaders[appliance_name]=dataloader
-                dataset = dataloader(inputs=self._data['features'], targets=power)
+                self.data_loaders['Multi-appliance']=dataloader
+                dataset = dataloader(inputs=self._data['features'], targets=self._data['targets'])
                 
                 # Splitting the data into several folds
                 fold = TimeSeriesSplit(n_splits=self.hparams['kfolds'], test_size=self.hparams['test_size'], gap = self.hparams['gap'])
@@ -873,7 +878,7 @@ class NILMExperiment(Disaggregator):
                 for fold_idx, (train_idx, valid_idx) in enumerate(fold.split(range(len(dataset)))):
                     print(f'started training for the fold {fold_idx}.')
                     app_model, _ = self.get_net_and_loaders()
-                    self.models[appliance_name][f'fold_{fold_idx}'] = pilModel(app_model, self.hparams)
+                    self.models['Multi-appliance'][f'fold_{fold_idx}'] = pilModel(app_model, self.hparams)
                     train_data = torch.utils.data.Subset(dataset, train_idx)
                     val_data = torch.utils.data.Subset(dataset, valid_idx)
                     
@@ -895,7 +900,7 @@ class NILMExperiment(Disaggregator):
                 
                     # select experiment if does not exist create it 
                     # an experiment is created for each appliance
-                    mlflow.set_experiment(f'{appliance_name}')
+                    mlflow.set_experiment(f'Multi-appliance')
                     
                     
             
@@ -904,18 +909,18 @@ class NILMExperiment(Disaggregator):
                         # Auto log all MLflow from lightening
                         mlflow.pytorch.autolog()  
                         # Save the run ID to use in testing phase
-                        self.run_id[appliance_name] =  mlflow.active_run().info.run_id
+                        self.run_id['Multi-appliance'] =  mlflow.active_run().info.run_id
                         # Log parameters of current run 
                         mlflow.log_params(self.hparams)
                         # Model Training
-                        mae_loss = self.train_model(appliance_name, 
+                        mae_loss = self.train_model('Multi-appliance', 
                                                     train_loader, 
                                                     val_loader,
                                                     exp_name,
                                                     dataset.mean if self.hparams['target_norm'] == 'z-norm' else None,
                                                     dataset.std  if self.hparams['target_norm'] == 'z-norm' else None,
                                                     fold_idx = fold_idx,
-                                                    model=self.models[appliance_name][f'fold_{fold_idx}'])
+                                                    model=self.models['Multi-appliance'][f'fold_{fold_idx}'])
                     
                     scores.append(mae_loss)
                                         
@@ -976,7 +981,7 @@ class NILMExperiment(Disaggregator):
         new_params = {"checkpoints_path": original_checkpoint }
         self.hparams.update(new_params)   
 
-        
+     
         
             
                    
