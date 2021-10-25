@@ -237,7 +237,20 @@ class PTPNet(nn.Module):
         
         self.power_scale = params["power_scale"] if "power_scale" in params else 2000.0
         
-        
+    @staticmethod
+    def suggest_hparams(self, trial):
+        """
+        Function returning list of params that will be suggested from optuna
+
+        :param trial: Optuna Trial.
+        :type trial: optuna.trial
+        :return: Parameters with values suggested by optuna
+        :rtype: dict
+        """
+        window_length = trial.suggest_int('in_size', low=50, high=1800) 
+        return {
+            'in_size': window_length,
+            } 
     
     def forward(self, x):
         # TODO: verify that the shapes with the original paper using the same parameters 
@@ -285,7 +298,7 @@ class PTPNet(nn.Module):
         
         
         
-        loss = (self.pow_w * pow_loss/ self.pow_loss_avg + self.act_w * act_loss / self.act_loss_avg)
+        loss = (self.pow_w * pow_loss+ self.act_w * act_loss )
         
         error = (output_power - target_power)
         mae = error.abs().data.mean()
@@ -363,10 +376,10 @@ class PTPNet(nn.Module):
         
         results ={
             # 'aggregates': torch.tensor(x_true), 
-            'pred': pred[self.border//2:], # this done to remove the data that was added 
+            'pred': pred[:], # this done to remove the data that was added 
                                            # during padding, data at the end will automatically 
                                            # be removed by the API
-            'pred_states': torch.tensor(s_hat)[self.border//2:]
+            'pred_states': torch.tensor(s_hat)[:]
         }
         
         return results
@@ -379,6 +392,11 @@ class PTPNet(nn.Module):
         :return: Aggregted sequence
         :rtype: tensor
         """
+        print(f'''
+        
+        {prediction.shape}
+        
+        ''')
         l = self.seq_len
         n = prediction.shape[0] + l - 1
         sum_arr = np.zeros((n))

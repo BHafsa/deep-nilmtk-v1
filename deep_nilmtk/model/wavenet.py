@@ -1,4 +1,3 @@
-
 import math
 import torch
 import torch.nn as nn
@@ -203,9 +202,9 @@ class DilatedResidualBlock(nn.Module):
         init_layer(self.mixing_conv)
 
     def forward(self, data_in):
-
+      
         out = self.dilated_conv(data_in)
-
+       
         out1 = out.narrow(-2, 0, self.dilation_channels)
         out2 = out.narrow(-2, self.dilation_channels, self.dilation_channels)
         tanh_out = torch.tanh(out1)
@@ -214,7 +213,9 @@ class DilatedResidualBlock(nn.Module):
         data = self.mixing_conv(data)
         res = data.narrow(-2, 0, self.residual_channels)
         skip = data.narrow(-2, self.residual_channels, self.skip_channels)
+        
         res = res + data_in
+        
         return res, skip
         
         
@@ -253,12 +254,10 @@ class DilatedResidualBlock2(nn.Module):
 class WaveNet(S2S):
     """
     .. _wavenilm:
-
     WaveNet model for load disaggregtion using residual and dilated convolutions.
     This model a sequence to subsequence model where:
     Output_sequence_length = Input_sequence_length - L
     L = (2 ** layers - 1) * (kernel_size - 1) + 1
-
     
     """
 
@@ -316,7 +315,7 @@ class WaveNet(S2S):
         #data_out = F.relu(data_out)
         data_out = self.final_conv(data_out)
         
-        data_out = data_out.narrow(-1, self.seq_len//2, data_out.size()[-1]-self.seq_len)
+        # data_out = data_out.narrow(-1, self.seq_len//2, data_out.size()[-1]-self.seq_len)
         # data_out = data_out.view(data_out.shape[0], data_out.shape[2])
         
         if self.to_binary:
@@ -328,7 +327,6 @@ class WaveNet(S2S):
 class WaveNetBGRU(nn.Module):
     """
     WaveNet model with a GRU 
-
     :param nn: [description]
     :type nn: [type]
     :return: [description]
@@ -418,7 +416,6 @@ class WaveNetBGRU(nn.Module):
 class WaveNetBGRU_speedup(nn.Module):
     """
     WaveNet with a GRU and faster generation fo predictions
-
     :param nn: [description]
     :type nn: [type]
     :return: [description]

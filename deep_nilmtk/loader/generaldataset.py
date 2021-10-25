@@ -83,9 +83,15 @@ class generalDataLoader(torch.utils.data.Dataset):
             if  params['target_norm'] == 'z-norm':
                 self.mean = np.mean(targets)
                 self.std = np.std(targets)
-                
                 self.targets = torch.tensor( (targets - self.mean) / self.std ).float()
-            else:
+            elif params['target_norm'] == 'min-max':
+                self.min = np.min(targets)
+                self.max = np.max(targets)
+                
+                self.targets = torch.tensor( (targets - self.min) / (self.max- self.min) ).float()
+            
+            elif params['target_norm'] == 'lognorm':
+                
                 self.targets = torch.tensor(targets).float().log1p()
                 
             print(f"inputs {self.inputs.shape}, targets {self.targets.shape}")
@@ -113,22 +119,26 @@ class generalDataLoader(torch.utils.data.Dataset):
         :rtype: np.array
         """
         indices = self.indices[index : index + self.num_points]
-        inds_context = sorted(indices[self.num_points//2:self.num_points])
         
-        # inds_context = sorted(indices[:self.context_size])
-        inds_targs   = sorted(indices[self.context_size:self.num_points])
+        inds_context = sorted(indices)[self.num_points//2:]
+        
+        
+        inds_targs   = sorted(indices)[self.context_size:self.num_points]
         
         
         inputs = self.inputs[sorted(indices)]
         if self.targets is not None:
             if self.seq_type =="seq2point":
                 if self.point_position == "last_point":
-                    targets  = self.targets[inds_targs]
+                    targets  = self.targets[sorted(indices)[-1]]
                     return inputs,  targets
 
+                elif self.point_position == "midpoint":
+                    targets  =self.targets[sorted(indices)[self.num_points//2]]
+                    return inputs,  targets
 
                 elif self.point_position == "median":
-                    targets  =torch.median(self.targets[inds_context], dim=0).values
+                    targets  =torch.median(self.targets[sorted(indices)], dim=0).values
                     return inputs,  targets
 
                 else:
@@ -140,12 +150,9 @@ class generalDataLoader(torch.utils.data.Dataset):
                 return inputs,  targets
             
             elif self.seq_type =="seq2quantile":
-                targets=torch.quantile(self.targets[indices], q=self.q, dim=0)
-                print(f"""
-                
-                {targets.shape}
-                
-                """)
+                seq = self.targets[sorted(indices)]
+                # print(f'{seq.shape}')
+                targets=torch.quantile(seq, q=self.q, dim=0)
                 return inputs,  targets
             
             else:

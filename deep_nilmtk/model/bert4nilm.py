@@ -296,19 +296,29 @@ class BERT4NILM(nn.Module):
        
 
         self.original_len = params['in_size'] if 'in_size' in params else 99
-        self.output_size = len(params['appliances']) if 'appliances' in params else 1
+        self.output_size = len(params['appliances']) if params['multi_appliance'] else 1
         self.stride = params['stride'] if 'stride' in params else 1
 
-        # this is only valide for a single appliance usage
         # The original mode was proposed for several appliances
-        self.cutoff = [params['cutoff'][params['appliances'][0]]] if 'cutoff' in params else None
-        self.threshold = [params['threshold'][params['appliances'][0]]] if 'threshold' in params else None
-        self.min_on = [params['min_on'][params['appliances'][0]]] if 'min_on' in params else None
-        self.min_off = [params['min_off'][params['appliances'][0]]] if 'min_off' in params else None
+        if params['multi_appliance']:
+            self.threshold = [params['threshold'][app] for app in params['appliances']] if 'threshold' in params else None
+
+            self.cutoff = [params['cutoff'][app] for app in params['appliances']] if 'cutoff' in params else None
+
+            self.min_on = [params['min_on'][app] for app in params['appliances']] if 'min_on' in params else None
+            self.min_off = [params['min_off'][app] for app in params['appliances']] if 'min_off' in params else None
+        else:
+            self.threshold = [params['threshold'][params['appliances'][0]]] if 'threshold' in params else None
+
+            self.cutoff = [params['cutoff'][params['appliances'][0]]] if 'cutoff' in params else None
+
+            self.min_on = [params['min_on'][params['appliances'][0]]] if 'min_on' in params else None
+            self.min_off = [params['min_off'][params['appliances'][0]]] if 'min_off' in params else None
         
         # self.C0 = [params['lambda'][params['appliances'][0]]] if 'lambda' in params else [1e-6]
         
-      
+        self.main_mu = params['main_mu']
+        self.main_std = params['main_std']
         
         self.set_hpramas(self.cutoff, self.threshold, self.min_on, self.min_off)
 
@@ -317,7 +327,7 @@ class BERT4NILM(nn.Module):
         self.latent_len = int(self.original_len / 2)
         self.dropout_rate = params['dropout'] if 'dropout' in params else 0.2
 
-        self.hidden = params['hidden'] if 'hidden' in params else 256
+        self.hidden = params['hidden'] if 'hidden' in params else 32
         self.heads = params['heads'] if 'heads' in params else 2
         self.n_layers = params['n_layers'] if 'n_layers' in params else 2
 
@@ -358,7 +368,6 @@ class BERT4NILM(nn.Module):
     
 
     def forward(self, sequence):
-        
         x_token = self.pool(self.conv(sequence.unsqueeze(1))).permute(0, 2, 1)
 
         embedding = x_token + self.position(sequence)
@@ -395,7 +404,7 @@ class BERT4NILM(nn.Module):
         logits_energy = self.cutoff_energy(logits * self.cutoff.to(seqs.device))
         logits_status = self.compute_status(logits_energy)
             
-        mask = (status >= 0).to(seqs.device)
+        mask = (status > 0).to(seqs.device)
        
         labels_masked = torch.masked_select(labels, mask).view((-1, batch_shape[-1])).float()
         logits_masked = torch.masked_select(logits, mask).view((-1, batch_shape[-1])).float()
@@ -509,7 +518,8 @@ class BERT4NILM(nn.Module):
         e_pred_curve = []
         s_pred_curve = []
 
-        
+        true = []
+
         with tqdm(total = len(values), file=sys.stdout) as pbar:
             with torch.no_grad():
                 for batch_idx, batch in enumerate(test_dataloader):
@@ -517,15 +527,15 @@ class BERT4NILM(nn.Module):
 
                     logits = self.forward(seqs)
 
+                    true.append(seqs)
+
                     logits_energy = self.cutoff_energy(logits * self.cutoff.to(seqs.device)) # Denormalization
                     logits_status = self.compute_status(logits_energy)
                     
                     status = (logits_status > 0) * 1
                     
                     s_pred_curve.append(status )
-                    e_pred_curve.append(logits_energy * status)
-                    
-                    
+                    e_pred_curve.append(logits_energy * status) 
                     
                     del  batch    
                     pbar.set_description('processed: %d' % (1 + batch_idx))
@@ -536,9 +546,16 @@ class BERT4NILM(nn.Module):
         # TODO: Denormalisation !!! Previously done ?
         e_pred_curve = torch.cat(e_pred_curve, 0)
         s_pred_curve = torch.cat(s_pred_curve, 0)
-        
+
+        true = torch.cat(true, 0)
+        true = true * self.main_std +self.main_mu
+
         e_pred_curve = self.aggregate_seqs(e_pred_curve.squeeze())
         s_pred_curve = self.aggregate_seqs(s_pred_curve.squeeze())
+        true = self.aggregate_seqs(true.squeeze())
+
+        e_pred_curve[e_pred_curve>true] = 0
+        s_pred_curve[e_pred_curve>true] = 0
         
         results = {
             "pred":e_pred_curve, 
@@ -563,16 +580,19 @@ class BERT4NILM(nn.Module):
         s = self.stride
         n = (prediction.shape[0] -1) * self.stride + l # this is yo take into consideration the stride
         
-        sum_arr = np.zeros((n))
-        counts_arr = np.zeros((n))
+        sum_arr = np.zeros((n, self.output_size))
+        counts_arr = np.zeros((n, self.output_size))
         o = len(sum_arr)
-        
+
+        if len(prediction.shape) == 2:
+            prediction = prediction.unsqueeze(dim=2)
+
         for i in range(prediction.shape[0]):
-            sum_arr[i*s:i*s + l] += prediction[i].reshape(-1).numpy()
-            counts_arr[i*s:i*s + l] += 1
+            sum_arr[i*s:i*s + l,:] += prediction[i,:,:].numpy()
+            counts_arr[i*s:i*s + l,:] += 1
             
         for i in range(len(sum_arr)):
-            sum_arr[i] = sum_arr[i] / counts_arr[i]
+            sum_arr[i,:] = sum_arr[i,:] / counts_arr[i,:]
         
         return torch.tensor(sum_arr)
         

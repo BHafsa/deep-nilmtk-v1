@@ -39,8 +39,7 @@ class UNETNILM(nn.Module):
             params):
         super().__init__()
         
-        
-        out_size= len(params['appliances']) if 'appliance' in params else params['out_size']
+        out_size= len(params['appliances']) if 'appliances' in params else 1
         
         if 'feature_type' in params:
             n_channels=4 if params['feature_type']=="combined" else 1
@@ -49,6 +48,7 @@ class UNETNILM(nn.Module):
         
         pool_filter = params['pool_filter'] if 'pool_filter' in params  else 8
         latent_size = params['latent_size'] if 'latent_size' in params  else 1024
+        self.target_norm = params['target_norm'] if 'target_norm' in params  else 'z-norm'
         
         layers = [nn.Sequential(create_conv1(n_channels, 30, 
                                              kernel_size=10, 
@@ -78,8 +78,8 @@ class UNETNILM(nn.Module):
                                 nn.Dropout(0.2),
                                 nn.Linear(latent_size, out_size))
         
-        self.mean = params['mean'] if 'mean' in params else 0
-        self.std = params['std'] if 'std' in params else 1
+        self.mean = params['mean'] if 'mean' in params else 0.0
+        self.std = params['std'] if 'std' in params else 1.0
         
     
             
@@ -98,7 +98,8 @@ class UNETNILM(nn.Module):
         for i, layer in enumerate(self.dec_layers):
            
             xi[-1] = layer(xi[-1], xi[-2 - i])
-            
+        
+        
         out = self.fc(xi[-1])
         return out
 
@@ -111,9 +112,11 @@ class UNETNILM(nn.Module):
         :return: loss function as returned form the model and MAE as returned from the model.
         :rtype: tuple(float,float)
         """
+        
         x, y  = batch 
         out   = self(x)  # BxCxT
         error = (y - out)
+    
         loss = F.mse_loss(out, y)
         mae = error.abs().data.mean()
         return  loss, mae   
@@ -152,11 +155,14 @@ class UNETNILM(nn.Module):
                     pbar.update(1)  
                 
                 pbar.close()
+
+        pred = torch.cat(pred, 0)
         
         # Perform the denormalization Here
         # Denormalise the output 
         if self.target_norm == 'z-norm':
             # z-normalisation
+            print(self.mean, self.std)
             pred = self.mean + self.std * pred
             pred = torch.tensor(np.where(pred > 0, pred, 0))
         elif self.target_norm =='min-max':
@@ -237,9 +243,12 @@ class UNETNILMSeq2Quantile(nn.Module):
         self.target_norm = params['target_norm']
         self.mean = params['mean'] if 'mean' in params else 0
         self.std = params['std'] if 'std' in params else 1
+
+
         
         
     def forward(self, x):
+        # print(x.shape)
         out = self.unet(x).reshape(x.size(0), -1, self.out_size)
         return out
     

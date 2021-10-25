@@ -182,7 +182,9 @@ def compute_status(appliances,
                     thresholds=None,
                     min_off=None,
                     min_on=None,
+                    max_power =None,
                     threshold_std=True,
+                    
                     return_means=False,
                     appliances_labels=[],
                     threshold_method='at'):
@@ -214,7 +216,7 @@ def compute_status(appliances,
     # Set the parameters according to given threshold method
     if threshold_method != "custom":
         (thresholds, min_off, min_on, threshold_std) = get_threshold_params(
-            appliances_labels, threshold_method
+            appliances_labels, threshold_method, minon=min_on, threshold=thresholds, minoff=min_off, max_power=max_power
         )
     
     arr_apps = np.expand_dims(appliances, axis=1)

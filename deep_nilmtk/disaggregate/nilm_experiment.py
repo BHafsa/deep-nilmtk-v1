@@ -103,7 +103,7 @@ class NILMExperiment(Disaggregator):
                                                             self.hparams['input_norm'], 
                                                             self.hparams['main_mu'], 
                                                             self.hparams['main_std'], 
-                                                            self.hparams['q_filter'])
+                                                            self.hparams['q_filter'], self.hparams['cutoff'] if 'cutoff' in self.hparams else None)
             # Data fromating according to the type of the model ['single-appliance', 'multi-appliance']
             self._data = {
                     "features":mains, 
@@ -144,15 +144,12 @@ class NILMExperiment(Disaggregator):
             results.mkdir(parents=True, exist_ok=True)
             figures.mkdir(parents=True, exist_ok=True)
 
+            self.hparams['appliances'] = [app_name for app_name, data in sub_main]
+
             # Select a fitting strategy according to the model type
             if not self.hparams['multi_appliance']:
                 self.single_appliance_fit()
             else:
-                print("""
-                
-                This is partial fit with multi-applaince
-                
-                """)
                 self.multi_appliance_fit()
 
     def disaggregate_chunk(self,test_main_list,do_preprocessing=True):
@@ -167,11 +164,11 @@ class NILMExperiment(Disaggregator):
         :rtype: list of pd.DataFrame
         """
         
-        if not self.hparams['multi_appliance']:
-            test_predictions = self.single_appliance_disaggregate(test_main_list, do_preprocessing = do_preprocessing)
+        if  self.hparams['multi_appliance']:
+            test_predictions = self.multi_appliance_disaggregate(test_main_list, do_preprocessing = do_preprocessing)
             return test_predictions
         else:
-            test_predictions = self.multi_appliance_disaggregate(test_main_list, do_preprocessing = do_preprocessing)
+            test_predictions = self.single_appliance_disaggregate(test_main_list, do_preprocessing = do_preprocessing)
             return test_predictions
 
     def single_appliance_disaggregate(self, test_main_list, model=None,do_preprocessing=True):
@@ -217,7 +214,7 @@ class NILMExperiment(Disaggregator):
             
             
             for appliance in self.models:
-            
+                
                 dataloader = self.data_loaders[appliance]
                 model = self.models[appliance]
                 
@@ -327,7 +324,6 @@ class NILMExperiment(Disaggregator):
             test_results.append(result_dict)
 
 
-
         np.save(self.hparams['results_path']+f"{self.exp_name}.npy", test_results)   
          
         return test_predictions
@@ -386,7 +382,7 @@ class NILMExperiment(Disaggregator):
                 
                 train_data, val_data = torch.utils.data.random_split(data, 
                                                      [int(data.len*(1-0.15)), data.len - int(data.len*(1-0.15))], 
-                                                     generator=torch.Generator().manual_seed(42))
+                                                     generator=torch.Generator().manual_seed(3407))
                 
                 train_loader = torch.utils.data.DataLoader(train_data, self.hparams['batch_size'], shuffle=True, 
                                                            collate_fn= 
@@ -403,7 +399,7 @@ class NILMExperiment(Disaggregator):
                                                     num_workers=self.hparams['num_workers'])
 
             # Auto log all MLflow from lightening
-            mlflow.pytorch.autolog()  
+            # mlflow.pytorch.autolog()  
             
             # Model Training
             if fold_idx is None:
@@ -490,6 +486,7 @@ class NILMExperiment(Disaggregator):
         :rtype: tuple(nn.Module, torch.utils.data.Dataset)
         """
         # Get the class of the required model from the config file
+       
         net = NILM_MODELS[self.hparams['model_name']]['model'](self.hparams)
         
         # Get the class of the related dataloader from the config file
@@ -630,7 +627,7 @@ class NILMExperiment(Disaggregator):
                         # Start a new for the current appliance
                         with mlflow.start_run(run_name=self.hparams['model_name']): 
                             # Auto log all MLflow from lightening
-                            mlflow.pytorch.autolog()  
+                            # mlflow.pytorch.autolog()  
                             # Save the run ID to use in testing phase
                             self.run_id[appliance_name] =  mlflow.active_run().info.run_id
                             # Log parameters of current run 
@@ -669,7 +666,7 @@ class NILMExperiment(Disaggregator):
                     
                     train_data, val_data=torch.utils.data.random_split(data, 
                                                          [int(data.len*(1-0.15)), data.len - int(data.len*(1-0.15))], 
-                                                         generator=torch.Generator().manual_seed(42))
+                                                         generator=torch.Generator().manual_seed(3407))
                     train_loader = torch.utils.data.DataLoader(train_data, self.hparams['batch_size'], shuffle=True, 
                                                                collate_fn= 
                                                                 NILM_MODELS[self.hparams['model_name']]['extra_params']['collate_fns'](
@@ -690,7 +687,7 @@ class NILMExperiment(Disaggregator):
                     # Start a new for the current appliance
                     with mlflow.start_run(): 
                         # Auto log all MLflow from lightening
-                        mlflow.pytorch.autolog()  
+                        # mlflow.pytorch.autolog()  
                         # Save the run ID to use in testing phase
                         self.run_id[appliance_name] =  mlflow.active_run().info.run_id
                         # Log parameters of current run 
@@ -794,7 +791,151 @@ class NILMExperiment(Disaggregator):
                 return logger.metrics[-2]["val_loss"], checkpoint_callback.best_model_path
 
     def multi_appliance_disaggregate(self, test_main_list, model=None,do_preprocessing=True):
-        return None
+        """
+        Perfroms load disaggregtaion for single appliance models. If Optuna was used during the 
+        training phase, it disaggregtaes the test_main_list using only the best trial. 
+        If cross-validation is used during training, it returns the average of predictions 
+        cross all folds for each applaince. In this later case, the predictions for each fold 
+        are also logged in the results folder under the name 
+        ['model_name']_[appliance_name]_all_folds_predictions.p. 
+        Alternatively, when both Optuna and cross-validation are used, it returns the average predictions 
+        of all folds for only the best trial.
+
+        :param test_main_list: Aggregate power measurements
+        :type test_main_list: liste of pd.DataFrame
+        :param model: Pre-trained appliance's models. Defaults to None.
+        :type model: dict, optional
+        :param do_preprocessing: Specify if pre-processing need to be done or not, defaults to True
+        :type do_preprocessing: bool, optional
+        :return: estimated power consumption of the considered appliances.
+        :rtype: liste of dict
+        """    
+          
+        if model is not None:
+            self.models = model
+
+        if do_preprocessing:
+            test_main_list = data_preprocessing(test_main_list, None,
+                                            self.hparams['feature_type'],
+                                            self.hparams['alpha'],
+                                            self.hparams['input_norm'], 
+                                            self.hparams['main_mu'], 
+                                            self.hparams['main_std'], 
+                                            self.hparams['q_filter'])
+        
+        test_predictions = []
+        test_results = []
+
+       
+
+        for test_main in test_main_list:
+            test_main = test_main.values
+            disggregation_dict = {}
+            result_dict = {}
+            dataloader = self.data_loaders['Multi-appliance']
+            model = self.models['Multi-appliance']
+            
+            
+        
+            data = dataloader(inputs=test_main, 
+                                targets=None,
+                                params = self.hparams )
+            test_loader = torch.utils.data.DataLoader(data, 
+                            self.hparams['batch_size'], 
+                            collate_fn= 
+                            NILM_MODELS[self.hparams['model_name']]['extra_params']['collate_fns'](
+                                self.hparams, sample=False)  if 'collate_fns' in  NILM_MODELS[self.hparams['model_name']]['extra_params'] else None,
+                            shuffle=False, 
+                            num_workers=self.hparams['num_workers'])
+            
+            exp_name = self.hparams['checkpoints_path']+f"{self.exp_name}_Multi-appliance"
+
+            
+
+
+            if self.hparams['use_optuna']:
+                    exp_name += f'/trial_{self.best_trials["Multi-appliance"]}/'
+
+            if self.hparams['kfolds'] > 1:
+                # TODO: check if average cross all folds or only the best model
+                app_result_cross_fold =[]
+                dump_results ={}
+                for fold in  model:
+                    #load checkpoints
+                    checkpoint_path = get_latest_checkpoint(exp_name+f'/{fold}')
+                    chechpoint=torch.load(checkpoint_path)
+                    model_fold = model[fold]
+                    model_fold.load_state_dict(chechpoint['state_dict'])
+                    
+                    model_fold.eval()
+                    
+                    network = model_fold.model.eval()
+                    
+                    if self.hparams['target_norm'] == 'z-norm' :
+                        network.mean = self.appliance_params["Multi-appliance"]['mean']
+                        network.std = self.appliance_params["Multi-appliance"]['std']
+                    elif self.hparams['target_norm'] == 'min-max' :
+                        network.min = self.appliance_params["Multi-appliance"]['min']
+                        network.max = self.appliance_params["Multi-appliance"]['max']
+                    # starter, ender = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
+                    # starter.record()
+                    results = network.predict(model_fold, test_loader) 
+                    # ender.record()
+                    # torch.cuda.synchronize()
+                    # curr_time = starter.elapsed_time(ender)
+                    # print(f'''
+                    
+                    # Inference time : {curr_time}
+                    
+                    # ''')
+                    df = results['pred'].cpu().numpy()
+                    app_result_cross_fold.append(df)
+                    dump_results [fold] = df
+                dump_results ['mean_preditions'] = pd.Series(np.mean(np.array(app_result_cross_fold), axis=0))
+                dump_results ['std_predictions'] = pd.Series(np.std(np.array(app_result_cross_fold), axis=0))
+                dump_results ['min_predictions'] = pd.Series(np.min(np.array(app_result_cross_fold), axis=0))
+                dump_results ['max_predictions'] = pd.Series(np.max(np.array(app_result_cross_fold), axis=0))
+                
+                pickle.dump(dump_results, open(f"{self.hparams['results_path']}/{self.hparams['model_name']}_{appliance}_all_folds_predictions.p", "wb"))
+                df = np.mean(np.array(app_result_cross_fold), axis=0)
+                
+            else:
+                #load checkpoints
+
+                checkpoint_path = get_latest_checkpoint(exp_name)
+                chechpoint=torch.load(checkpoint_path)
+                model.load_state_dict(chechpoint['state_dict'])
+                model.eval()
+                
+                network = model.model.eval()
+                
+                if self.hparams['target_norm'] == 'z-norm' :
+                        network.mean = self.appliance_params["Multi-appliance"]['mean']
+                        network.std = self.appliance_params["Multi-appliance"]['std']
+                elif self.hparams['target_norm'] == 'min-max' :
+                    network.min = self.appliance_params["Multi-appliance"]['min']
+                    network.max = self.appliance_params["Multi-appliance"]['max']
+                    
+                results = network.predict(model, test_loader) 
+                df = results['pred'].cpu().numpy()
+
+            
+            disggregation_dict ={
+                appliance : df[:, i].flatten() for i, appliance in enumerate(self.hparams["appliances"])
+            }
+
+            result_dict ={
+                appliance : {
+                    key: results[key][:,i].flatten() for key in results
+                } for i, appliance in enumerate(self.hparams['appliances'])
+            }
+
+            results = pd.DataFrame(disggregation_dict, dtype='float32')
+            
+            test_predictions.append(results)
+            test_results.append(result_dict)
+
+        return test_predictions
 
     def multi_appliance_fit(self):
         """
@@ -806,7 +947,7 @@ class NILMExperiment(Disaggregator):
         original_checkpoint = self.hparams['checkpoints_path']
         
         
-        exp_name = f"{self.exp_name}_multi_app"
+        exp_name = f"{self.exp_name}_Multi-appliance"
         checkpoints = Path(original_checkpoint +f"{exp_name}")
         checkpoints.mkdir(parents=True, exist_ok=True)
         #update checkpoint path
@@ -907,7 +1048,7 @@ class NILMExperiment(Disaggregator):
                     # Start a new for the current appliance
                     with mlflow.start_run(run_name=self.hparams['model_name']): 
                         # Auto log all MLflow from lightening
-                        mlflow.pytorch.autolog()  
+                        # mlflow.pytorch.autolog()  
                         # Save the run ID to use in testing phase
                         self.run_id['Multi-appliance'] =  mlflow.active_run().info.run_id
                         # Log parameters of current run 
@@ -944,7 +1085,7 @@ class NILMExperiment(Disaggregator):
                 
                 train_data, val_data=torch.utils.data.random_split(data, 
                                                      [int(data.len*(1-0.15)), data.len - int(data.len*(1-0.15))], 
-                                                     generator=torch.Generator().manual_seed(42))
+                                                     generator=torch.Generator().manual_seed(3407))
                 train_loader = torch.utils.data.DataLoader(train_data, self.hparams['batch_size'], shuffle=True, 
                                                            collate_fn= 
                                                             NILM_MODELS[self.hparams['model_name']]['extra_params']['collate_fns'](
@@ -965,7 +1106,7 @@ class NILMExperiment(Disaggregator):
                 # Start a new for the current appliance
                 with mlflow.start_run(): 
                     # Auto log all MLflow from lightening
-                    mlflow.pytorch.autolog()  
+                    # mlflow.pytorch.autolog()  
                     # Save the run ID to use in testing phase
                     self.run_id['Multi-appliance'] =  mlflow.active_run().info.run_id
                     # Log parameters of current run 

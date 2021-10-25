@@ -141,7 +141,7 @@ def get_exp_parameters():
     parser.add_argument('--n_layers', default=4, type=int)
     parser.add_argument('--out_size', default=0, type=int)
     parser.add_argument('--in_size', default=99, type=int)
-    parser.add_argument('--appliances', default=["fridge"], nargs='+', type=str)
+    parser.add_argument('--appliances', default=None, nargs='+', type=str)
     
     parser.add_argument('--patience_optim', default=5, type=int)
     parser.add_argument('--patience_check', default=5, type=int)
@@ -157,15 +157,15 @@ def get_exp_parameters():
 
     parser.add_argument('--feature_type', default="combined", type=str)      
     parser.add_argument('--alpha', default=0.1, type=float)
-    parser.add_argument('--seed', default=7777, type=float)
+    parser.add_argument('--seed', default=3407, type=float)
     parser.add_argument('--main_mu', default=150.0, type=float)
     parser.add_argument('--main_std', default=350.0, type=float)
-    parser.add_argument('--input_norm', default="lognorm", type=str)
+    parser.add_argument('--input_norm', default="z-norm", type=str)
     parser.add_argument('--q_filter', default=None, type=dict)
     parser.add_argument('--sample_second', default=6, type=int)
     parser.add_argument('--multi_appliance', default=False, type=bool)
     parser.add_argument('--seq_type', default="seq2point", type=str)
-    parser.add_argument('--point_position', default="median", type=str)
+    parser.add_argument('--point_position', default="midpoint", type=str)
     parser.add_argument('--target_norm', default="lognorm", type=str)
     
     parser.add_argument('--threshold_method', default="at", type=str)

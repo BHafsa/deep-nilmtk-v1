@@ -6,7 +6,6 @@ import random
 
 def pad_data(data, context_size):
     """Performs data padding for both target and aggregate consumption
-
     :param data: The aggregate power
     :type data: np.array
     :param context_size: The length of teh sequence.
@@ -29,26 +28,21 @@ def pad_data(data, context_size):
 class WaveNetDataLoader(torch.utils.data.Dataset):
     """
     .. _wavenetdataset:
-
     This class is the dataLoader for the WaveNILM NILM model. The original code 
     can be found here: https://github.com/jiejiang-jojo/fast-seq2point/
-
     :param inputs: The aggregate power.
     :type inputs: np.array
     :param targets: The target appliance(s) power consumption, defaults to None
     :type targets: np.array, optional
     :param params: Hyper-parameter values, defaults to {}
     :type params: dict, optional
-
     The hyperparameter dictionnary is expected to include the following parameters
-
     :param in_size: The input sequence length, defaults to 99
     :type in_size: int
     :param kernel_size: The size of teh kernel, defaults to 3.
     :type kernel_size: int
     :param layers: The number of layers of the model, defaults to 6.
     :type layers: int
-
     .. note:: 
        This data loader generates target sequence cenetred in the input sequence with a length difference  L between input and output sequence
        L = (2 ** layers - 1) * (kernel_size - 1) + 1
@@ -94,7 +88,6 @@ class WaveNetDataLoader(torch.utils.data.Dataset):
     def get_sample(self, index):
         """
         Generate a sample of power sequence.
-
         :param index: The start index of the first sequence
         :type index: int
         :return: Aggregate power and target consumption during training and only aggreagte power during testing
@@ -115,4 +108,4 @@ class WaveNetDataLoader(torch.utils.data.Dataset):
         
     
     def __getitem__(self, index):
-        return self.get_sample(index)  
+        return self.get_sample(index) 

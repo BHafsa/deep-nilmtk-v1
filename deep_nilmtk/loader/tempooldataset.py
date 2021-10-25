@@ -60,15 +60,23 @@ class TemPoolLoader(torch.utils.data.Dataset):
         seq_len = self.length + self.border
         units_to_pad = ((inputs.shape[0] // seq_len ) + 1) * seq_len - inputs.shape[0] + 2  
         
-        self.meter = pad_data(inputs, units_to_pad)
+        self.meter = pad_data(inputs, units_to_pad, self.border)
         
         self.appliance = targets
                
         
         if targets is not None:
            
-            self.appliance = pad_data(targets, units_to_pad)
-            self.status = compute_status(self.appliance, appliances_labels= params['appliances'], threshold_method = params['threshold_method'])
+            self.appliance = pad_data(targets, units_to_pad, self.border)
+            self.status = compute_status(
+                                        self.appliance, appliances_labels= params['appliances'], 
+                                        threshold_method = params['threshold_method'],
+                                        min_on=params['min_on'],
+                                        min_off = params['min_off'],
+                                        thresholds= params['threshold'],
+                                        max_power = params['max_power']
+                                        )
+
             if  params['target_norm'] == 'z-norm':
                 self.mean = np.mean(targets)
                 self.std = np.std(targets)
@@ -103,7 +111,6 @@ class TemPoolLoader(torch.utils.data.Dataset):
             x = torch.tensor(x).reshape((x.shape[0],-1)).permute(1,0)
             y = self.appliance[target_indices] 
             s= self.status[target_indices]
-            
             return x , y , torch.tensor(s)
         else:
             return torch.tensor(x).permute(1,0)

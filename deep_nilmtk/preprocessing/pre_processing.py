@@ -127,7 +127,7 @@ def data_preprocessing(aggregate, targets=None,
                        main_std=450,
                        q_filter={"q":50, "w":10},
                        main_min=0,
-                       main_max = 1500,):
+                       main_max = 1500,cutoff =None):
     """Default pre-processing function. It performs normalization of the input. 
     However, it leaves the target output normlization to the dataloader as 
     some loaders require to also generate the states from the the original data.
@@ -185,6 +185,9 @@ def data_preprocessing(aggregate, targets=None,
         sub_aggregate = []
         for app_name, app_dfs in appliance_list:
             app_df = pd.concat(app_dfs, axis=0)
+            if cutoff is not None:
+                app_df[app_df>cutoff[app_name]] = cutoff[app_name]
+
             sub_aggregate.append(app_df.values)
             sub_meters.append((app_name, app_df.values))
             

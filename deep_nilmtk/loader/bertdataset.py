@@ -14,7 +14,7 @@ class BERTDataset(torch.utils.data.Dataset):
 
 
     The normalization of the target applainces is performed 
-    at this level just after the generation of the operational states using predefined thresholds for the considered appliances. 
+    during in the step function after of the operational states using predefined thresholds for the considered appliances. 
     
     :param inputs: The aggregate power.
     :type inputs: np.array
@@ -45,19 +45,30 @@ class BERTDataset(torch.utils.data.Dataset):
 
         self.x = inputs 
         
-        self.threshold = [params['threshold'][params['appliances'][0]]] if 'threshold' in params else None
+        if params['multi_appliance']:
+            self.threshold = [params['threshold'][app] for app in params['appliances']] if 'threshold' in params else None
+
+            self.cutoff =[ params['cutoff'][app] for app in params['appliances']] if 'cutoff' in params else None
+
+            self.min_on = [params['min_on'][app] for app in params['appliances']] if 'min_on' in params else None
+            self.min_off = [params['min_off'][app] for app in params['appliances']] if 'min_off' in params else None
+        else:
+            self.threshold = [params['threshold'][params['appliances'][0]]] if 'threshold' in params else None
+
+            self.cutoff = [params['cutoff'][params['appliances'][0]]] if 'cutoff' in params else None
+
+            self.min_on = [params['min_on'][params['appliances'][0]]] if 'min_on' in params else None
+            self.min_off = [params['min_off'][params['appliances'][0]]] if 'min_off' in params else None
         
-        self.cutoff = [params['cutoff'][params['appliances'][0]]] if 'cutoff' in params else None
+
         
-        self.min_on = [params['min_on'][params['appliances'][0]]] if 'min_on' in params else None
-        self.min_off = [params['min_off'][params['appliances'][0]]] if 'min_off' in params else None
         
         self.window_size = params['in_size'] if 'in_size' in params else 480
         self.stride = params['stride'] if 'stride' in params else 1
         self.mask_prob = params['mask_prob'] if 'mask_prob' in params else 0.25
 
         self.y =targets
-        
+                
         if self.y is not None:
             self.y [targets > self.cutoff] =  self.cutoff
            
@@ -111,8 +122,8 @@ class BERTDataset(torch.utils.data.Dataset):
                     labels.append(temp)
                     on_offs.append(temp)
 
-            
             return torch.tensor(tokens).float(), torch.tensor(labels).float(), torch.tensor(on_offs).float()
+            
         else :
             # Testing Phase
             tokens = []

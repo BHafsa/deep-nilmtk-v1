@@ -48,6 +48,7 @@ class S2P(nn.Module):
         :type params: dict
         """
         super(S2P, self).__init__()
+        self.original_len = params['in_size']  if 'in_size' in params else 99
         self.target_norm = params['target_norm'] if 'target_norm' in params else 'z-norm'
         self.mean = params['mean'] if 'mean' in params else 0
         self.std = params['std'] if 'std' in params else 1
@@ -66,14 +67,11 @@ class S2P(nn.Module):
         :rtype: dict
         """
         
-        norm_ = trial.suggest_categorical('normalize', ['z-norm', 'lognorm'])
         window_length = trial.suggest_int('in_size', low=50, high=1800) 
         window_length += 1 if window_length % 2 == 0 else 0
         return {
-            'input_norm': norm_,
-            'output_norm':norm_,
             'in_size': window_length,
-            'point_position':trial.suggest_categorical('point_position',['median','last_point'])
+            # 'point_position':trial.suggest_categorical('point_position',['median','last_point'])
             }
         
     def step(self, batch):
@@ -139,6 +137,7 @@ class S2P(nn.Module):
         # Denormalise the output 
         if self.target_norm == 'z-norm':
             # z-normalisation
+            print(self.mean, self.std)
             pred = self.mean + self.std * pred
             pred = torch.tensor(np.where(pred > 0, pred, 0))
         elif self.target_norm =='min-max':
@@ -153,7 +152,7 @@ class S2P(nn.Module):
             true  = torch.cat(true, 0).expm1() 
             results = {"pred":pred, 'true':true}
         else:
-            print(pred.shape)
+            
             results = {"pred":pred}
         return results
 
@@ -224,7 +223,7 @@ class Seq2Point(S2P):
         if self.target_norm =='lognorm' :
             x = F.softplus(x) 
         elif self.target_norm =='min-max':
-            F.relu(x)
+            x= F.relu(x)
         
         return x
 
@@ -295,7 +294,7 @@ class RNN(S2P):
         if self.target_norm =='lognorm' :
             x = F.softplus(x) 
         elif self.target_norm =='min-max':
-            F.relu(x)
+            x= F.relu(x)
         return y_pred
 
 
@@ -372,6 +371,7 @@ class WindowGRU(S2P):
             x = F.softplus(x) 
         elif self.target_norm =='min-max':
             F.relu(x)
+        
         return y_pred
 
 
@@ -439,6 +439,7 @@ class S2S(nn.Module):
         error = (y - out)
         loss = F.mse_loss(out, y)
         mae = error.abs().data.mean()
+        # mae = loss
         return  loss, mae 
     
     def predict(self,  model, test_dataloader):

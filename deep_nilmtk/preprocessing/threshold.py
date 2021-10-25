@@ -38,7 +38,7 @@ MAX_POWER = {
 }
 
 
-def get_threshold_params(appliances, threshold_method = 'at'):
+def get_threshold_params(appliances, threshold_method = 'at', minon = None, threshold=None, minoff=None, max_power=None):
     """Given the method name and list of appliances,
     this function results the necessary Args to use the method in
     ukdale_data.load_ukdale_meter
@@ -52,6 +52,10 @@ def get_threshold_params(appliances, threshold_method = 'at'):
     :return: thresholds, min_off, min_on, threshold_std
     :rtype: tuple
     """
+    minoff = MIN_OFF if minoff is None else minoff
+    thresholds = THRESHOLDS if threshold is None else threshold
+    minon = MIN_ON if minon is None else minon
+    max_power = MAX_POWER if max_power is None else max_power
 
     if threshold_method == 'vs':
         # Variance-Sensitive threshold
@@ -73,13 +77,13 @@ def get_threshold_params(appliances, threshold_method = 'at'):
         min_on = []
         for label in appliances:
             
-            if label not in THRESHOLDS.keys():
+            if label not in threshold.keys():
                 msg = f"Appliance {label} has no AT info.\n" \
-                      f"Available appliances: {', '.join(THRESHOLDS.keys())}"
+                      f"Available appliances: {', '.join(threshold.keys())}"
                 raise ValueError(msg)
-            thresholds += [THRESHOLDS[label]]
-            min_off += [MIN_OFF[label]]
-            min_on += [MIN_ON[label]]
+            thresholds += [threshold[label]]
+            min_off += [minoff[label]]
+            min_on += [minon[label]]
     else:
         raise ValueError(f"Method {threshold_method} doesnt exist\n"
                          f"Use one of the following: vs, mp, at")
