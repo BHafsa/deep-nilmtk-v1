@@ -5,7 +5,7 @@ setup(
     name='deep_nilmtk',
     version='0.0.1',    
     description='A pytorch-based DNN-NILM package.',
-    url='https://github.com/shuds13/pyexample',
+    url='https://github.com/BHafsa/deep-nilmtk-v1',
     author='Hafsa Bousbiat',
     author_email='eh_bousbiat@esi.dz',
     packages=['deep_nilmtk'],
