@@ -31,7 +31,7 @@ It impelements a variety of features such as CV and hyper-param optimisation wit
 pip install .
 ```
 
-Check the [documentation] also (https://bhafsa.github.io/deep-nilmtk-v1/)
+Check the [documentation](https://bhafsa.github.io/deep-nilmtk-v1/) for more details.
 
 
 ## Citation   
