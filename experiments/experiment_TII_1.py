@@ -1,8 +1,8 @@
 from deep_nilmtk import setup, NILMExperiment
 
 
-max_nb_epochs = 20
-
+max_nb_epochs = 8
+sequence_length = 183
 experiment = {
    'power': {'mains': ['active'],'appliance': ['active']},
    'sample_rate': 6,
@@ -22,24 +22,21 @@ experiment = {
       
         'Seq2Point': NILMExperiment({
                "model_name": 'Seq2Pointbaseline', 
-               'in_size': 480, 
                'input_norm':'z-norm',
                'target_norm':'z-norm',
-               'use_optuna':True,
-               'n_trials':30,
+               'in_size': sequence_length,
+              #  'use_optuna':True,
+              #  'n_trials':20,
                'feature_type':'mains',
                'seq_type':'seq2point', 
                'max_nb_epochs':max_nb_epochs
-               }),
-       
-       
-        
+               }), 
    },
 
    'train': {
      'datasets': {
       'ukdale': {
-         'path': './data/ukdale.h5',
+         'path': '../../Data/ukdale.h5',
          'buildings': {
                1: {
                   'start_time': '2015-01-01',
@@ -53,7 +50,7 @@ experiment = {
      'datasets': {
 
        'ukdale': {
-         'path': './data/ukdale.h5',
+         'path': '../../Data/ukdale.h5',
          'buildings': {
                1: {
                    'start_time': '2015-05-01',
@@ -67,4 +64,4 @@ experiment = {
 
  }
 
-setup(experiment,  experiment_name = 'experiment_stage_2')
+setup(experiment,  experiment_name = 'experiment_stage_1')

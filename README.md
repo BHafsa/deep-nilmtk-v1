@@ -26,13 +26,18 @@ It impelements a variety of features such as CV and hyper-param optimisation wit
 
 
 ## How to run   
-Check the [documentation](https://bhafsa.github.io/deep-nilmtk-v1/)
+
+```
+pip install .
+```
+
+Check the [documentation] also (https://bhafsa.github.io/deep-nilmtk-v1/)
 
 
 ## Citation   
 ```
-@article{Deep-NILMtk: Towards implementing DL best pratices in NILM,
-  title={To},
+@article{dnn__nilm,
+  title={Deep-NILMtk: Not just another NILM toolkit},
   author={Bousbiat Hafsa, Anthony Faustine , Lukas Pereira, Christoph Klemenjak, Wilfried Elmenreich},
   year={2021}
 }

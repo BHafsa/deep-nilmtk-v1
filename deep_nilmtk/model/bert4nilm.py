@@ -327,7 +327,7 @@ class BERT4NILM(nn.Module):
         self.latent_len = int(self.original_len / 2)
         self.dropout_rate = params['dropout'] if 'dropout' in params else 0.2
 
-        self.hidden = params['hidden'] if 'hidden' in params else 32
+        self.hidden = params['hidden'] if 'hidden' in params else 64
         self.heads = params['heads'] if 'heads' in params else 2
         self.n_layers = params['n_layers'] if 'n_layers' in params else 2
 
