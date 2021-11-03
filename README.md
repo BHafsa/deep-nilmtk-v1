@@ -34,14 +34,6 @@ pip install .
 Check the [documentation](https://bhafsa.github.io/deep-nilmtk-v1/) for more details.
 
 
-## Citation   
-```
-@article{dnn__nilm,
-  title={Deep-NILMtk: Not just another NILM toolkit},
-  author={Bousbiat Hafsa, Anthony Faustine , Lukas Pereira, Christoph Klemenjak, Wilfried Elmenreich},
-  year={2021}
-}
-```  
 
 For any enquiries, please contact the main authors.
 
