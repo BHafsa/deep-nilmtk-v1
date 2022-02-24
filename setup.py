@@ -1,38 +1,30 @@
-#!/usr/bin/env python
-from setuptools import setup
+from setuptools import setup, find_packages
+import logging
 
-setup(
-    name='deep_nilmtk',
-    version='0.0.1',    
-    description='A pytorch-based DNN-NILM package.',
-    url='https://github.com/BHafsa/deep-nilmtk-v1',
-    author='Hafsa Bousbiat',
-    author_email='eh_bousbiat@esi.dz',
-    packages=['deep_nilmtk'],
-    install_requires=[
-        'mlflow>=1.15.0',
-        'optuna>=2.2.0',
-        'arviz>=0.11.2',
-        'scikit-image>=0.17.2',
-        'scikit-learn>=0.23.2',
-        'scikit-plot>=0.3.7',
-        'pytorch-lightning>=1.2.5',
-        'torch>=1.8.0',
-        'torchmetrics>=0.2.0',
-        'torchvision>=0.9.0',
-        'tqdm>=4.59.0',
-        'traitlets>=4.1.0',
-        'statsmodels>=0.12.2',
-],
+# By default the root logger is set to WARNING and all loggers you define
+# inherit that value. Here we set the root logger to NOTSET. This logging
+# level is automatically inherited by all existing and new sub-loggers
+# that do not set a less verbose level.
+logging.root.setLevel(logging.NOTSET)
 
-    classifiers=[
-        'Development Status :: 1 - Planning',
-        'Intended Audience :: Science/Research',
-        'License :: OSI Approved :: BSD License',  
-        'Operating System :: POSIX :: Linux',        
-        'Programming Language :: Python :: 3.6',
-    ],
-)
+# The following line sets the root logger level as well.
+# It's equivalent to both previous statements combined:
+logging.basicConfig(level=logging.NOTSET)
+
+with open('requirements.txt') as f:
+    required = f.read().splitlines()
+
+
+setup(name="deep_nilmtk",
+      version="0.1",
+
+
+      packages=find_packages(),
+
+      description="deep_nilmtk",
+      install_requires= required,
+      zip_safe=False)
+
 
 
 

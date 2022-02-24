@@ -1,44 +1,43 @@
-
-
-<div align="center">    
- 
-# Deep-NILMtk 
+Deep-NILMtk
+----
 
 
 
 
-<!--  
-Conference   
--->   
-</div>
- 
-## Description   
-
-This repository contains deep baselines and three recent state-of-the-art models for the task of energy disaggregation implemented using NILMTK's Rapid Experimentation API and Pytorch lightning. 
-
-The repository facilitates also the experiments management and model evaluation through the implementation of recent best practices in DL discipline. It performs automatic management of experiments with MLflow and allows automatic hyperparameters optimisation with Optuna.
-
-## Why Deep-NILMtk  ?
-
-Deep-NILMtk was originally developped to enable PyTorch community from interacting with NILMtk API and benifiting from its features. However, it was further developed to include more recent models and sofisticated evaluation practices from DL. 
-
-It impelements a variety of features such as CV and hyper-param optimisation with minimal coding  to facilitate prototyping and speed up the reseach process.
+## What's included
 
 
-## How to run   
+
+### Automatic tracking of experiments
+
+### Hyper-parameter optimisation
+
+### Time-split cross validation
+
+### Customisable pipeline
+
+
+
+## How to use it
+This project is setup as a package which means you can now easily import any file into any other file like so:
+
+## How to install
 
 ```
+conda create --name deep-nilmtk
+conda activate deep-nilmtk
+conda install -c nilmtk nilmtk
+
+conda install pip
 pip install .
 ```
 
-Check the [documentation](https://bhafsa.github.io/deep-nilmtk-v1/) for more details.
+## Notes
+
+Cuda 
+Cudadnn
 
 
+## Authors
 
-For any enquiries, please contact the main authors.
-
-
-
-
-
-
+## Licence
