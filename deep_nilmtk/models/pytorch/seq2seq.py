@@ -112,7 +112,7 @@ class S2S(nn.Module):
                     pbar.update(1)
 
                 pbar.close()
-        pred = torch.cat(pred, 0)
+        pred = torch.cat(pred, 0).detach().numpy()
 
         pred = aggregate_seq(pred)
 
@@ -141,11 +141,12 @@ class S2S(nn.Module):
         return results
 
     def aggregate_seqs(self, prediction):
-        """Aggregate the overleapping sequences using the mean
+        """
+        Aggregate the overlapping sequences using the mean
 
         :param prediction: test predictions of the current model
         :type prediction: tensor
-        :return: Aggregted sequence
+        :return: Aggregated sequence
         :rtype: tensor
         """
         l = self.original_len

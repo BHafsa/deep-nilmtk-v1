@@ -40,8 +40,8 @@ class KerasTrainer(TrainerImplementor):
             batch_size=64, epochs=20, use_optuna=False, learning_rate=1e-4, optimizer='adam', patience_optim=5,
             train_idx=None, validation_idx=None):
 
-        if not os.path.exists(f'{results_path}\\{chkpt_path}\\'):
-            os.makedirs(f'{results_path}\\{chkpt_path}\\')
+        if not os.path.exists(f'{results_path}/{chkpt_path}/'):
+            os.makedirs(f'{results_path}/{chkpt_path}/')
 
         ds_series = dataset.dataset.batch(batch_size)
 
@@ -52,7 +52,7 @@ class KerasTrainer(TrainerImplementor):
         mlflow.keras.autolog()
 
         es = EarlyStopping(monitor='val_loss', min_delta=.01, verbose=1, patience=4)
-        mc = ModelCheckpoint(f'{results_path}\\{chkpt_path}\\disaggregator.h5', monitor='val_loss',
+        mc = ModelCheckpoint(f'{results_path}/{chkpt_path}/disaggregator.h5', monitor='val_loss',
                              save_weights_only=True, save_best_only=True, verbose=1)
         history = model.fit(train_data, validation_data=val_data, validation_freq=1,
                             batch_size=batch_size, epochs=epochs, callbacks=[es, mc], verbose=1)
@@ -64,7 +64,7 @@ class KerasTrainer(TrainerImplementor):
         return opt
 
     def load_model(self, model, path):
-        model.load_weights(f'{path}\\disaggregator.h5')
+        model.load_weights(f'{path}/disaggregator.h5')
         return model
 
     def get_dataset(self, main, submain=None, seq_type='seq2point',

@@ -150,9 +150,9 @@ class UNETNILM(nn.Module):
 
         if len(true) != 0:
             true = torch.cat(true, 0).expm1()
-            results = {"pred": pred, 'true': true}
+            results = {"pred": pred.detach().numpy(), 'true': true.detach().numpy()}
         else:
-            results = {"pred": pred}
+            results = {"pred": pred.detach().numpy()}
         return results
 
 

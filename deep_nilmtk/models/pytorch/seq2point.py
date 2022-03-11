@@ -63,7 +63,7 @@ class S2P(nn.Module):
         :rtype: dict
         """
 
-        window_length = trial.suggest_int('in_size', low=99, high=1800)
+        window_length = trial.suggest_int('in_size', low=99, high=560)
         window_length += 1 if window_length % 2 == 0 else 0
         return {
             'in_size': window_length,

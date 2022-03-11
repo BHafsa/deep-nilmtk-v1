@@ -37,7 +37,7 @@ class GeneralDataLoader(torch.utils.data.Dataset):
     """
     def __init__(self, inputs,  targets=None,  in_size = 99,
                  out_size = 1, point_position = 'last_position', seq_type='seq2point',
-                 quantiles=[0.1, 0.25, 0.5, 0.75, 0.90], pad_at_begin=False, pad=False):
+                 quantiles=[0.1, 0.25, 0.5, 0.75, 0.90], pad_at_begin=False):
 
         self.in_size= in_size
         self.out_size= out_size
@@ -56,7 +56,6 @@ class GeneralDataLoader(torch.utils.data.Dataset):
 
 
         if targets is not None:
-            print(targets)
             logging.info (f"Targets shape before padding {targets.shape}, the padding at the beginning is set to {pad_at_begin}")
             targets = pad_data(targets, self.in_size, pad_at_begin)
             logging.warning(f'the max value of target data is {targets.max()}')

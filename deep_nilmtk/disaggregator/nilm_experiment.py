@@ -54,8 +54,8 @@ class NILMExperiment(Disaggregator):
         logging.info(f'Started the experiment with name {self.hparams["exp_name"]}')
         # STEP 01: Pre-processing
         if do_preprocessing:
-            mains, sub_main, params = preprocess(mains,self.hparams['input_norm'], sub_main) if not self.hparams['custom_preprocess'] \
-                else self.hparams['custom_preprocess'](mains, sub_main, self.hparams)
+            mains, params, sub_main = preprocess(mains,self.hparams['input_norm'], sub_main) if not self.hparams['custom_preprocess'] \
+                else self.hparams['custom_preprocess'](mains, self.hparams, sub_main)
 
             self.main_params = params
         # STEP 02: Feature engineering
@@ -82,8 +82,8 @@ class NILMExperiment(Disaggregator):
         predictions_results = []
         for test_mains_df in test_main_list:
             if do_preprocessing:
-                test_mains_df, _ = preprocess([test_mains_df], norm_type=self.hparams['input_norm'], params=self.main_params) if not self.hparams['custom_preprocess'] \
-                    else self.hparams['custom_preprocess'](test_mains_df)
+                test_mains_df, params = preprocess([test_mains_df], norm_type=self.hparams['input_norm'], params=self.main_params) if not self.hparams['custom_preprocess'] \
+                    else self.hparams['custom_preprocess'](test_mains_df, self.hparams)
             else:
                 logging.warning('The data was not normalised, this may influence the performance of your model')
 

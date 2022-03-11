@@ -325,7 +325,7 @@ class PTPNet(nn.Module):
             'pred': p_hat,  # this done to remove the data that was added
             # during padding, data at the end will automatically
             # be removed by the API
-            'pred_states': torch.tensor(s_hat)
+            'pred_states': s_hat
         }
 
         return results

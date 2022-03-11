@@ -46,7 +46,10 @@ __models__ = {
                 'loader': TorchLoader.GeneralDataLoader,
                 'extra_params':{}
             },
-
-
+            'unet': {
+                'model': TorchModels.UNETNILM,
+                 'loader': TorchLoader.GeneralDataLoader,
+                'extra_params': {}
+            },
     }
 }

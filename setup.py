@@ -16,11 +16,8 @@ with open('requirements.txt') as f:
 
 
 setup(name="deep_nilmtk",
-      version="0.1",
-
-
+      version="0.1.1",
       packages=find_packages(),
-
       description="deep_nilmtk",
       install_requires= required,
       zip_safe=False)

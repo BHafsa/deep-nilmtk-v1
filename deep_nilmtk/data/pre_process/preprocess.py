@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 
 from .normalize import normalize
+
 def pad_data(data, sequence_length, pad_at_begin= False):
     """
     Performs data padding for both target and aggregate consumption
@@ -48,6 +49,6 @@ def preprocess(mains,  norm_type, submains=None, params=None):
         ], axis=1)
         submains.columns = columns
         logging.info(f'The target data contains the following appliances:{submains.columns} with shape {submains.shape}')
-        return mains, pd.DataFrame(submains), params
+        return mains, params,  pd.DataFrame(submains)
 
     return mains, params

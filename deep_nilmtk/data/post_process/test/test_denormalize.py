@@ -7,22 +7,23 @@ from deep_nilmtk.utils import assertNumpyArraysEqual
 class TestDenormalize(unittest.TestCase):
 
     def test_z_norm(self):
-        data = np.array([1,2,1,2,1,3,4,1]).reshape(-1,2)
-        mean, std, norm_data = normalize(data, type='z-norm')
-        denorm_data = denormalize(norm_data, type='z-norm')
+        data = np.array([1,2,1,2,1,3,4,1]).reshape(-1,1)
+        params, norm_data = normalize(data, type='z-norm')
+        denorm_data = denormalize(norm_data, type='z-norm', params= params)
         assertNumpyArraysEqual(denorm_data, data)
 
     def test_min_max_norm(self):
-        data = np.array([1,2,1,2,1,2,2,1]).reshape(-1,2)
-        min_, max_, norm_data = normalize(data, type='min-max')
-        denorm_data = denormalize(norm_data, type='min-max')
+        data = np.array([1,2,1,2,1,2,2,1]).reshape(-1,1)
+        params, norm_data = normalize(data, type='min-max')
+
+        denorm_data = denormalize(norm_data, type='min-max', params= params)
         assertNumpyArraysEqual(denorm_data, data)
 
 
 
     def test_log_norm(self):
         data = np.array([1,2,1,2,1,2,2,1])
-        norm_data = normalize(data, type='lognorm')
+        _, norm_data = normalize(data, type='lognorm')
         denorm_data = denormalize(norm_data, type='lognorm')
         assertNumpyArraysEqual(denorm_data, data)
 

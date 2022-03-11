@@ -16,7 +16,7 @@ import json
 class DictLogger(TensorBoardLogger):
     """PyTorch Lightning `dict` logger."""
 
-    # see https:\\\\github.com\\PyTorchLightning\\pytorch-lightning\\blob\\50881c0b31\\pytorch_lightning\\logging\\base.py
+    # see https://github.com/PyTorchLightning/pytorch-lightning/blob/50881c0b31/pytorch_lightning/logging/base.py
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -44,7 +44,7 @@ def get_latest_checkpoint(checkpoint_path):
     """
 
     checkpoint_path = str(checkpoint_path)
-    list_of_files = glob.glob(checkpoint_path + '\\*.ckpt')
+    list_of_files = glob.glob(checkpoint_path + '/*.ckpt')
 
     if list_of_files:
         latest_file = max(list_of_files, key=os.path.getctime)
@@ -61,7 +61,7 @@ def start_logging(filename, params):
     :param filename: The name of the log file
     :type filename: str
     """
-    f = open(f'{params["logs_path"]}\\experiment-{filename}.txt' , 'w')
+    f = open(f'{params["logs_path"]}/experiment-{filename}.txt' , 'w')
     sys.stdout = f
     return f
 
@@ -74,14 +74,14 @@ def stop_logging(f):
     f.close()
     sys.stdout = sys.__stdout_
 
-def save_results(api_results_f1,time, experiment_name, path='..\\results'):
+def save_results(api_results_f1,time, experiment_name, path='../results'):
     """This function persists teh output of the predictions in a pickel file
 
     :param api_results_f1: Execution results as returned by the NILMtk-API
     :param time: execution time
     :param experiment_name: Name of the experiment
     :type experiment_name: str
-    :param path: Path to the results folder, defaults to '..\\results'
+    :param path: Path to the results folder, defaults to '../results'
     :type path: str, optional
     """
     error_df_f1 = api_results_f1.errors
@@ -99,11 +99,11 @@ def save_results(api_results_f1,time, experiment_name, path='..\\results'):
         'execution_time':time,
     }
 
-    pickle.dump(df_dict, open(f"{path}\\{experiment_name}.p", "wb"))
+    pickle.dump(df_dict, open(f"{path}/{experiment_name}.p", "wb"))
 
     for metric, f1_errors in zip(error_keys_df_f1, error_df_f1):
         ff_errors = round(f1_errors, 3)
-        ff_errors.to_csv(f'{path}\\{experiment_name}_{metric}.csv', sep='\t')
+        ff_errors.to_csv(f'{path}/{experiment_name}_{metric}.csv', sep='\t')
 
 def log_results(experiment, api_res, multi_appliance= True):
     """This function logs the final results of the testing in the correspanding
@@ -184,9 +184,9 @@ def results_dir(logs_path, results_path, figure_path):
     :param figure_path: figures path
     :return:
     """
-    logs =    Path(logs_path) # logs\\ log files containing the details of the execution
-    results = Path(results_path) # results\\ csv and pickle files recording the testing results
-    figures = Path(figure_path) # figures\\ folder to save figures
+    logs =    Path(logs_path) # logs/ log files containing the details of the execution
+    results = Path(results_path) # results/ csv and pickle files recording the testing results
+    figures = Path(figure_path) # figures/ folder to save figures
 
     logs.mkdir(parents=True, exist_ok=True)
     results.mkdir(parents=True, exist_ok=True)

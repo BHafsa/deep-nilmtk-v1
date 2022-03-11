@@ -522,8 +522,7 @@ class BERT4NILM(nn.Module):
         s_pred_curve = torch.cat(s_pred_curve, 0)
 
 
-        e_pred_curve[e_pred_curve > true] = 0
-        s_pred_curve[e_pred_curve > true] = 0
+        e_pred_curve[e_pred_curve > true] = true
 
         results = {
             "pred": e_pred_curve,
