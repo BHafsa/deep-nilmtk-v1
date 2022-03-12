@@ -70,6 +70,23 @@ class S2P(nn.Module):
             'outsize':1
         }
 
+    @staticmethod
+    def get_template():
+        logging.warning('the in_size and max_nb_epochs must be added to the list of this parameters')
+        return {
+            'backend': 'pytorch',
+            # 'in_size': sequence_length,
+            'out_size': 1,
+            'custom_preprocess': None,
+            'feature_type': 'mains',
+            'input_norm': 'z-norm',
+            'target_norm': 'z-norm',
+            'seq_type': 'seq2point',
+            'learning_rate': 10e-5,
+            'point_position': 'mid_position'
+            # 'max_nb_epochs': max_nb_epochs
+        }
+
     def step(self, batch):
         """
         Disaggregates a batch of data
@@ -193,6 +210,14 @@ class Seq2Point(S2P):
                                 nn.Dropout(0.2),
                                 nn.Linear(latent_size, output_size))
 
+    @staticmethod
+    def get_template():
+        params = S2P.get_template()
+        logging.warning('the in_size and max_nb_epochs must be added to the list of this parameters')
+        params.update({
+            'model_name':'Seq2Pointbaseline'
+        })
+        return params
 
     def forward(self, x):
         if x.ndim!=3:
@@ -263,6 +288,16 @@ class RNN(S2P):
                 out_features = output_size
             )),
         ]))
+
+    @staticmethod
+    def get_template():
+        params = S2P.get_template()
+        logging.warning('the in_size and max_nb_epochs must be added to the list of this parameters')
+        params.update({
+            'model_name': 'RNNbaseline'
+        })
+        return params
+
 
     def forward(self,x ):
         y_pred = nn.functional.pad(x.permute(0,2,1), (1,2))
@@ -352,3 +387,13 @@ class WindowGRU(S2P):
             F.relu(x)
 
         return y_pred
+
+
+    @staticmethod
+    def get_template():
+        params = S2P.get_template()
+        logging.warning('the in_size and max_nb_epochs must be added to the list of this parameters')
+        params.update({
+            'model_name': 'WindowGRUbaseline'
+        })
+        return params

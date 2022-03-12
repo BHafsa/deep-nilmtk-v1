@@ -5,10 +5,12 @@ from deep_nilmtk.data.pre_process import preprocess, generate_features
 from deep_nilmtk.data.post_process import postprocess
 from deep_nilmtk.trainers import Trainer, TorchTrainer, KerasTrainer
 from deep_nilmtk.config import get_exp_parameters
+from deep_nilmtk.utils import check_model_backend
 from collections import OrderedDict
 import logging
 
 warnings.filterwarnings("ignore")
+
 
 
 class NILMExperiment(Disaggregator):
@@ -38,6 +40,7 @@ class NILMExperiment(Disaggregator):
             'The specified dl framework is not compatible'
         logging.info(f'The DL Framework used is:{self.hparams["backend"]}')
         self.trainer = Trainer(self.get_trainer(), self.hparams)
+        check_model_backend(hparams['backend'], hparams['model_class'] if 'model_class' in hparams else None, hparams['model_name'])
 
     def result_path(self, path):
         self.hparams['results_path'] = path
@@ -69,7 +72,14 @@ class NILMExperiment(Disaggregator):
         return the trainer according to the chosen DL framework
         Possibility of extension in the future
         """
-        return KerasTrainer() if self.hparams['backend'] != 'pytorch' else TorchTrainer()
+        if self.hparams['backend'] == 'pytorch':
+            return TorchTrainer()
+        elif self.hparams['backend'] == 'tensorflow':
+            return KerasTrainer()
+        else:
+            raise Exception('The specified deep learning framework is not compatible, possible values for backend are : pytorch, tensorflow')
+
+
 
     # ------------------------- Disaggregregation Functions -------------------------------
     def disaggregate_chunk(self, test_main_list, do_preprocessing=True):

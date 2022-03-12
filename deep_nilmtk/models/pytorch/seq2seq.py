@@ -118,22 +118,9 @@ class S2S(nn.Module):
 
         # Perform denormalisation here
 
-        # Denormalise the output
-        if self.target_norm == 'z-norm':
-            # z-normalisation
-            pred = self.mean + self.std * pred
-            pred = torch.tensor(np.where(pred > 0, pred, 0))
-        elif self.target_norm =='min-max':
-            # min-max normalisation
-            pred = self.min + (self.max - self.min) * pred
-            pred = torch.tensor(np.where(pred > 0, pred, 0))
-        else:
-            # log normalisation was perfomed
-            pred = pred.expm1()
-
         if len(true)!=0:
             true  = torch.cat(true, 0).expm1()
-            true = self.aggregate_seqs(true)
+            true = torch.tensor(self.aggregate_seqs(true.detach().numpy()))
             results = {"pred":pred[self.original_len // 2:], 'true':true} # removing the padding added at the beginning
         else:
             results = {"pred":pred[self.original_len // 2:]}
@@ -161,6 +148,18 @@ class S2S(nn.Module):
             sum_arr[i] = sum_arr[i] / counts_arr[i]
 
         return torch.tensor(sum_arr)
+
+    @staticmethod
+    def get_template():
+        return  {
+                'backend': 'pytorch',
+                'custom_preprocess': None,
+                'feature_type': 'mains',
+                'input_norm': 'z-norm',
+                'target_norm': 'z-norm',
+                'seq_type': 'seq2seq',
+                'learning_rate': 10e-5,
+            }
 
 
 class Seq2Seq(S2S):
@@ -228,6 +227,14 @@ class Seq2Seq(S2S):
         x = self.fc(x).reshape(x.size(0), -1, self.out_dim)
         x = F.softplus(x) if self.target_norm =='lognorm' else F.relu(x)
         return x
+
+    @staticmethod
+    def get_template():
+        params = S2S.get_template()
+        params.update({
+            'model_name': 'Seq2Seqbaseline',
+        })
+        return params
 
 
 class DAE(S2S):
@@ -305,3 +312,11 @@ class DAE(S2S):
         elif self.target_norm =='min-max':
             F.relu(x)
         return y_pred
+
+    @staticmethod
+    def get_template():
+        params = S2S.get_template()
+        params.update({
+            'model_name': 'DAE',
+        })
+        return params

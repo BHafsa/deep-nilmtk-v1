@@ -50,6 +50,7 @@ class TorchTrainer(TrainerImplementor):
 
         best_checkpoint = get_latest_checkpoint(f'{results_path}/{chkpt_path}')
         self.batch_size = batch_size
+        print(model.__class__)
         pl_model = PlModel(model, optimizer=optimizer, learning_rate=learning_rate, patience_optim= learning_rate)
 
         callbacks_lst, logger = self.log_init(f'{results_path}/{chkpt_path}',results_path, logs_path, exp_name, version)
@@ -68,7 +69,7 @@ class TorchTrainer(TrainerImplementor):
         dataset_train, dataset_validation = self.data_split(dataset , batch_size)
         # Fit the model using the train_loader, val_loader
         trainer.fit(pl_model, dataset_train, dataset_validation)
-        print(logger.metrics)
+
         val_losses = [metric['val_loss'] for metric in logger.metrics if len(logger.metrics)>1 and 'val_loss' in metric]
 
         return pl_model, np.min(val_losses) if len(val_losses)>0 else -1
