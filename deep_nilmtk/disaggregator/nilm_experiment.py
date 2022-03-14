@@ -93,7 +93,7 @@ class NILMExperiment(Disaggregator):
         for test_mains_df in test_main_list:
             if do_preprocessing:
                 test_mains_df, params = preprocess([test_mains_df], norm_type=self.hparams['input_norm'], params=self.main_params) if not self.hparams['custom_preprocess'] \
-                    else self.hparams['custom_preprocess'](test_mains_df, self.hparams)
+                    else self.hparams['custom_preprocess']([test_mains_df], self.hparams)
             else:
                 logging.warning('The data was not normalised, this may influence the performance of your model')
 

@@ -185,13 +185,12 @@ class Seq2Point(S2P):
 
         super(Seq2Point, self).__init__(params)
 
-        in_size=4 if params['feature_type']=="combined" else 1
-        output_size = len(params['appliances']) if 'appliances' in params else 1
-        pool_filter = params['pool_filter'] if 'pool_filter' in params else 50
-        latent_size = params['latent_size'] if 'latent_size' in params else 1024
+        self.in_size=4 if params['feature_type']=="combined" else 1
+        self.output_size = len(params['appliances']) if 'appliances' in params else 1
+        self.pool_filter = params['pool_filter'] if 'pool_filter' in params else 50
+        self.latent_size = params['latent_size'] if 'latent_size' in params else 1024
 
-        self.pool_filter = pool_filter
-        self.enc_net = nn.Sequential(create_conv1(in_size, 30, 10, bias=True, stride=1),
+        self.enc_net = nn.Sequential(create_conv1(self.in_size, 30, 10, bias=True, stride=1),
                                      nn.ReLU(),
                                      create_conv1(30, 40, 8, bias=True, stride=1),
                                      nn.ReLU(),
@@ -205,10 +204,9 @@ class Seq2Point(S2P):
                                      nn.AdaptiveAvgPool1d(self.pool_filter),
                                      nn.Flatten())
 
-        self.fc = nn.Sequential(create_linear(50*pool_filter, latent_size),
-
+        self.fc = nn.Sequential(create_linear(50*self.pool_filter, self.latent_size),
                                 nn.Dropout(0.2),
-                                nn.Linear(latent_size, output_size))
+                                nn.Linear(self.latent_size, self.output_size))
 
     @staticmethod
     def get_template():
