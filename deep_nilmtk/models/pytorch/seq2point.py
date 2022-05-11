@@ -6,6 +6,7 @@ import torch.nn.functional as F
 from tqdm import tqdm
 import sys
 from .layers import  create_conv1,  create_linear
+from .bert4nilm import Attention
 
 import torch
 import numpy as np
@@ -77,7 +78,6 @@ class S2P(nn.Module):
             'backend': 'pytorch',
             # 'in_size': sequence_length,
             'out_size': 1,
-            'custom_preprocess': None,
             'feature_type': 'mains',
             'input_norm': 'z-norm',
             'target_norm': 'z-norm',
@@ -155,7 +155,6 @@ class S2P(nn.Module):
         logging.warning(f'the max value predicted is {pred.max()}')
         return results
 
-
 class Seq2Point(S2P):
     """
     .. _seqpoint:
@@ -214,6 +213,7 @@ class Seq2Point(S2P):
         logging.warning('the in_size and max_nb_epochs must be added to the list of this parameters')
         params.update({
             'model_name':'Seq2Pointbaseline'
+
         })
         return params
 
@@ -231,6 +231,41 @@ class Seq2Point(S2P):
             x= F.relu(x)
 
         return x
+
+class SAED(S2P):
+    def __init__(self, params):
+        super(SAED, self).__init__(params)
+        self.encoder = nn.Sequential(
+            nn.Conv1d(1, 16, 4, stride=1),
+            nn.ReLU())
+        self.att = Attention(128, attention_type=params['attention_type'])
+        self.gru = nn.GRU(input_size=params['in_size'] - 3, hidden_size=64, bidirectional=True)
+        self.decoder = nn.Sequential(
+            nn.Flatten(),
+            nn.Tanh(),
+            nn.Linear(2048, 64),
+            nn.ReLU(),
+            nn.Linear(64, 1))
+
+    def forward(self, x):
+        if x.ndim != 3:
+            x = torch.unsqueeze(x, 1)
+        else:
+            x = x.permute(0, 2, 1)
+        x = self.encoder(x)
+        x, hn = self.gru(x)
+        x, weights = self.att(x, x)
+        x = self.decoder(x)
+        return x
+
+    @staticmethod
+    def get_template():
+        params = S2P.get_template()
+        logging.warning('the in_size and max_nb_epochs must be added to the list of this parameters')
+        params.update({
+            'model_name': 'SAED'
+        })
+        return params
 
 class RNN(S2P):
     """

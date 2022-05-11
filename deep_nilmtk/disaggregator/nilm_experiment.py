@@ -56,11 +56,18 @@ class NILMExperiment(Disaggregator):
         """
         logging.info(f'Started the experiment with name {self.hparams["exp_name"]}')
         # STEP 01: Pre-processing
+        print(f"""
+        
+        This is the preprocessing: {self.hparams['custom_preprocess'] }
+        
+        """)
+
         if do_preprocessing:
             mains, params, sub_main = preprocess(mains,self.hparams['input_norm'], sub_main) if not self.hparams['custom_preprocess'] \
                 else self.hparams['custom_preprocess'](mains, self.hparams, sub_main)
 
             self.main_params = params
+
         # STEP 02: Feature engineering
         mains = generate_features(mains, self.hparams)
         self.trainer.hparams.update(self.hparams)
@@ -91,18 +98,20 @@ class NILMExperiment(Disaggregator):
         """
         predictions_results = []
         for test_mains_df in test_main_list:
+            # STEP 01: Pre Process
+            print(test_mains_df.shape)
             if do_preprocessing:
-                test_mains_df, params = preprocess([test_mains_df], norm_type=self.hparams['input_norm'], params=self.main_params) if not self.hparams['custom_preprocess'] \
-                    else self.hparams['custom_preprocess']([test_mains_df], self.hparams)
+                test_mains_df, params = self.hparams['custom_preprocess']([test_mains_df], self.hparams) if  self.hparams['custom_preprocess'] \
+                    else  preprocess([test_mains_df], norm_type=self.hparams['input_norm'], params=self.main_params)
             else:
                 logging.warning('The data was not normalised, this may influence the performance of your model')
-
-            # STEP 01: Generate the predictions
+            print(test_mains_df.shape)
+            # STEP 02: Generate the predictions
             predictions = self.trainer.predict(test_mains_df)
 
-            # STEP 02: Post Process
+            # STEP 03: Post Process
             predictions = postprocess(predictions, self.hparams['target_norm'], self.appliance_params,\
-                                      aggregate= (self.hparams['seq_type'] == 'seq2seq' or self.hparams['seq_type'] == 'seq2subseq'))\
+                                      aggregate= (self.hparams['seq_type'] == 'seq2seq' or self.hparams['seq_type'] == 'seq2subseq'), stride=self.hparams['stride'])\
                 if not self.hparams['custom_postprocess'] else self.hparams[
                 'custom_postprocess'](predictions. self.hparams)
 

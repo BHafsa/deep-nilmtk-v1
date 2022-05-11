@@ -14,31 +14,18 @@ from .layers import create_linear, create_conv1, create_deconv1
 
 from torch.nn import TransformerEncoderLayer
 
-import numpy as np
-import mlflow
+import math
+import torch
+from torch import nn
+import torch.nn.functional as F
 
 
 class GELU(nn.Module):
-    """
-    Gaussian Error Linear Units GLU
-    """
-
     def forward(self, x):
-        """
-        """
         return 0.5 * x * (1 + torch.tanh(math.sqrt(2 / math.pi) * (x + 0.044715 * torch.pow(x, 3))))
 
 
 class PositionalEmbedding(nn.Module):
-    """
-    Positional Embedding
-
-    :param max_len: maximum length of the input
-    :type max_len: int
-    :param d_model: dimension of the model
-    :type d_model: int
-    """
-
     def __init__(self, max_len, d_model):
         super().__init__()
         self.pe = nn.Embedding(max_len, d_model)
@@ -49,14 +36,6 @@ class PositionalEmbedding(nn.Module):
 
 
 class LayerNorm(nn.Module):
-    """
-    Normalization layer
-    :param features: The number of input features
-    :type features: int
-    :param eps: Regularization factor, defaults to 1e-6
-    :type eps: float, optional
-    """
-
     def __init__(self, features, eps=1e-6):
         super(LayerNorm, self).__init__()
         self.weight = nn.Parameter(torch.ones(features))
@@ -70,24 +49,7 @@ class LayerNorm(nn.Module):
 
 
 class Attention(nn.Module):
-    """
-    Attention layer
-    :param query: Query values
-    :type query: tensor
-    :param key: Key values
-    :type key: tensor
-    :param value: Values
-    :type value: tensor
-    :param mask: Mask for a causal model, defaults to None
-    :type mask: tensor, optional
-    :param dropout: Dropout, defaults to None
-    :type dropout: float, optional
-    :return:  output of the attention layer and attention score
-    :rtype: tuple(tensor, tensor)
-    """
-
     def forward(self, query, key, value, mask=None, dropout=None):
-
         scores = torch.matmul(query, key.transpose(-2, -1)) / math.sqrt(query.size(-1))
         if mask is not None:
             scores = scores.masked_fill(mask == 0, -1e9)
@@ -100,19 +62,6 @@ class Attention(nn.Module):
 
 
 class MultiHeadedAttention(nn.Module):
-    """
-    Multi headed attention layer
-    :param h: The number of heads
-    :type h: int
-    :param d_model: The dimension of the model
-    :type d_model: int
-    :param dropout: Dropout, defaults to 0.1
-    :type dropout: float, optional
-    .. note:
-       d_model should be multiple of h.
-
-    """
-
     def __init__(self, h, d_model, dropout=0.1):
         super().__init__()
         assert d_model % h == 0
@@ -120,8 +69,8 @@ class MultiHeadedAttention(nn.Module):
         self.d_k = d_model // h
         self.h = h
 
-        self.linear_layers = nn.ModuleList([create_linear(d_model, d_model) for _ in range(3)])
-        self.output_linear = create_linear(d_model, d_model)
+        self.linear_layers = nn.ModuleList([nn.Linear(d_model, d_model) for _ in range(3)])
+        self.output_linear = nn.Linear(d_model, d_model)
         self.attention = Attention()
 
         self.dropout = nn.Dropout(p=dropout)
@@ -142,18 +91,10 @@ class MultiHeadedAttention(nn.Module):
 
 
 class PositionwiseFeedForward(nn.Module):
-    """
-    Calculates the position wise feed forward
-    :param d_model: The dimension of the model
-    :type d_model: int
-    :param d_ff: size of hidden layer
-    :type d_ff: int
-    """
-
     def __init__(self, d_model, d_ff):
         super(PositionwiseFeedForward, self).__init__()
-        self.w_1 = create_linear(d_model, d_ff)
-        self.w_2 = create_linear(d_ff, d_model)
+        self.w_1 = nn.Linear(d_model, d_ff)
+        self.w_2 = nn.Linear(d_ff, d_model)
         self.activation = GELU()
 
     def forward(self, x):
@@ -161,15 +102,6 @@ class PositionwiseFeedForward(nn.Module):
 
 
 class SublayerConnection(nn.Module):
-    """
-    Performs the addition and layer normalisation
-    More details can be found https://arxiv.org/pdf/1706.03762.pdf
-    :param size: the size of teh input
-    :type size: int
-    :param dropout: Dropout
-    :type dropout: float
-    """
-
     def __init__(self, size, dropout):
         super(SublayerConnection, self).__init__()
         self.layer_norm = LayerNorm(size)
@@ -180,26 +112,12 @@ class SublayerConnection(nn.Module):
 
 
 class TransformerBlock(nn.Module):
-    """
-    Tranformer decoder block.
-    :param hidden: Dimension of the model
-    :type hidden: int
-    :param attn_heads: The number of attention heads
-    :type attn_heads: int
-    :param feed_forward_hidden: The hidden size of feedforward layer
-    :type feed_forward_hidden: int
-    :param dropout: Dropout
-    :type dropout: float
-    """
-
     def __init__(self, hidden, attn_heads, feed_forward_hidden, dropout):
         super().__init__()
         self.attention = MultiHeadedAttention(
             h=attn_heads, d_model=hidden, dropout=dropout)
-
         self.feed_forward = PositionwiseFeedForward(
             d_model=hidden, d_ff=feed_forward_hidden)
-
         self.input_sublayer = SublayerConnection(size=hidden, dropout=dropout)
         self.output_sublayer = SublayerConnection(size=hidden, dropout=dropout)
         self.dropout = nn.Dropout(p=dropout)
@@ -209,7 +127,6 @@ class TransformerBlock(nn.Module):
             x, lambda _x: self.attention.forward(_x, _x, _x, mask=mask))
         x = self.output_sublayer(x, self.feed_forward)
         return self.dropout(x)
-
 
 class BERT4NILM(nn.Module):
     """
@@ -282,27 +199,19 @@ class BERT4NILM(nn.Module):
     def __init__(self, params):
 
         super().__init__()
+        
 
         self.original_len = params['in_size'] if 'in_size' in params else 99
         self.output_size = len(params['appliances']) if params['multi_appliance'] else 1
         self.stride = params['stride'] if 'stride' in params else 1
 
         # The original mode was proposed for several appliances
-        if params['multi_appliance']:
-            self.threshold = [params['threshold'][app] for app in
-                              params['appliances']] if 'threshold' in params else None
+        self.threshold = [params['threshold'][params['appliances'][0]]] if 'threshold' in params else None
 
-            self.cutoff = [params['cutoff'][app] for app in params['appliances']] if 'cutoff' in params else None
+        self.cutoff = [params['cutoff'][params['appliances'][0]]] if 'cutoff' in params else None
 
-            self.min_on = [params['min_on'][app] for app in params['appliances']] if 'min_on' in params else None
-            self.min_off = [params['min_off'][app] for app in params['appliances']] if 'min_off' in params else None
-        else:
-            self.threshold = [params['threshold'][params['appliances'][0]]] if 'threshold' in params else None
-
-            self.cutoff = [params['cutoff'][params['appliances'][0]]] if 'cutoff' in params else None
-
-            self.min_on = [params['min_on'][params['appliances'][0]]] if 'min_on' in params else None
-            self.min_off = [params['min_off'][params['appliances'][0]]] if 'min_off' in params else None
+        self.min_on = [params['min_on'][params['appliances'][0]]] if 'min_on' in params else None
+        self.min_off = [params['min_off'][params['appliances'][0]]] if 'min_off' in params else None
 
         # self.C0 = [params['lambda'][params['appliances'][0]]] if 'lambda' in params else [1e-6]
 
@@ -311,7 +220,7 @@ class BERT4NILM(nn.Module):
 
         self.set_hpramas(self.cutoff, self.threshold, self.min_on, self.min_off)
 
-        self.C0 = torch.tensor([params['c0'] if 'c0' in params else 1.])
+        self.C0 = torch.tensor([params['c0'] if 'c0' in params else .3])
 
         self.latent_len = int(self.original_len / 2)
         self.dropout_rate = params['dropout'] if 'dropout' in params else 0.2
@@ -332,7 +241,7 @@ class BERT4NILM(nn.Module):
 
 
 
-        self.transformer_blocks = nn.ModuleList([TransformerEncoderLayer(
+        self.transformer_blocks = nn.ModuleList([TransformerBlock(
             self.hidden, self.heads, self.hidden * 4, self.dropout_rate) for _ in range(self.n_layers)])
 
         self.deconv = create_deconv1(
@@ -350,7 +259,7 @@ class BERT4NILM(nn.Module):
         self.l1_on = nn.L1Loss(reduction='sum')
 
     def forward(self, sequence):
-        x_token = self.pool(self.conv(sequence.unsqueeze(1))).permute(0, 2, 1)
+        x_token = self.pool(self.conv(sequence.float().unsqueeze(1))).permute(0, 2, 1)
 
         embedding = x_token + self.position(sequence)
         x = self.dropout(self.layer_norm(embedding))
@@ -374,33 +283,27 @@ class BERT4NILM(nn.Module):
         """
         seqs, labels_energy, status = batch
 
-        batch_shape = status.shape
 
-        logits = self.forward(seqs)
 
-        labels = labels_energy / self.cutoff.to(seqs.device)  # This the normalization of the output data ?!!!
+        logits = self.forward(seqs).float()
 
-        logits_energy = self.cutoff_energy(logits * self.cutoff.to(seqs.device))
-        logits_status = self.compute_status(logits_energy)
+        labels = (labels_energy / self.cutoff.to(seqs.device)).float()  # This the normalization of the output data ?!!!
 
-        mask = (status > 0).to(seqs.device)
-
-        labels_masked = torch.masked_select(labels, mask).view((-1, batch_shape[-1])).float()
-        logits_masked = torch.masked_select(logits, mask).view((-1, batch_shape[-1])).float()
-        status_masked = torch.masked_select(status, mask).view((-1, batch_shape[-1])).float()
-        logits_status_masked = torch.masked_select(logits_status, mask).view((-1, batch_shape[-1])).float()
+        logits_energy = self.cutoff_energy(logits * self.cutoff.to(seqs.device)).float()
+        logits_status = self.compute_status(logits_energy).float()
 
         # Calculating the Loss function
-        kl_loss = self.kl(torch.log(F.softmax(logits_masked.squeeze() / 0.1, dim=-1) + 1e-9),
-                          F.softmax(labels_masked.squeeze() / 0.1, dim=-1))
-        mse_loss = self.mse(logits_masked.contiguous().view(-1),
-                            labels_masked.contiguous().view(-1))
-
-        margin_loss = self.margin((logits_status_masked * 2 - 1).contiguous().view(-1),
-                                  (status_masked * 2 - 1).contiguous().view(-1))
-
+        kl_loss = self.kl(torch.log(F.softmax(logits.squeeze() / 0.1, dim=-1) + 1e-9),
+                          F.softmax(labels.squeeze() / 0.1, dim=-1))
+        # print(f'margin:{kl_loss}')
+        mse_loss = self.mse(logits.contiguous().view(-1),
+                            labels.contiguous().view(-1))
+        # print(f'margin:{mse_loss}')
+        margin_loss = self.margin((logits_status * 2 - 1).contiguous().view(-1),
+                                  (status * 2 - 1).contiguous().view(-1))
+        # print(f'margin:{margin_loss}')
         total_loss = kl_loss + mse_loss + margin_loss
-        on_mask = (status >= 0) * (((status == 1) + (status != logits_status.reshape(status.shape))) >= 1)
+        on_mask = (status >= 0) * (((status == 1) + (status != logits_status)) >= 1)
         if on_mask.sum() > 0:
             total_size = torch.tensor(on_mask.shape).prod()
             logits_on = torch.masked_select(logits.reshape(on_mask.shape), on_mask)
@@ -409,9 +312,9 @@ class BERT4NILM(nn.Module):
                                     labels_on.contiguous().view(-1))
             total_loss += self.C0.to(seqs.device)[0] * loss_l1_on / total_size
 
-        mae = self.mae(logits_masked.contiguous().view(-1),
-                       labels_masked.contiguous().view(-1))
-
+        mae = self.mae(logits.contiguous().view(-1),
+                       labels.contiguous().view(-1))
+        # print(total_loss)
         return total_loss, mae
 
     def set_hpramas(self, cutoff, threshold, min_on, min_off):
@@ -509,7 +412,7 @@ class BERT4NILM(nn.Module):
                     status = (logits_status > 0) * 1
 
                     s_pred_curve.append(status)
-                    e_pred_curve.append(logits_energy * status)
+                    e_pred_curve.append(logits_energy)
 
                     del batch
                     pbar.set_description('processed: %d' % (1 + batch_idx))
@@ -518,16 +421,28 @@ class BERT4NILM(nn.Module):
                 pbar.close()
 
         # TODO: Denormalisation !!! Previously done ?
-        e_pred_curve = torch.cat(e_pred_curve, 0)
-        s_pred_curve = torch.cat(s_pred_curve, 0)
-
-
-        e_pred_curve[e_pred_curve > true] = true
-
+        e_pred_curve = torch.cat(e_pred_curve, 0).detach().numpy()
+        s_pred_curve = torch.cat(s_pred_curve, 0).detach().numpy()
+    
         results = {
             "pred": e_pred_curve,
             "s_pred_curve": s_pred_curve
         }
 
         return results
+
+    @staticmethod
+    def get_template(self):
+        return {
+            'backend': 'pytorch',
+            # 'in_size': sequence_length,
+            'out_size': 1,
+            'feature_type': 'mains',
+            'loader_class': 'z-norm',
+            'target_norm': 'z-norm',
+            'seq_type': 'seq2point',
+            'learning_rate': 10e-5,
+            'point_position': 'mid_position'
+            
+        }
 

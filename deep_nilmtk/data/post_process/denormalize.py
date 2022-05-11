@@ -42,6 +42,7 @@ def denormalize(data, type='z-norm', params=None):
     :param type: type of normalization
     :return: the denormalized power consumption
     """
+
     logging.info(f'The sequences are being denormalized  using the {type}')
     if type == 'z-norm':
         assert params is not None, f'Please specify the parameters for {type}'
@@ -53,6 +54,8 @@ def denormalize(data, type='z-norm', params=None):
         return min_max_denorm(data, params['min'], params['max'])
     elif type == 'lognorm':
         return log_denorm(data)
+    elif type is None:
+        return data
     else:
         logging.error(
             'The type of normalization is not recognized. The problem is generated in the file '

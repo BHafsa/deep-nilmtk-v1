@@ -69,11 +69,13 @@ class KerasTrainer(TrainerImplementor):
 
     def get_dataset(self, main, submain=None, seq_type='seq2point',
                     in_size=99, out_size=1, point_position='mid_position',
-                    target_norm='z-norm', quantiles=None, loader=None, **kwargs):
+                    target_norm='z-norm', quantiles=None, loader=None, hparams= None):
         self.len = len(main) - in_size
-        return GeneralDataLoader(main, submain, seq_type, in_size, out_size, point_position) \
+        params={}
+        data = GeneralDataLoader(main, submain, seq_type, in_size, out_size, point_position) \
             if loader is None else \
-            loader(main, submain, seq_type, in_size, out_size, point_position)
+            loader(main, submain, hparams)
+        return data, params
 
     def train_test_split(self, dataset, train_idx=None, val_idx=None, batch_size=None):
         """

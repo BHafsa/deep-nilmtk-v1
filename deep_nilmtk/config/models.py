@@ -4,6 +4,7 @@ import deep_nilmtk.models.pytorch as TorchModels
 import deep_nilmtk.data.loader.tensorflow as KerasLoader
 import deep_nilmtk.data.loader.pytorch as TorchLoader
 
+
 __models__ = {
     'tensorflow': {
         'Seq2Pointbaseline':{
@@ -23,6 +24,14 @@ __models__ = {
                     'sequence_type':'seq2point'
                 }
             },
+            'SAED_model':{
+                'model': TorchModels.seq2point.SAED,
+                'loader': TorchLoader.GeneralDataLoader,
+                'extra_params': {
+                    'point_position': 'mid_point',
+                    'sequence_type': 'seq2point'
+                }
+            },
             'RNNbaseline': {
                 'model': TorchModels.seq2point.RNN,
                 'loader': TorchLoader.GeneralDataLoader,
@@ -39,6 +48,14 @@ __models__ = {
                 'model': TorchModels.seq2seq.Seq2Seq,
                 'loader': TorchLoader.GeneralDataLoader,
                 'extra_params':{}
+            },
+
+            'BERT4NILM': {
+                'model': TorchModels.BERT4NILM,
+                'loader': TorchLoader.BERTDataset,
+                'extra_params': {
+
+                }
             },
 
             'DAE':{

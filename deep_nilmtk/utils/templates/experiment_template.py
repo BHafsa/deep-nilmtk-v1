@@ -17,7 +17,8 @@ class ExperimentTemplate:
         self.experiment = templates[template_name]
         self.template_name = template_name
         self.data_path = data_path
-        self.experiment.update({'appliances': list_appliances})
+        if list_appliances is not None:
+            self.experiment.update({'appliances': list_appliances})
         methods = {}
         for baseline, backend in list_baselines_backends:
             params = models[backend][baseline]['model'].get_template()

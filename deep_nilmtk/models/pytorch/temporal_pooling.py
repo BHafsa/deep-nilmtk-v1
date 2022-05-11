@@ -245,6 +245,7 @@ class PTPNet(nn.Module):
         :param x: A batch of the input features.
         :return: the power estimation, and the state estimation.
         """
+
         enc1 = self.encoder1(x)
         enc2 = self.encoder2(self.pool1(enc1))
         enc3 = self.encoder3(self.pool2(enc2))
@@ -272,14 +273,12 @@ class PTPNet(nn.Module):
         output_power, output_status = self(data)
 
         pow_loss = self.pow_criterion(output_power, target_power)
-        act_loss = self.act_criterion(output_status, target_status)
+        # act_loss = self.act_criterion(output_status, target_status)
 
-        loss = (self.pow_w * pow_loss + self.act_w * act_loss)
+        # loss = (self.pow_w * pow_loss + self.act_w * act_loss)
 
-        error = (output_power - target_power)
-        mae = error.abs().data.mean()
 
-        return loss, mae
+        return pow_loss, (output_power - target_power).abs().mean()
 
     def predict(self, model, test_dataloader):
         """Generates predictions for the test data loader
@@ -297,11 +296,13 @@ class PTPNet(nn.Module):
         s_hat = []
         p_hat = []
         x_true = []
+        print(enumerate(test_dataloader))
         with tqdm(total=len(values), file=sys.stdout) as pbar:
             with torch.no_grad():
                 for batch_idx, batch in enumerate(test_dataloader):
+
                     x = batch
-                    pw, sh = self(x)
+                    pw, sh = net(x)
                     sh = torch.sigmoid(sh)
 
                     s_hat.append(sh)
@@ -317,8 +318,8 @@ class PTPNet(nn.Module):
 
                 pbar.close()
 
-        p_hat = torch.cat(p_hat, 0).float()
-        s_hat = torch.cat(s_hat, 0).float()
+        p_hat = torch.cat(p_hat, 0).float().detach().numpy()
+        s_hat = torch.cat(s_hat, 0).float().detach().numpy()
 
         results = {
             # 'aggregates': torch.tensor(x_true),

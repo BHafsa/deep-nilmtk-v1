@@ -20,8 +20,8 @@ class Trainer:
         self.hparams = {}
         self.hparams.update(hparams)
         self.trainer_imp = imp
-        self.model_class = self.hparams['model_class']  if 'model_class' in hparams else __models__[self.hparams['backend']][self.hparams['model_name']]['model']
-        self.loader_class = self.hparams['loader_class']  if 'loader_class' in hparams else __models__[self.hparams['backend']][self.hparams['model_name']]['loader']
+        self.model_class = self.hparams['model_class']  if  hparams['model_class'] else __models__[self.hparams['backend']][self.hparams['model_name']]['model']
+        self.loader_class = self.hparams['loader_class']  if hparams['loader_class'] else None
         self.appliances = []
         self.models = {}
         self.appliance_params = {}
@@ -29,7 +29,7 @@ class Trainer:
 
     def get_dataset(self, main, submain, seq_type,
                     in_size, out_size, point_position,
-                    target_norm, quantiles= None,  loader= None, **kwargs):
+                    target_norm, quantiles= None,  loader= None, hparams=None):
         """
         return the datset according the params specified and the DL backend used for training
         :param main: the aggregate power (normalized)
@@ -45,13 +45,17 @@ class Trainer:
         :return: sequences generator and the normalization's params
         """
         submain_norm = submain.copy()
+        params = {}
         if loader is None:
             # if a custom loader is used this part is left to the developer
             # since some models require state generation wich can only be done using the
             # target power before normalization
-            params, submain_norm = normalize(submain.values, target_norm)
-        dataset = self.trainer_imp.get_dataset(main, submain_norm, seq_type, in_size, out_size,
-                                   point_position, target_norm, quantiles, loader, **kwargs)
+            new_params, submain_norm = normalize(submain.values, target_norm)
+
+        dataset, loader_params = self.trainer_imp.get_dataset(main, submain_norm, seq_type, in_size, out_size,
+                                   point_position, target_norm, quantiles, loader=self.loader_class, hparams= hparams if hparams is not None else self.hparams)
+
+        params = new_params if not loader else loader_params
 
         return dataset, params
 
@@ -84,7 +88,7 @@ class Trainer:
                                                target_norm=self.hparams['target_norm'],
                                                    in_size=self.hparams['in_size'],
                                                    out_size=self.hparams['out_size'],
-                                                   point_position=self.hparams['point_position'])
+                                                   point_position=self.hparams['point_position'], loader=self.loader_class, hparams={**self.hparams, **{'appliances':[appliance_name]}})
             with mlflow.start_run(run_name=self.hparams['model_name']):
                 # Auto log all MLflow from lightening
                 # Save the run ID to use in testing phase
@@ -118,7 +122,7 @@ class Trainer:
                                                target_norm=self.hparams['target_norm'],
                                                in_size=self.hparams['in_size'],
                                                out_size=self.hparams['out_size'],
-                                               point_position=self.hparams['point_position'])
+                                               point_position=self.hparams['point_position'], hparams={**self.hparams, **{'appliances':[appliance_name]}})
             mlflow.set_experiment(appliance_name)
             model, run_id, _ = cv.cross_validate( self.trainer_imp, dataset, self.models[appliance_name], appliance_name, self.hparams)
             self.models[appliance_name] = model
@@ -133,7 +137,7 @@ class Trainer:
                                                target_norm=self.hparams['target_norm'],
                                                in_size=self.hparams['in_size'],
                                                out_size=self.hparams['out_size'],
-                                               point_position=self.hparams['point_position'])
+                                               point_position=self.hparams['point_position'], hparams={**self.hparams, **{'appliances':[appliance_name]}})
 
             mlflow.set_experiment(appliance_name)
 
@@ -145,21 +149,22 @@ class Trainer:
 
     def init_models(self, hparams=None):
         self.models = {
-            app:  self.model_class(self.hparams if hparams is None else hparams) for app in self.appliances
+            app:  self.model_class({**self.hparams, **{'appliances':[app]}}  if hparams is None else {**hparams, **{'appliances':[app]}}) for app in self.appliances
         }
 
     def predict_model(self, mains, model, chkpt):
         # load the model from the checkpoint
 
         model = self.trainer_imp.load_model(model, chkpt)
-        data = self.trainer_imp.get_dataset(mains, seq_type=self.hparams['seq_type'],
+        data, _ = self.trainer_imp.get_dataset(mains, seq_type=self.hparams['seq_type'],
                                             target_norm=self.hparams['target_norm'],
                                             in_size=self.hparams['in_size'],
                                             out_size=self.hparams['out_size'],
-                                            point_position=self.hparams['point_position'])
+                                            point_position=self.hparams['point_position'], loader=self.loader_class,
+                                            hparams=self.hparams)
 
         y_pred = self.trainer_imp.predict(model, data, self.hparams['batch_size'])
-
+        logging.error(f"{y_pred.shape}")
         return y_pred
 
 
@@ -179,7 +184,7 @@ class Trainer:
                 v = params[1]['version']
             else:
                 v= self.hparams['version']
-
+            print(mains.shape)
             chkpt = f'{self.hparams["results_path"]}/{self.hparams["checkpoints_path"]}/{appliance}/{self.hparams["model_name"]}/version_{v}'
             # if CV is used the predictions are averaged over the models trained on different folds
             y_pred = self.predict_model( mains, self.models[appliance], chkpt) if self.hparams['kfolds']<=1 else \

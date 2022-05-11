@@ -26,12 +26,6 @@ class PlModel(pl.LightningModule):
         loss, mae = self.model.step(batch)
         self.log("train_loss", loss, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         self.log('train_mae', mae, on_step=False, on_epoch=True, prog_bar=True, logger=True)
-
-        # mlflow.log_metrics({
-        #     "train_loss":float(loss.detach().cpu().numpy()),
-        #     'train_mae':float(mae.detach().cpu().numpy())
-        # })
-
         return loss
 
 
@@ -39,13 +33,9 @@ class PlModel(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         loss, mae = self.model.step(batch)
 
-        self.model.sample_id = 1
         self.log("val_loss", loss, on_step=False, on_epoch=True, prog_bar=True, logger=True)
         self.log('val_mae', mae, on_step=False, on_epoch=True, prog_bar=True, logger=True)
-        # mlflow.log_metrics({
-        #     "val_loss":float(loss.detach().cpu().numpy()),
-        #     'val_mae':float(mae.detach().cpu().numpy())
-        # })
+
 
 
     def configure_optimizers(self):

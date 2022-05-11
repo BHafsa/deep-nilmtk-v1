@@ -113,41 +113,14 @@ class S2S(nn.Module):
 
                 pbar.close()
         pred = torch.cat(pred, 0).detach().numpy()
-
-        pred = aggregate_seq(pred)
-
         # Perform denormalisation here
 
-        if len(true)!=0:
-            true  = torch.cat(true, 0).expm1()
-            true = torch.tensor(self.aggregate_seqs(true.detach().numpy()))
-            results = {"pred":pred[self.original_len // 2:], 'true':true} # removing the padding added at the beginning
-        else:
-            results = {"pred":pred[self.original_len // 2:]}
+        results = {"pred":pred[self.original_len // 2:]}
 
         return results
 
-    def aggregate_seqs(self, prediction):
-        """
-        Aggregate the overlapping sequences using the mean
 
-        :param prediction: test predictions of the current model
-        :type prediction: tensor
-        :return: Aggregated sequence
-        :rtype: tensor
-        """
-        l = self.original_len
-        n = prediction.shape[0] + l - 1
-        sum_arr = np.zeros((n))
-        counts_arr = np.zeros((n))
-        o = len(sum_arr)
-        for i in range(prediction.shape[0]):
-            sum_arr[i:i + l] += prediction[i].reshape(-1).numpy()
-            counts_arr[i:i + l] += 1
-        for i in range(len(sum_arr)):
-            sum_arr[i] = sum_arr[i] / counts_arr[i]
 
-        return torch.tensor(sum_arr)
 
     @staticmethod
     def get_template():
@@ -268,7 +241,7 @@ class DAE(S2S):
         self.input_features = 4 if params['feature_type']=="combined" else 1
         self.sequence_length = params['in_size'] if 'in_size' in params else 99
         self.n_appliances = len(params['appliances']) if 'appliances' in params else 1
-
+        self.output_size = len(params['appliances']) if 'appliances' in params else 1
         self.net = nn.Sequential(OrderedDict([
             ('conv1', nn.Conv1d(
                 in_channels = self.input_features,

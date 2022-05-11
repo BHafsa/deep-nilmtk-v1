@@ -67,6 +67,8 @@ def normalize(data, type='z-norm', params=None):
         return min_max_norm(data, params)
     elif type =='lognorm':
         return log_norm(data, params)
+    elif type is None:
+        return {}, data
     else:
         logging.error('The type of normalization is not recognized. The problem is generated in the file deep_nilmtk.data.post_process.utils.py')
         raise Exception('The type of normalization is not recognized')

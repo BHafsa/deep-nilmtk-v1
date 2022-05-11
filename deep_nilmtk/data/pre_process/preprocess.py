@@ -20,6 +20,11 @@ def pad_data(data, sequence_length, pad_at_begin= False):
     :return: The padded aggregate power.
     :rtype: np.array
     """
+    print(f"""
+    
+    This is a padding fucntion
+    
+    """)
     units_to_pad = 1 + sequence_length // 2
     padding = (sequence_length,) if pad_at_begin else (units_to_pad,units_to_pad+1)
     if data.ndim==1:

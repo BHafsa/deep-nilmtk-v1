@@ -6,6 +6,7 @@ import numpy as np
 from deep_nilmtk.data.pre_process import pad_data
 import logging
 from deep_nilmtk.data.loader.utils import target_generator
+
 class GeneralDataLoader(torch.utils.data.Dataset):
     """
     .. _generaldataset:
@@ -39,21 +40,26 @@ class GeneralDataLoader(torch.utils.data.Dataset):
                  out_size = 1, point_position = 'last_position', seq_type='seq2point',
                  quantiles=[0.1, 0.25, 0.5, 0.75, 0.90], pad_at_begin=False):
 
+
         self.in_size= in_size
         self.out_size= out_size
         self.point_position= point_position
         self.seq_type= seq_type
         self.original_inputs = copy.deepcopy(inputs)
         self.original_targets = copy.deepcopy(targets)
+        self.params = {}
         #pad the sequence with zeros in the beginning and at the end
         logging.info (f"Inputs shape before padding {inputs.shape}, padding at the beginning is set to {pad_at_begin}")
-        inputs  = pad_data(inputs, self.in_size, pad_at_begin)
+        print(self.in_size)
+        inputs = pad_data(inputs, self.in_size, pad_at_begin)
         logging.info (f"Inputs shape after padding {inputs.shape}")
+
         if seq_type == 'seq2quantile':
             assert quantiles is not None
             self.q=torch.tensor(quantiles)
         self.inputs = torch.tensor(inputs).float()
 
+        print(in_size)
 
         if targets is not None:
             logging.info (f"Targets shape before padding {targets.shape}, the padding at the beginning is set to {pad_at_begin}")

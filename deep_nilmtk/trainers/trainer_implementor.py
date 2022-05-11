@@ -15,7 +15,7 @@ class TrainerImplementor(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def get_dataset(self,  main, submain, seq_type,
                     in_size, out_size, point_position,
-                    target_norm, quantiles= None,  loader= None, **kwargs):
+                    target_norm, quantiles= None,  loader= None, hparams=None):
         pass
 
     @abc.abstractmethod

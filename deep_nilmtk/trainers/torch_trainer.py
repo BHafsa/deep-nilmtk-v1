@@ -44,13 +44,13 @@ class TorchTrainer(TrainerImplementor):
 
     def fit(self, model, dataset,
             chkpt_path=None,exp_name=None,results_path=None, logs_path=None,  version=None,
-            batch_size=64, epochs=20, use_optuna=False, learning_rate=1e-4, optimizer='adam', patience_optim=5,
+            batch_size=64, epochs=20, use_optuna=False, learning_rate=1e-6, optimizer='adam', patience_optim=5,
             train_idx=None, validation_idx=None):
         # Load weights from the last checkpoint if any in the checkpoints path
 
         best_checkpoint = get_latest_checkpoint(f'{results_path}/{chkpt_path}')
         self.batch_size = batch_size
-        print(model.__class__)
+
         pl_model = PlModel(model, optimizer=optimizer, learning_rate=learning_rate, patience_optim= learning_rate)
 
         callbacks_lst, logger = self.log_init(f'{results_path}/{chkpt_path}',results_path, logs_path, exp_name, version)
@@ -76,7 +76,7 @@ class TorchTrainer(TrainerImplementor):
 
     def get_dataset(self, main, submain=None, seq_type='seq2point',
                     in_size=99, out_size=1, point_position='mid_position',
-                    target_norm='z-norm', quantiles= None,  loader= None, **kwargs):
+                    target_norm='z-norm', quantiles= None,  loader= None, hparams=None):
 
         data = GeneralDataLoader(
             main, targets=submain,
@@ -87,8 +87,8 @@ class TorchTrainer(TrainerImplementor):
             quantiles=quantiles,
             pad_at_begin=False
         ) if loader is None else \
-            loader(main, submain, seq_type, in_size, out_size, point_position, target_norm, kwargs)
-        return data
+            loader(main, submain, hparams)
+        return data, data.params
 
     def data_split(self, data, batch_size, train_idx=None, val_idx=None):
         """
@@ -127,9 +127,8 @@ class TorchTrainer(TrainerImplementor):
                                                    shuffle=False)
 
         network = model.model.eval()
-
         predictions = network.predict(model, test_loader)
-        df = predictions['pred'].cpu().numpy()
+        df = predictions['pred']
 
         return df
 
