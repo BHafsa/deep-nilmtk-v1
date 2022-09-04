@@ -44,7 +44,7 @@ conda install pip
 pip install .
 ```
 
-## Template stater project
+## Template starter project
 
 A template project is offered in the following [link](https://github.com/BHafsa/DNN-NILM-template) leveraging on docker to offer a pre-configured execution environement and avoid any compatibility issues that could encounter the developers.
 
