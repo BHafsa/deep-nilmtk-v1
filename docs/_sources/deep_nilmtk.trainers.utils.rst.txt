@@ -1,0 +1,22 @@
+deep\_nilmtk.trainers.utils package
+===================================
+
+Submodules
+----------
+
+deep\_nilmtk.trainers.utils.cross\_validator module
+---------------------------------------------------
+
+.. automodule:: deep_nilmtk.trainers.utils.cross_validator
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+deep\_nilmtk.trainers.utils.hparams\_optimizer module
+-----------------------------------------------------
+
+.. automodule:: deep_nilmtk.trainers.utils.hparams_optimizer
+   :members:
+   :undoc-members:
+   :show-inheritance:
+

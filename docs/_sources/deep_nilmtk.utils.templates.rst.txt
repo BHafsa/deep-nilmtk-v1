@@ -1,0 +1,23 @@
+deep\_nilmtk.utils.templates package
+====================================
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   deep_nilmtk.utils.templates.baseline_templates
+
+Submodules
+----------
+
+deep\_nilmtk.utils.templates.experiment\_template module
+--------------------------------------------------------
+
+.. automodule:: deep_nilmtk.utils.templates.experiment_template
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+

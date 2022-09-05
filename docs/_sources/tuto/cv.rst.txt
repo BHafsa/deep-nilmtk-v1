@@ -1,0 +1,13 @@
+Cross-Validation
+----------------
+
+Cross validation is performed using sklearn.model_selection.TimeSeriesSplit which is
+a suitable splitting strategy for timeseries. The use of cross-validation is triggered
+whenever a number of folds >= 1 is specified.
+
+Other paramaters of sklearn.model_selection.TimeSeriesSplit can also be specified
+using same labels as the original function.
+
+.. code-block:: python
+
+   print('hello world')

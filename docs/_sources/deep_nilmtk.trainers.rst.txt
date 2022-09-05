@@ -1,0 +1,46 @@
+deep\_nilmtk.trainers package
+=============================
+
+
+
+
+
+deep\_nilmtk.trainers.keras\_trainer module
+-------------------------------------------
+
+.. automodule:: deep_nilmtk.trainers.keras_trainer
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+deep\_nilmtk.trainers.torch\_trainer module
+-------------------------------------------
+
+.. automodule:: deep_nilmtk.trainers.torch_trainer
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+deep\_nilmtk.trainers.trainer module
+------------------------------------
+
+.. automodule:: deep_nilmtk.trainers.trainer
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+deep\_nilmtk.trainers.trainer\_implementor module
+-------------------------------------------------
+
+.. automodule:: deep_nilmtk.trainers.trainer_implementor
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+
+
+.. toctree::
+   :maxdepth: 4
+
+   deep_nilmtk.trainers.utils

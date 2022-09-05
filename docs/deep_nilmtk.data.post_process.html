@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="Python" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>deep_nilmtk.data.post_process package &mdash; deep-nilmtk 0.0.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="deep_nilmtk.data.pre_process package" href="deep_nilmtk.data.pre_process.html" />
+    <link rel="prev" title="deep_nilmtk.data.loader.tensorflow package" href="deep_nilmtk.data.loader.tensorflow.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> deep-nilmtk
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">deep_nilmtk</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="deep_nilmtk.html">deep_nilmtk package</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="deep_nilmtk.config.html">deep_nilmtk.config package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="deep_nilmtk.data.html">deep_nilmtk.data package</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="deep_nilmtk.data.loader.html">deep_nilmtk.data.loader package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">deep_nilmtk.data.post_process package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="deep_nilmtk.data.pre_process.html">deep_nilmtk.data.pre_process package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="deep_nilmtk.disaggregator.html">deep_nilmtk.disaggregator package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="deep_nilmtk.models.html">deep_nilmtk.models package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="deep_nilmtk.trainers.html">deep_nilmtk.trainers package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="deep_nilmtk.utils.html">deep_nilmtk.utils package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">deep-nilmtk</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="modules.html">deep_nilmtk</a> &raquo;</li>
+          <li><a href="deep_nilmtk.html">deep_nilmtk package</a> &raquo;</li>
+          <li><a href="deep_nilmtk.data.html">deep_nilmtk.data package</a> &raquo;</li>
+      <li>deep_nilmtk.data.post_process package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/deep_nilmtk.data.post_process.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="deep-nilmtk-data-post-process-package">
+<h1>deep_nilmtk.data.post_process package<a class="headerlink" href="#deep-nilmtk-data-post-process-package" title="Permalink to this heading"></a></h1>
+<section id="module-deep_nilmtk.data.post_process.aggregate">
+<span id="deep-nilmtk-data-post-process-aggregate-module"></span><h2>deep_nilmtk.data.post_process.aggregate module<a class="headerlink" href="#module-deep_nilmtk.data.post_process.aggregate" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="deep_nilmtk.data.post_process.aggregate.aggregate_mean">
+<span class="sig-prename descclassname"><span class="pre">deep_nilmtk.data.post_process.aggregate.</span></span><span class="sig-name descname"><span class="pre">aggregate_mean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stride</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_nilmtk.data.post_process.aggregate.aggregate_mean" title="Permalink to this definition"></a></dt>
+<dd><p>Aggregate the overleapping sequences using the mean</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>prediction</strong> (<em>numpy/array</em>) -- test predictions of the current model</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Aggregted sequence</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>numpy.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="deep_nilmtk.data.post_process.aggregate.aggregate_median">
+<span class="sig-prename descclassname"><span class="pre">deep_nilmtk.data.post_process.aggregate.</span></span><span class="sig-name descname"><span class="pre">aggregate_median</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stride</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_nilmtk.data.post_process.aggregate.aggregate_median" title="Permalink to this definition"></a></dt>
+<dd><p>Aggregate the overleapping sequences using the mean</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>prediction</strong> (<em>tensor</em><em>[</em><em>n_samples + window_size +1 1</em><em>,</em><em>window_size</em><em>]</em>) -- test predictions of the current model</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>[description]</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>[type]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="deep_nilmtk.data.post_process.aggregate.aggregate_seq">
+<span class="sig-prename descclassname"><span class="pre">deep_nilmtk.data.post_process.aggregate.</span></span><span class="sig-name descname"><span class="pre">aggregate_seq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stride</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_nilmtk.data.post_process.aggregate.aggregate_seq" title="Permalink to this definition"></a></dt>
+<dd><p>Aggregates the data after predictions are generated in the case of Seq2Seq models
+:param data: a 2d np array of data
+:param type: type of aggregation
+:return: 1d np array of the predictions</p>
+</dd></dl>
+
+</section>
+<section id="module-deep_nilmtk.data.post_process.denormalize">
+<span id="deep-nilmtk-data-post-process-denormalize-module"></span><h2>deep_nilmtk.data.post_process.denormalize module<a class="headerlink" href="#module-deep_nilmtk.data.post_process.denormalize" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="deep_nilmtk.data.post_process.denormalize.denormalize">
+<span class="sig-prename descclassname"><span class="pre">deep_nilmtk.data.post_process.denormalize.</span></span><span class="sig-name descname"><span class="pre">denormalize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'z-norm'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_nilmtk.data.post_process.denormalize.denormalize" title="Permalink to this definition"></a></dt>
+<dd><p>A function the denormalize the
+:param params: a dictionnaty of parameters
+:param data: a 1D array of power consumption
+:param type: type of normalization
+:return: the denormalized power consumption</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="deep_nilmtk.data.post_process.denormalize.log_denorm">
+<span class="sig-prename descclassname"><span class="pre">deep_nilmtk.data.post_process.denormalize.</span></span><span class="sig-name descname"><span class="pre">log_denorm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_nilmtk.data.post_process.denormalize.log_denorm" title="Permalink to this definition"></a></dt>
+<dd><p>Denormalize the data using that was normalized using log normalization
+:param data: 1d array of power consumption
+:return: denormalized power consumption</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="deep_nilmtk.data.post_process.denormalize.min_max_denorm">
+<span class="sig-prename descclassname"><span class="pre">deep_nilmtk.data.post_process.denormalize.</span></span><span class="sig-name descname"><span class="pre">min_max_denorm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_nilmtk.data.post_process.denormalize.min_max_denorm" title="Permalink to this definition"></a></dt>
+<dd><p>Denormalize the data using that was normalized using min-max normalization
+:param data: 1d array of power consumption
+:param min: the min of the power consumption
+:param max: the max of the power consumption
+:return: denormalized power consumption</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="deep_nilmtk.data.post_process.denormalize.z_denorm">
+<span class="sig-prename descclassname"><span class="pre">deep_nilmtk.data.post_process.denormalize.</span></span><span class="sig-name descname"><span class="pre">z_denorm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mean</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">std</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_nilmtk.data.post_process.denormalize.z_denorm" title="Permalink to this definition"></a></dt>
+<dd><p>Denormalize the data using that was normalized using z-norm
+:param data: 1d array of power consumption
+:param mean: the mean of the power consumption
+:param std: the std of the power consumption
+:return: denormalized power consumption</p>
+</dd></dl>
+
+</section>
+<section id="module-deep_nilmtk.data.post_process.postprocess">
+<span id="deep-nilmtk-data-post-process-postprocess-module"></span><h2>deep_nilmtk.data.post_process.postprocess module<a class="headerlink" href="#module-deep_nilmtk.data.post_process.postprocess" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="deep_nilmtk.data.post_process.postprocess.postprocess">
+<span class="sig-prename descclassname"><span class="pre">deep_nilmtk.data.post_process.postprocess.</span></span><span class="sig-name descname"><span class="pre">postprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">predictions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aggregate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stride</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_nilmtk.data.post_process.postprocess.postprocess" title="Permalink to this definition"></a></dt>
+<dd><p>Post processing function for the predictions
+:param predictions: a 2d np array
+:param hparams: hparameters
+:return: processed energy consumption</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="deep_nilmtk.data.post_process.postprocess.remove_negatives">
+<span class="sig-prename descclassname"><span class="pre">deep_nilmtk.data.post_process.postprocess.</span></span><span class="sig-name descname"><span class="pre">remove_negatives</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pred</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deep_nilmtk.data.post_process.postprocess.remove_negatives" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="deep_nilmtk.data.loader.tensorflow.html" class="btn btn-neutral float-left" title="deep_nilmtk.data.loader.tensorflow package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="deep_nilmtk.data.pre_process.html" class="btn btn-neutral float-right" title="deep_nilmtk.data.pre_process package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Bousbiat Hafsa.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,37 @@
+deep\_nilmtk.trainers.test package
+==================================
+
+Submodules
+----------
+
+deep\_nilmtk.trainers.test.test\_keras\_trainer module
+------------------------------------------------------
+
+.. automodule:: deep_nilmtk.trainers.test.test_keras_trainer
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+deep\_nilmtk.trainers.test.test\_torch\_trainer module
+------------------------------------------------------
+
+.. automodule:: deep_nilmtk.trainers.test.test_torch_trainer
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+deep\_nilmtk.trainers.test.test\_trainer module
+-----------------------------------------------
+
+.. automodule:: deep_nilmtk.trainers.test.test_trainer
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: deep_nilmtk.trainers.test
+   :members:
+   :undoc-members:
+   :show-inheritance:

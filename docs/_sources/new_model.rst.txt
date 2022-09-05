@@ -1,0 +1,11 @@
+New model
+---------
+
+The creation of a new model is straight forward and requires only the definition  of the architecture of the model
+as well as the data loader. The tool takes into consideration the three input mapping types: Seq2point, Seq2Seq,
+and Seq2subsequence.
+
+A template project on Github illustrating how a new model can be tested is provided `here`_.
+
+
+.. _here: https://github.com/BHafsa/DNN-NILM-template

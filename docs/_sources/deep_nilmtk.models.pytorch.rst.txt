@@ -1,0 +1,48 @@
+deep\_nilmtk.models.pytorch package
+===================================
+
+
+deep\_nilmtk.models.pytorch.seq2point module
+--------------------------------------------
+
+.. automodule:: deep_nilmtk.models.pytorch.seq2point
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+deep\_nilmtk.models.pytorch.seq2seq module
+------------------------------------------
+
+.. automodule:: deep_nilmtk.models.pytorch.seq2seq
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+deep\_nilmtk.models.pytorch.bert4nilm module
+--------------------------------------------
+
+.. automodule:: deep_nilmtk.models.pytorch.bert4nilm
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+deep\_nilmtk.models.pytorch.temporal\_pooling module
+----------------------------------------------------
+
+.. automodule:: deep_nilmtk.models.pytorch.temporal_pooling
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+deep\_nilmtk.models.pytorch.unet\_nilm module
+---------------------------------------------
+
+.. automodule:: deep_nilmtk.models.pytorch.unet_nilm
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+
+

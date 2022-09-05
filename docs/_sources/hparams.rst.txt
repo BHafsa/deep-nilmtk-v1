@@ -1,0 +1,40 @@
+Hyper-parameters optimisation
+-----------------------------
+
+The hyper-parameter optimization is performed using Optuna. It can be done in
+two steps as follows:
+
+1. Declare the set of parameter to be optimized inside the model through
+the definition of a static function return a dictionnary of values. The following Listing
+provide an example of such function suggesting parameters for the window size,
+the normlisation type, as well as the :
+
+.. code-block:: python
+
+    # Model Definition
+    class NILM_MODEL(nn.Module):
+        ...
+        @staticmethod
+        def suggest_hparams(self, trial):
+            # Returns a dictionary of suggested values for each parameter
+            window_length = trial.suggest_int('in_size', low=99, high=560)
+            window_length += 1 if window_length % 2 == 0 else 0
+            return {
+                'in_size': window_length,
+                'outsize':1
+            }
+
+2. Explicitly indicate to the toolkit that it should conduct a hyper-parameters search with Optuna
+
+.. code-block:: python
+
+    #Experiment Definition
+    'model': NILMExperiment({
+                # ... other params go here
+                'model_class': NILM_MODEL,
+                'use_optuna':True
+            })
+
+The use of optuna will generate several models and they will all have
+saved as checkpoints in the corresponding folder splot into different sub-folders
+labelled according to the trial ID.

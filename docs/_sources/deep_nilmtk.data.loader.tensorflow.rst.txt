@@ -1,0 +1,14 @@
+deep\_nilmtk.data.loader.tensorflow package
+===========================================
+
+
+
+deep\_nilmtk.data.loader.tensorflow.general\_dataloader module
+--------------------------------------------------------------
+
+.. automodule:: deep_nilmtk.data.loader.tensorflow.general_dataloader
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+

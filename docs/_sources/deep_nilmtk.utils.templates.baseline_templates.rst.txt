@@ -1,0 +1,15 @@
+deep\_nilmtk.utils.templates.baseline\_templates package
+========================================================
+
+Submodules
+----------
+
+deep\_nilmtk.utils.templates.baseline\_templates.ukdale\_template module
+------------------------------------------------------------------------
+
+.. automodule:: deep_nilmtk.utils.templates.baseline_templates.ukdale_template
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+

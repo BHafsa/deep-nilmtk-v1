@@ -1,0 +1,31 @@
+Cross-Validation
+----------------
+
+Cross validation is performed using sklearn.model_selection.TimeSeriesSplit which is
+a suitable splitting strategy for timeseries. The use of cross-validation is triggered
+whenever a number of folds >= 1 is specified.
+
+Other paramaters of sklearn.model_selection.TimeSeriesSplit can also be specified
+using same labels as the original function.
+
+.. code-block:: python
+
+   saed_model = NILMExperiment({
+        'kfolds':5, # this would mean that the data will be split into 5 folds
+        "model_class": SAED, # The class of the models
+        "loader_class": None,
+        "model_name": 'SAED', # label of the models
+        'attention_type': 'dot',
+        'backend': 'pytorch', # The backend framework
+        'in_size': 151, # input window length
+        'out_size': 1,  # output window length
+        'custom_preprocess': None,
+        'feature_type': 'mains',
+        'input_norm': 'z-norm',
+        'target_norm': 'z-norm',
+        'seq_type': 'seq2point',  # Type of the mapping
+        'stride':1,
+        'point_position': 'mid_position',
+        'learning_rate': 10e-5,
+        'max_nb_epochs': MAX_EPOCHS
+    })

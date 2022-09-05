@@ -1,0 +1,13 @@
+deep\_nilmtk.data package
+=========================
+
+
+
+.. toctree::
+   :maxdepth: 4
+
+   deep_nilmtk.data.loader
+   deep_nilmtk.data.post_process
+   deep_nilmtk.data.pre_process
+
+

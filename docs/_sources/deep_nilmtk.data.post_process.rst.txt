@@ -1,0 +1,29 @@
+deep\_nilmtk.data.post\_process package
+=======================================
+
+
+
+deep\_nilmtk.data.post\_process.aggregate module
+------------------------------------------------
+
+.. automodule:: deep_nilmtk.data.post_process.aggregate
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+deep\_nilmtk.data.post\_process.denormalize module
+--------------------------------------------------
+
+.. automodule:: deep_nilmtk.data.post_process.denormalize
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+deep\_nilmtk.data.post\_process.postprocess module
+--------------------------------------------------
+
+.. automodule:: deep_nilmtk.data.post_process.postprocess
+   :members:
+   :undoc-members:
+   :show-inheritance:
+

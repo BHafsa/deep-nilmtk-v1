@@ -1,0 +1,43 @@
+Templating
+==========
+
+The concept of templating was included in the toolkit to allow for universal testing.
+It enables  developer to have the same testbed and to design and share their templates.
+It allows to pre-define the parameters of the API except for the algorithms.
+These templates allow fair comparison and encourage the culture of sharing a
+nd collaboration while saving both time and computational resources
+
+The following listing illustrates the main steps that must be followed to use pre-defined templates included
+in the toolkit:
+
+
+.. code-block:: python
+
+    from deep_nilmtk.utils.templates import ExperimentTemplate
+    from deep_nilmtk.disaggregator import NILMExperiment
+
+
+    if __name__=="__main__":
+
+        # 1. Choosing a pre-configrued template
+        template = ExperimentTemplate( data_path=DATA_PATH,
+                 template_name='ukdale_0',
+                 list_appliances=['kettle'], #Appliances to consider from the chosen template
+                 list_baselines_backends=[], # Thelist of tuples with ('DL_framework', 'model')
+                 in_sequence=151,
+                 out_sequence= 151,
+                 max_epochs=MAX_EPOCHS)
+
+        # 2. Setting up the NILM pipeline
+        new_model = NILMExperiment({
+            ....
+        })
+
+        # 3. Extending the experiment
+        template.extend_experiment({
+            'new_model': new_model
+        })
+        # 4. Running the experiment
+        template.run_template(EXPERIMENT_NAME,
+                          RESULTS_PATH,
+                          f'{RESULTS_PATH}/mlflow/mlruns')

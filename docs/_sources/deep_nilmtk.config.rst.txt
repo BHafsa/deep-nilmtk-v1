@@ -1,0 +1,17 @@
+deep\_nilmtk.config package
+===========================
+
+This package contains different configuration parameters of the tool. It
+includes the default values of the hyper-parameters
+besides the detailed description of the DNN-NILM models
+compatible with the tool, including the models and the loaders classes.
+
+deep\_nilmtk.config.hparams module
+----------------------------------
+
+.. automodule:: deep_nilmtk.config.hparams
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+

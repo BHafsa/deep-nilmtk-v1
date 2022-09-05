@@ -1,0 +1,32 @@
+deep\_nilmtk.data.loader.pytorch package
+========================================
+
+This modules includes the implementation of the different
+data loaders for the models already implemented in Deep-NILMtk.
+The general dataloader is used by several models it implements
+both seq2seq and seq2point models. 
+
+deep\_nilmtk.data.loader.pytorch.bert\_dataloader module
+--------------------------------------------------------
+
+.. automodule:: deep_nilmtk.data.loader.pytorch.bert_dataloader
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+deep\_nilmtk.data.loader.pytorch.general\_dataloader module
+-----------------------------------------------------------
+
+.. automodule:: deep_nilmtk.data.loader.pytorch.general_dataloader
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+deep\_nilmtk.data.loader.pytorch.temp\_dataloader module
+--------------------------------------------------------
+
+.. automodule:: deep_nilmtk.data.loader.pytorch.temp_dataloader
+   :members:
+   :undoc-members:
+   :show-inheritance:
+

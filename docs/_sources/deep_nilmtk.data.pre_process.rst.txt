@@ -1,0 +1,37 @@
+deep\_nilmtk.data.pre\_process package
+======================================
+
+
+deep\_nilmtk.data.pre\_process.features module
+----------------------------------------------
+
+.. automodule:: deep_nilmtk.data.pre_process.features
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+deep\_nilmtk.data.pre\_process.normalize module
+-----------------------------------------------
+
+.. automodule:: deep_nilmtk.data.pre_process.normalize
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+deep\_nilmtk.data.pre\_process.preprocess module
+------------------------------------------------
+
+.. automodule:: deep_nilmtk.data.pre_process.preprocess
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+deep\_nilmtk.data.pre\_process.thresholding module
+--------------------------------------------------
+
+.. automodule:: deep_nilmtk.data.pre_process.thresholding
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
