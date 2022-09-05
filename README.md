@@ -9,7 +9,7 @@
 
  **`Documentation`** |
 ------------------- |
-[![Documentation](https://img.shields.io/badge/api-reference-blue.svg)](https:://bhafsa.github.io/deep-nilmtk-v1/) |
+[![Documentation](https://img.shields.io/badge/api-reference-blue.svg)](https://bhafsa.github.io/deep-nilmtk-v1/) |
  
 
 
