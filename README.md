@@ -4,15 +4,16 @@
  
 # Deep-NILMtk    
 
-[![Python](https://img.shields.io/pypi/pyversions/tensorflow.svg?style=plastic)](https://badge.fury.io/py/tensorflow)
-[![PyPI](https://badge.fury.io/py/tensorflow.svg)](https://badge.fury.io/py/tensorflow)
+[![Python](https://img.shields.io/pypi/pyversions/tensorflow.svg?style=plastic)]()
 
-[//]: # (| **`Documentation`**                                                                                           |)
 
-[//]: # (|---------------------------------------------------------------------------------------------------------------|)
+ **`Documentation`** |
+------------------- |
+[![Documentation](https://img.shields.io/badge/api-reference-blue.svg)](https:://bhafsa.github.io/deep-nilmtk-v1/) |
+ 
 
-[//]: # (| [![Documentation]&#40;https://img.shields.io/badge/api-reference-blue.svg&#41;]&#40;https://bhafsa.github.io/deep-nilmtk-v1/&#41; |)
 
+ 
 </div>
 Deep-NILMtk is an open source package designed specifically 
 for deep models applied to solve NILM. It implements the general NILM 
