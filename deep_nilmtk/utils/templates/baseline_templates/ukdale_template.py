@@ -1,4 +1,4 @@
-ukdale_experiment = {
+NILM22_experiment = {
     'power': {'mains': ['active'], 'appliance': ['active']},
     'sample_rate': 8,
     'appliances': [],
@@ -14,7 +14,7 @@ ukdale_experiment = {
                 'buildings': {
                     1: {
                         'start_time': '2015-01-04',
-                        'end_time': '2015-03-30'
+                        'end_time': '2015-01-30'
                     }
                 }
             }
