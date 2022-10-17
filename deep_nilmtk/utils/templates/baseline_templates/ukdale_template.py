@@ -14,7 +14,7 @@ NILM22_experiment = {
                 'buildings': {
                     1: {
                         'start_time': '2015-01-04',
-                        'end_time': '2015-01-30'
+                        'end_time': '2015-01-15'
                     }
                 }
             }
@@ -27,7 +27,7 @@ NILM22_experiment = {
                 'buildings': {
                     1: {
                         'start_time': '2015-04-16',
-                        'end_time': '2015-05-15'
+                        'end_time': '2015-04-30'
                     },
                 }
             },
