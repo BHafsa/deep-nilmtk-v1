@@ -52,26 +52,26 @@ ukdale_0 = {'power': {'mains': ['active'], 'appliance': ['active']},
                                                                'end_time': '2015-05-15'}}}},
                      'metrics': ['mae', 'nde', 'rmse', 'f1score']}}
 
-ukdale_1 = {'power': {'mains': ['active'], 'appliance': ['active']},
-            'sample_rate': 8,
-            'appliances': ['toaster'],
-            'artificial_aggregate': False,
-            'DROP_ALL_NANS': True,
-            'methods': {},
-            'train': {'datasets': {'ukdale': {'path': None,
-                                              'buildings': {1: {'start_time': '2013-11-13',
-                                                                'end_time': '2014-02-03'}}}}},
-            'test': {'datasets': {'ukdale': {'path': None,
-                                             'buildings': {1: {'start_time': '2015-04-16',
-                                                               'end_time': '2015-05-15'}}}},
-                     'metrics': ['mae', 'nde', 'rmse', 'f1score']}}
+# ukdale_1 = {'power': {'mains': ['active'], 'appliance': ['active']},
+#             'sample_rate': 8,
+#             'appliances': ['toaster'],
+#             'artificial_aggregate': False,
+#             'DROP_ALL_NANS': True,
+#             'methods': {},
+#             'train': {'datasets': {'ukdale': {'path': None,
+#                                               'buildings': {1: {'start_time': '2013-11-13',
+#                                                                 'end_time': '2014-02-03'}}}}},
+#             'test': {'datasets': {'ukdale': {'path': None,
+#                                              'buildings': {1: {'start_time': '2015-04-16',
+#                                                                'end_time': '2015-05-15'}}}},
+#                      'metrics': ['mae', 'nde', 'rmse', 'f1score']}}
 
 # The dryer can also be integrated in the ukdale but rather here the problem
 # is as follows two dryers are connected to the same meter and thus we do not have the
 # recording for a single dryer but rather two dryers together.
 # In the case of IADL this is not a problem since we are just interested in detecting if the
 # the dryer is used or not as part of the laundry activity.
-ukdale_2 = {'power': {'mains': ['active'], 'appliance': ['active']},
+ukdale_1 = {'power': {'mains': ['active'], 'appliance': ['active']},
             'sample_rate': 8,
             'appliances': ['breadmaker',
                            'washing machine',
@@ -88,7 +88,7 @@ ukdale_2 = {'power': {'mains': ['active'], 'appliance': ['active']},
                                                                'end_time': '2015-05-15'}}}},
                      'metrics': ['mae', 'nde', 'rmse', 'f1score']}}
 
-ukdale_3 = {'power': {'mains': ['active'], 'appliance': ['active']},
+ukdale_2 = {'power': {'mains': ['active'], 'appliance': ['active']},
             'sample_rate': 8,
             'appliances': ['kettle'],
             'artificial_aggregate': False,
@@ -119,7 +119,7 @@ ukdale_3 = {'power': {'mains': ['active'], 'appliance': ['active']},
 #        'end_time': '2015-05-15'}}}},
 #    'metrics': ['mae', 'nde', 'rmse', 'f1score']}}
 
-ukdale_5 = {'power': {'mains': ['active'], 'appliance': ['active']},
+ukdale_4 = {'power': {'mains': ['active'], 'appliance': ['active']},
             'sample_rate': 8,
             'appliances': ['computer',
                            'dish washer',
