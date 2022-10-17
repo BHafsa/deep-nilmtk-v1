@@ -24,7 +24,7 @@ def get_exp_parameters():
     # parser.add_argument('--dropout', default=0.25, type=float)
     # parser.add_argument('--pool_filter', default=16, type=int)
     # parser.add_argument('--kernel_size', default=5, type=int)
-    # parser.add_argument('--stride', default=1, type=int)
+    parser.add_argument('--stride', default=1, type=int)
     # parser.add_argument('--features_start', default=16, type=int)
     # parser.add_argument('--latent_size', default=64, type=int)
     # parser.add_argument('--num_gauss', default=5, type=int)
