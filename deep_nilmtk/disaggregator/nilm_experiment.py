@@ -56,11 +56,6 @@ class NILMExperiment(Disaggregator):
         """
         logging.info(f'Started the experiment with name {self.hparams["exp_name"]}')
         # STEP 01: Pre-processing
-        print(f"""
-        
-        This is the preprocessing: {self.hparams['custom_preprocess'] }
-        
-        """)
 
         if do_preprocessing:
             mains, params, sub_main = preprocess(mains,self.hparams['input_norm'], sub_main) if not self.hparams['custom_preprocess'] \
