@@ -19,5 +19,5 @@ def postprocess(predictions, type_target, params, aggregate=False, stride=1):
         app: remove_negatives(denormalize(aggregate_mean(predictions[app], stride), type=type_target, params=params[app])).reshape(-1) \
          if aggregate else remove_negatives(denormalize(predictions[app], type=type_target, params=params[app]).reshape(-1) ) for app in predictions
     }
-    print(processed_predictions)
+    
     return processed_predictions
