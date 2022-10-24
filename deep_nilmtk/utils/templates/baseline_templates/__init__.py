@@ -1,7 +1,7 @@
 from .ukdale_template import *
 
 templates = {
-    'ukdale':ukdale_experiment,
+    'NILM22_experiment':NILM22_experiment,
     'ukdale_0':ukdale_0,
     'ukdale_1':ukdale_1,
     'ukdale_2':ukdale_2 ,
