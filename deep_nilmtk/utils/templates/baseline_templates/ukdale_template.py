@@ -105,19 +105,19 @@ ukdale_2 = {'power': {'mains': ['active'], 'appliance': ['active']},
 ### the boiler do not have recording for teh active power in the ukdale
 ### but rather contain different measures for the input and the target
 
-# ukdale_4 =  {'power': {'mains': ['apparent'], 'appliance': ['active']},
-#   'sample_rate': 8,
-#   'appliances': ['boiler'],
-#   'artificial_aggregate': False,
-#   'DROP_ALL_NANS': True,
-#   'methods': {},
-#   'train': {'datasets': {'ukdale': {'path': None,
-#      'buildings': {1: {'start_time': '2015-01-09',
-#        'end_time': '2015-03-15'}}}}},
-#   'test': {'datasets': {'ukdale': {'path': None,
-#      'buildings': {1: {'start_time': '2015-04-16',
-#        'end_time': '2015-05-15'}}}},
-#    'metrics': ['mae', 'nde', 'rmse', 'f1score']}}
+ukdale_3 =  {'power': {'mains': ['apparent'], 'appliance': ['active']},
+  'sample_rate': 8,
+  'appliances': ['boiler'],
+  'artificial_aggregate': False,
+  'DROP_ALL_NANS': True,
+  'methods': {},
+  'train': {'datasets': {'ukdale': {'path': None,
+     'buildings': {1: {'start_time': '2015-01-09',
+       'end_time': '2015-03-15'}}}}},
+  'test': {'datasets': {'ukdale': {'path': None,
+     'buildings': {1: {'start_time': '2015-04-16',
+       'end_time': '2015-05-15'}}}},
+   'metrics': ['mae', 'nde', 'rmse', 'f1score']}}
 
 ukdale_4 = {'power': {'mains': ['active'], 'appliance': ['active']},
             'sample_rate': 8,
