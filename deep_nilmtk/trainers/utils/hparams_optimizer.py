@@ -56,7 +56,7 @@ class HparamsOptimiser:
     def objective(self, trial):
         suggested_params = self.suggest_params(trial)
         # TODO: USE the hyper-params
-        dataset = self.trainer_impl.get_dataset(self.dataset.original_inputs, self.dataset.original_targets,
+        dataset, _ = self.trainer_impl.get_dataset(self.dataset.original_inputs, self.dataset.original_targets,
                                                 seq_type=self.hparam['seq_type'],
                                                 target_norm=self.hparam['target_norm'],
                                                 in_size=self.hparam['in_size'],
