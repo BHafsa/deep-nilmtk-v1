@@ -53,6 +53,10 @@ pip install .
 
 A template project is offered in the following [link](https://github.com/BHafsa/DNN-NILM-template) leveraging on docker to offer a pre-configured execution environement and avoid any compatibility issues that could encounter the developers.
 
+## Use the toolkit with colab
+
+A **tutorial notebook** can be found [here](https://colab.research.google.com/drive/1ZVBB1Nd-b6LLDCK_FR8xiDrDjdJb5XcS?usp=sharing) leveraging resources available in Colab for training the NILM models. The tutorial was presented in [NILM22 workshop](http://nilmworkshop.org/2022/#program).
+
 
 ## What's new about Deep-NILMtk?
 
