@@ -46,6 +46,9 @@ conda activate deep-nilmtk
 conda install -c nilmtk nilmtk
 
 conda install pip
+#clone the deep-nilmtk
+git clone https://github.com/BHafsa/deep-nilmtk-v1.git
+cd deep-nilmtk-v1
 pip install .
 ```
 
